@@ -1,0 +1,10 @@
+texts:
+  prefix: '&f[&aP&f]'
+  error:
+    noPermission: '&c Du hast keine ausreichende Berechtigung'
+  info:
+    pipeCreated: '&a Du hast eine Item-Pipe gebaut:&f{0}'
+    info:
+      cooldownStarted: '&a Klicke in 10 Sekunden eine Pipe'
+    reload:
+      reloaded: '&a Die Config wurde neu geladen'

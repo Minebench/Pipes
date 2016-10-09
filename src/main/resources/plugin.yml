@@ -1,0 +1,22 @@
+name: Pipes
+version: '${minecraft.plugin.version}'
+main: io.github.apfelcreme.Pipes.Pipes
+author: Lord36
+
+commands:
+   pipe:
+      description: Creating and inspecting Pipes
+      usage: /pipe <info>
+      permission:
+      permission-message:
+permissions:
+  Pipes.*:
+    description: All
+    children:
+      Pipes.user: true
+  Pipes.user:
+    description: package of all user permissions
+    children:
+      Pipes.info: true
+  Pipes.info:
+    description: check a dispenser

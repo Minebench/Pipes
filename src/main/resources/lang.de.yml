@@ -1,10 +1,13 @@
 texts:
   prefix: '&f[&aP&f]'
   error:
+    loop: '&c Du hast eine Endlosschleife gebaut! '
     noPermission: '&c Du hast keine ausreichende Berechtigung'
+    noPipe: '&c Es konnte keine Pipe gefunden werden!'
   info:
-    pipeCreated: '&a Du hast eine Item-Pipe gebaut:&f{0}'
     info:
       cooldownStarted: '&a Klicke in 10 Sekunden eine Pipe'
     reload:
       reloaded: '&a Die Config wurde neu geladen'
+  log:
+    loop: 'Loop detected at {0}'

@@ -1,7 +1,9 @@
 package io.github.apfelcreme.Pipes.Listener;
 
-import io.github.apfelcreme.Pipes.Pipe;
+import io.github.apfelcreme.Pipes.Exception.LoopException;
+import io.github.apfelcreme.Pipes.Pipe.Pipe;
 import io.github.apfelcreme.Pipes.Pipes;
+import io.github.apfelcreme.Pipes.PipesConfig;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
@@ -35,10 +37,13 @@ public class PlayerRightclickListener implements Listener {
             if (task != null) {
                 Pipes.getInstance().getRegisteredRightClicks().remove(event.getPlayer());
                 task.cancel();
-                Pipe pipe = Pipes.isPipe(event.getClickedBlock(), event.getClickedBlock().getData());
-                if (pipe != null) {
-                    Pipes.sendMessage(event.getPlayer(), pipe.getString());
-                }
+                    Pipe pipe = Pipes.isPipe(event.getClickedBlock());
+                    if (pipe != null) {
+                        Pipes.sendMessage(event.getPlayer(), pipe.getString());
+                        Pipes.getInstance().highlightPipe(pipe);
+                    } else {
+                        Pipes.sendMessage(event.getPlayer(), PipesConfig.getText("error.noPipe"));
+                    }
             }
 
         }

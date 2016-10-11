@@ -1,13 +1,19 @@
 package io.github.apfelcreme.Pipes;
 
-import io.github.apfelcreme.Pipes.Listener.BlockPlaceListener;
+import io.github.apfelcreme.Pipes.Exception.LoopException;
 import io.github.apfelcreme.Pipes.Listener.InventoryChangeListener;
 import io.github.apfelcreme.Pipes.Listener.PlayerRightclickListener;
+import io.github.apfelcreme.Pipes.Pipe.Pipe;
+import io.github.apfelcreme.Pipes.Pipe.PipeInput;
+import io.github.apfelcreme.Pipes.Pipe.PipeOutput;
 import org.bukkit.Bukkit;
+import org.bukkit.Effect;
+import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.*;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitTask;
 
@@ -33,16 +39,19 @@ import java.util.*;
  */
 public class Pipes extends JavaPlugin {
 
+    /**
+     * the players who have registered a right click for /pipe info
+     */
     private Map<Player, BukkitTask> registeredRightClicks;
 
     @Override
     public void onEnable() {
         registeredRightClicks = new HashMap<>();
-        getServer().getPluginManager().registerEvents(new BlockPlaceListener(), this);
         getServer().getPluginManager().registerEvents(new InventoryChangeListener(), this);
         getServer().getPluginManager().registerEvents(new PlayerRightclickListener(), this);
         getServer().getPluginCommand("pipe").setExecutor(new PipeCommand());
         PipesConfig.load();
+
     }
 
     /**
@@ -78,54 +87,89 @@ public class Pipes extends JavaPlugin {
      * checks if the block is part of a pipe.
      *
      * @param startingPoint a block
-     * @param color         the color of the pipe
      * @return a pipe, if there is one
      */
-    public static Pipe isPipe(Block startingPoint, byte color) {
-        // as i do not really trust recursive functions with a basically unlimited world, i use much safer queues ;)
+    public static Pipe isPipe(Block startingPoint) {
+
         Queue<Block> queue = new LinkedList<>();
         List<Block> found = new ArrayList<>();
 
-        List<Dispenser> inputs = new ArrayList<>();
-        List<Chest> randomOutputs = new ArrayList<>();
-        Map<Dropper, Chest> sortedOutputs = new HashMap<>();
+        List<PipeInput> inputs = new ArrayList<>();
+        List<PipeOutput> outputs = new ArrayList<>();
+        List<Block> pipeBlocks = new ArrayList<>();
 
-        // add a starting point
+        Byte color = null;
+
         queue.add(startingPoint);
 
         while (!queue.isEmpty()) {
             Block block = queue.remove();
             if (!found.contains(block)) {
-                if (block.getState() instanceof Chest && !sortedOutputs.values().contains(block.getState())) {
-                    randomOutputs.add((Chest) block.getState());
-                } else if (block.getState() instanceof Dispenser) {
-                    inputs.add((Dispenser) block.getState());
-                } else if (block.getState() instanceof Dropper) {
-                    Dropper dropper = (Dropper) block.getState();
-                    if (block.getRelative(getDropperFace(dropper)).getState() instanceof Chest) {
-                        sortedOutputs.put(dropper, (Chest) block.getRelative(getDropperFace(dropper)).getState());
+                if (block.getType() == Material.STAINED_GLASS) {
+                    if (color == null) {
+                        color = block.getData();
                     }
-                }
-                if ((block.getType() == Material.DISPENSER)
-                        || (block.getType() == Material.DROPPER)
-                        || (block.getType() == Material.CHEST)
-                        || ((block.getType() == Material.STAINED_GLASS) && (block.getData() == color))) {
+                    pipeBlocks.add(block);
                     found.add(block);
-
                     queue.add(block.getRelative(BlockFace.NORTH));
                     queue.add(block.getRelative(BlockFace.EAST));
                     queue.add(block.getRelative(BlockFace.SOUTH));
                     queue.add(block.getRelative(BlockFace.WEST));
                     queue.add(block.getRelative(BlockFace.UP));
                     queue.add(block.getRelative(BlockFace.DOWN));
+                } else if (block.getState() instanceof InventoryHolder) {
+                    if (block.getType() == Material.DROPPER) {
+                        if (block.getRelative(getDropperFace((Dropper) block.getState())).getState() instanceof InventoryHolder) {
+                            outputs.add(new PipeOutput((Dropper) block.getState(),
+                                    (InventoryHolder) block.getRelative(getDropperFace((Dropper) block.getState())).getState()));
+                            found.add(block);
+                            found.add(block.getRelative(getDropperFace((Dropper) block.getState())));
+                        }
+                    } else if (block.getState() instanceof Dispenser) {
+                        if (block.getRelative(getDispenserFace((Dispenser) block.getState())).getType() == Material.STAINED_GLASS) {
+                            inputs.add(new PipeInput((Dispenser) block.getState()));
+                            found.add(block);
+                            queue.add(block.getRelative(getDispenserFace((Dispenser)block.getState())));
+                        }
+                    }
                 }
             }
         }
-        if (((randomOutputs.size() > 0) || (sortedOutputs.size() > 0))
-                && (inputs.size() > 0)) {
-            return new Pipe(inputs, randomOutputs, sortedOutputs, found);
+        if ((outputs.size() > 0) && (inputs.size() > 0) && pipeBlocks.size() > 0) {
+            return new Pipe(inputs, outputs, pipeBlocks);
         }
         return null;
+    }
+
+
+    /**
+     * displays particles around a pipe
+     *
+     * @param pipe the pipe
+     */
+    public void highlightPipe(Pipe pipe) {
+        List<Block> blocks = new ArrayList<>();
+        for (Block block : pipe.getPipeBlocks()) {
+            blocks.add(block);
+        }
+        for (PipeInput input : pipe.getInputs()) {
+            blocks.add(input.getDispenser().getBlock());
+        }
+        for (PipeOutput output : pipe.getOutputs()) {
+            blocks.add(output.getDropper().getBlock());
+            blocks.add(output.getDropper().getBlock().getRelative(getDropperFace(output.getDropper())));
+        }
+        for (Block block : blocks) {
+            Location location = block.getLocation();
+            location.setX(location.getX() + 0.5);
+            location.setY(location.getY() + 0.5);
+            location.setZ(location.getZ() + 0.5);
+            for (int i = 0; i < 3; i++) {
+                block.getWorld().spigot().playEffect(location, Effect.FIREWORKS_SPARK, 0, 0,
+                        0.1f, 0.1f, 0.1f, 0, 1, 50);
+            }
+            location = null;
+        }
     }
 
     /**
@@ -136,6 +180,30 @@ public class Pipes extends JavaPlugin {
      */
     public static BlockFace getDropperFace(Dropper dropper) {
         byte data = dropper.getData().getData();
+        if (data == 0) {
+            return BlockFace.DOWN;
+        } else if (data == 1) {
+            return BlockFace.UP;
+        } else if (data == 2) {
+            return BlockFace.NORTH;
+        } else if (data == 3) {
+            return BlockFace.SOUTH;
+        } else if (data == 4) {
+            return BlockFace.WEST;
+        } else if (data == 5) {
+            return BlockFace.EAST;
+        }
+        return null;
+    }
+
+    /**
+     * returns the direction a dispenser is facing
+     *
+     * @param dispenser the dispenser block
+     * @return the BlockFace the dispenser is facing to
+     */
+    public static BlockFace getDispenserFace(Dispenser dispenser) {
+        byte data = dispenser.getData().getData();
         if (data == 0) {
             return BlockFace.DOWN;
         } else if (data == 1) {

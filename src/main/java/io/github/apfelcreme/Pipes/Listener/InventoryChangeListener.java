@@ -1,20 +1,24 @@
 package io.github.apfelcreme.Pipes.Listener;
 
-import io.github.apfelcreme.Pipes.Pipe;
+import io.github.apfelcreme.Pipes.Exception.LoopException;
+import io.github.apfelcreme.Pipes.Pipe.Pipe;
+import io.github.apfelcreme.Pipes.Pipe.PipeInput;
+import io.github.apfelcreme.Pipes.Pipe.PipeOutput;
 import io.github.apfelcreme.Pipes.Pipes;
+import io.github.apfelcreme.Pipes.PipesConfig;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
-import org.bukkit.block.Chest;
-import org.bukkit.block.Dropper;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.inventory.InventoryMoveItemEvent;
 import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.material.Dispenser;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Queue;
 
 /**
  * Copyright (C) 2016 Lord36 aka Apfelcreme
@@ -37,21 +41,27 @@ import java.util.*;
 public class InventoryChangeListener implements Listener {
 
     @EventHandler
-    public void onInventoryItemMove(InventoryMoveItemEvent event) {
+    private void onInventoryItemMove(final InventoryMoveItemEvent event) {
         if (event.getDestination().getType() == InventoryType.DISPENSER) {
             final Block dispenserBlock = event.getDestination().getLocation().getWorld().getBlockAt(
                     event.getDestination().getLocation().getBlockX(),
                     event.getDestination().getLocation().getBlockY(),
                     event.getDestination().getLocation().getBlockZ());
             if (dispenserBlock.getType() == Material.DISPENSER) {
-                final Dispenser dispenser = (Dispenser) dispenserBlock.getState().getData();
-                final Block relative = dispenserBlock.getRelative(dispenser.getFacing());
-                Pipes.getInstance().getServer().getScheduler().runTaskLaterAsynchronously(Pipes.getInstance(), new Runnable() {
+                Pipes.getInstance().getServer().getScheduler().scheduleSyncDelayedTask(Pipes.getInstance(), new Runnable() {
                     @Override
                     public void run() {
-                        Pipe pipe = Pipes.isPipe(dispenserBlock, relative.getData());
-                        if (pipe != null) {
-                            transferItems((org.bukkit.block.Dispenser) dispenserBlock.getState(), pipe);
+                        try {
+                            Pipe pipe = Pipes.isPipe(dispenserBlock);
+                            if (pipe != null) {
+                                PipeInput pipeInput = pipe.getInput(dispenserBlock);
+                                if (pipeInput != null) {
+                                    transferItems(pipe, pipeInput);
+                                }
+                            }
+                        } catch (LoopException e) {
+                            Pipes.getInstance().getLogger().info(PipesConfig.getText("log.loop")
+                                    .replace("{0}", e.getRelative().getLocation().toString()));
                         }
                     }
                 }, 2L);
@@ -60,17 +70,23 @@ public class InventoryChangeListener implements Listener {
     }
 
     @EventHandler
-    public void onInventoryClose(InventoryCloseEvent event) {
+    private void onInventoryClose(InventoryCloseEvent event) {
         final Block dispenserBlock = event.getInventory().getLocation().getWorld().getBlockAt(
                 event.getInventory().getLocation().getBlockX(),
                 event.getInventory().getLocation().getBlockY(),
                 event.getInventory().getLocation().getBlockZ());
         if (dispenserBlock.getType() == Material.DISPENSER) {
-            final Dispenser dispenser = (Dispenser) dispenserBlock.getState().getData();
-            final Block relative = dispenserBlock.getRelative(dispenser.getFacing());
-            Pipe pipe = Pipes.isPipe(dispenserBlock, relative.getData());
-            if (pipe != null) {
-                transferItems((org.bukkit.block.Dispenser) dispenserBlock.getState(), pipe);
+            try {
+                Pipe pipe = Pipes.isPipe(dispenserBlock);
+                if (pipe != null) {
+                    PipeInput pipeInput = pipe.getInput(dispenserBlock);
+                    if (pipeInput != null) {
+                        transferItems(pipe, pipeInput);
+                    }
+                }
+            } catch (LoopException e) {
+                Pipes.getInstance().getLogger().info(PipesConfig.getText("log.loop")
+                        .replace("{0}", e.getRelative().getLocation().toString()));
             }
         }
     }
@@ -78,49 +94,51 @@ public class InventoryChangeListener implements Listener {
     /**
      * processes all the items in a dispenser into a connected pipe
      *
-     * @param dispenser a dispenser item
-     * @param pipe      a pipe
+     * @param pipe a pipe
+     * @throws LoopException when a loop was built and the items inside it are carried indefinetly
      */
-    private void transferItems(org.bukkit.block.Dispenser dispenser, Pipe pipe) {
+    private void transferItems(Pipe pipe, PipeInput pipeInput) throws LoopException {
+
+        System.out.println(pipeInput.toString() + " -> " + pipe.toString());
+
+        //Store all items that should be moved to a queue
         Queue<ItemStack> itemQueue = new LinkedList<>();
-        for (ItemStack itemStack : dispenser.getInventory()) {
+        for (ItemStack itemStack : pipeInput.getDispenser().getInventory()) {
             itemQueue.add(itemStack);
         }
 
+        //Check all outputs and distribute the items
         while (!itemQueue.isEmpty()) {
             ItemStack item = itemQueue.remove();
+
             if (item != null) {
-                boolean itemTransferred = false;
-                for (Map.Entry<Dropper, Chest> entry : pipe.getSortedOutputs().entrySet()) {
-                    // first: look if it can be sorted anywhere
-                    Dropper sorter = entry.getKey();
-                    Chest chest = entry.getValue();
+
+                for (PipeOutput output : pipe.getOutputs()) {
+                    // check for a loop
+
+                    // look if it can be sorted anywhere
                     List<String> sortMaterials = new ArrayList<>();
-                    for (ItemStack i : sorter.getInventory().getContents()) {
+                    for (ItemStack i : output.getDropper().getInventory().getContents()) {
                         if (i != null) {
                             sortMaterials.add(i.getType() + ":" + i.getData().getData());
                         }
                     }
-                    if (sortMaterials.contains(item.getType() + ":" + item.getData().getData())) {
-                        if (chest.getInventory().firstEmpty() != -1) {
-                            chest.getInventory().addItem(item);
-                            dispenser.getInventory().remove(item);
-                            itemTransferred = true;
-                            break;
-                        }
-                    }
-                }
-                if (!itemTransferred) {
-                    // the item cannot be sorted, so its moved to one of the random chests
-                    for (Chest chest : pipe.getRandomOutputs()) {
-                        if (chest.getInventory().firstEmpty() != -1) {
-                            chest.getInventory().addItem(item);
-                            dispenser.getInventory().remove(item);
-                            break;
+                    // sort!
+                    if (sortMaterials.isEmpty() || sortMaterials.contains(item.getType() + ":" + item.getData().getData())) {
+                        if (output.getInventoryHolder().getInventory().firstEmpty() != -1) {
+//                                throw new LoopException(output.getDropper(), pipeInput.getDispenser().getBlock());
+
+                            output.getInventoryHolder().getInventory().addItem(item);
+                            pipeInput.getDispenser().getInventory().remove(item);
+
+                            InventoryMoveItemEvent event = new InventoryMoveItemEvent(pipeInput.getDispenser().getInventory(), item, output.getInventoryHolder().getInventory(), true);
+                            Pipes.getInstance().getServer().getPluginManager().callEvent(event);
+
                         }
                     }
                 }
             }
         }
+
     }
 }

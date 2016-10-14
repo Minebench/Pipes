@@ -1,24 +1,25 @@
 package io.github.apfelcreme.Pipes.Listener;
 
-import io.github.apfelcreme.Pipes.Exception.LoopException;
+import io.github.apfelcreme.Pipes.Exception.ChunkNotLoadedException;
+import io.github.apfelcreme.Pipes.InputOutputLocationManager;
 import io.github.apfelcreme.Pipes.Pipe.Pipe;
 import io.github.apfelcreme.Pipes.Pipe.PipeInput;
 import io.github.apfelcreme.Pipes.Pipe.PipeOutput;
+import io.github.apfelcreme.Pipes.Pipe.SimpleLocation;
 import io.github.apfelcreme.Pipes.Pipes;
 import io.github.apfelcreme.Pipes.PipesConfig;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
+import org.bukkit.block.Dispenser;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.inventory.InventoryMoveItemEvent;
 import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.inventory.ItemStack;
 
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Queue;
+import java.util.*;
 
 /**
  * Copyright (C) 2016 Lord36 aka Apfelcreme
@@ -40,33 +41,69 @@ import java.util.Queue;
  */
 public class InventoryChangeListener implements Listener {
 
-    @EventHandler
+    /**
+     * a cache to stop endless pipe checks
+     */
+    private Map<SimpleLocation, Long> lastChecked = new HashMap<>();
+
+    /**
+     * a cache to stop endless pipe checks
+     */
+    private Map<SimpleLocation, Pipe> pipeCache = new HashMap<>();
+
+
+    @EventHandler(priority = EventPriority.LOWEST)
     private void onInventoryItemMove(final InventoryMoveItemEvent event) {
+        if (event.isCancelled()) {
+            return;
+        }
         if (event.getDestination().getType() == InventoryType.DISPENSER) {
             final Block dispenserBlock = event.getDestination().getLocation().getWorld().getBlockAt(
                     event.getDestination().getLocation().getBlockX(),
                     event.getDestination().getLocation().getBlockY(),
                     event.getDestination().getLocation().getBlockZ());
-            if (dispenserBlock.getType() == Material.DISPENSER) {
+            if (dispenserBlock.getType() != Material.DISPENSER) {
+                return;
+            }
+            if (!InputOutputLocationManager.isBlockListed(dispenserBlock)) {
+                return;
+            }
+            Pipe pipe;
+            SimpleLocation dispenserLocation = new SimpleLocation(dispenserBlock.getX(), dispenserBlock.getY(), dispenserBlock.getZ());
+
+            // cache the pipe
+            if (!lastChecked.containsKey(dispenserLocation)
+                    || (new Date().getTime() > (lastChecked.get(dispenserLocation) + PipesConfig.getPipeCacheDuration()))) {
+                try {
+                    pipe = Pipes.isPipe(dispenserBlock);
+                    if (pipe != null) {
+                        lastChecked.put(dispenserLocation, new Date().getTime());
+                        pipeCache.put(dispenserLocation, pipe);
+                    }
+                } catch (ChunkNotLoadedException e) {
+                    pipe = null;
+                    event.setCancelled(true);
+                }
+            } else {
+                pipe = pipeCache.get(dispenserLocation);
+            }
+            if (pipe != null) {
+                final Pipe finalPipe = pipe;
                 Pipes.getInstance().getServer().getScheduler().scheduleSyncDelayedTask(Pipes.getInstance(), new Runnable() {
                     @Override
                     public void run() {
-                        try {
-                            Pipe pipe = Pipes.isPipe(dispenserBlock);
-                            if (pipe != null) {
-                                PipeInput pipeInput = pipe.getInput(dispenserBlock);
-                                if (pipeInput != null) {
-                                    transferItems(pipe, pipeInput);
-                                }
-                            }
-                        } catch (LoopException e) {
-                            Pipes.getInstance().getLogger().info(PipesConfig.getText("log.loop")
-                                    .replace("{0}", e.getRelative().getLocation().toString()));
+                        PipeInput pipeInput = finalPipe.getInput(dispenserBlock);
+                        if (pipeInput != null) {
+                            transferItems(finalPipe, pipeInput);
                         }
                     }
+
                 }, 2L);
             }
+
+
         }
+
     }
 
     @EventHandler
@@ -75,18 +112,35 @@ public class InventoryChangeListener implements Listener {
                 event.getInventory().getLocation().getBlockX(),
                 event.getInventory().getLocation().getBlockY(),
                 event.getInventory().getLocation().getBlockZ());
-        if (dispenserBlock.getType() == Material.DISPENSER) {
+        if (dispenserBlock.getType() != Material.DISPENSER) {
+            return;
+        }
+        if (!((Dispenser) dispenserBlock.getState()).getInventory().getName().equals("Pipe Input")) {
+            return;
+        }
+
+        Pipe pipe;
+        SimpleLocation dispenserLocation = new SimpleLocation(dispenserBlock.getX(), dispenserBlock.getY(), dispenserBlock.getZ());
+
+        // cache the pipe
+        if (!lastChecked.containsKey(dispenserLocation)
+                || (new Date().getTime() > (lastChecked.get(dispenserLocation) + PipesConfig.getPipeCacheDuration()))) {
             try {
-                Pipe pipe = Pipes.isPipe(dispenserBlock);
+                pipe = Pipes.isPipe(dispenserBlock);
                 if (pipe != null) {
-                    PipeInput pipeInput = pipe.getInput(dispenserBlock);
-                    if (pipeInput != null) {
-                        transferItems(pipe, pipeInput);
-                    }
+                    lastChecked.put(dispenserLocation, new Date().getTime());
+                    pipeCache.put(dispenserLocation, pipe);
                 }
-            } catch (LoopException e) {
-                Pipes.getInstance().getLogger().info(PipesConfig.getText("log.loop")
-                        .replace("{0}", e.getRelative().getLocation().toString()));
+            } catch (ChunkNotLoadedException e) {
+                pipe = null;
+            }
+        } else {
+            pipe = pipeCache.get(dispenserLocation);
+        }
+        if (pipe != null) {
+            PipeInput pipeInput = pipe.getInput(dispenserBlock);
+            if (pipeInput != null) {
+                transferItems(pipe, pipeInput);
             }
         }
     }
@@ -94,47 +148,62 @@ public class InventoryChangeListener implements Listener {
     /**
      * processes all the items in a dispenser into a connected pipe
      *
-     * @param pipe a pipe
-     * @throws LoopException when a loop was built and the items inside it are carried indefinetly
+     * @param pipe      the pipe
+     * @param pipeInput the input the item was injected in
      */
-    private void transferItems(Pipe pipe, PipeInput pipeInput) throws LoopException {
-
-        System.out.println(pipeInput.toString() + " -> " + pipe.toString());
-
+    private void transferItems(Pipe pipe, PipeInput pipeInput) {
         //Store all items that should be moved to a queue
         Queue<ItemStack> itemQueue = new LinkedList<>();
         for (ItemStack itemStack : pipeInput.getDispenser().getInventory()) {
-            itemQueue.add(itemStack);
+            if (itemStack != null) {
+                itemQueue.add(itemStack);
+            }
         }
 
         //Check all outputs and distribute the items
         while (!itemQueue.isEmpty()) {
             ItemStack item = itemQueue.remove();
+            boolean itemTransferred = false;
+            for (PipeOutput output : pipe.getOutputs()) {
 
-            if (item != null) {
+                // look if it can be sorted anywhere
+                List<String> sortMaterials = new ArrayList<>();
+                for (ItemStack i : output.getDropper().getInventory().getContents()) {
+                    if (i != null) {
+                        sortMaterials.add(i.getType() + ":" + i.getData().getData());
+                    }
+                }
+                // sort!
+                if (sortMaterials.contains(item.getType() + ":" + item.getData().getData())) {
+                    if (output.getInventoryHolder().getInventory().firstEmpty() != -1) {
+                        output.getInventoryHolder().getInventory().addItem(item);
+                        pipeInput.getDispenser().getInventory().remove(item);
 
+                        InventoryMoveItemEvent event = new InventoryMoveItemEvent(
+                                pipeInput.getDispenser().getInventory(), item, output.getInventoryHolder().getInventory(), true);
+                        Pipes.getInstance().getServer().getPluginManager().callEvent(event);
+                        itemTransferred = true;
+                        break;
+                    }
+                }
+            }
+            //item could not be sorted! try to find a chest where no sorting is active
+            if (!itemTransferred) {
                 for (PipeOutput output : pipe.getOutputs()) {
-                    // check for a loop
-
-                    // look if it can be sorted anywhere
                     List<String> sortMaterials = new ArrayList<>();
                     for (ItemStack i : output.getDropper().getInventory().getContents()) {
                         if (i != null) {
                             sortMaterials.add(i.getType() + ":" + i.getData().getData());
                         }
                     }
-                    // sort!
-                    if (sortMaterials.isEmpty() || sortMaterials.contains(item.getType() + ":" + item.getData().getData())) {
-                        if (output.getInventoryHolder().getInventory().firstEmpty() != -1) {
-//                                throw new LoopException(output.getDropper(), pipeInput.getDispenser().getBlock());
+                    if (sortMaterials.isEmpty()) {
+                        //no sorting function
+                        output.getInventoryHolder().getInventory().addItem(item);
+                        pipeInput.getDispenser().getInventory().remove(item);
 
-                            output.getInventoryHolder().getInventory().addItem(item);
-                            pipeInput.getDispenser().getInventory().remove(item);
-
-                            InventoryMoveItemEvent event = new InventoryMoveItemEvent(pipeInput.getDispenser().getInventory(), item, output.getInventoryHolder().getInventory(), true);
-                            Pipes.getInstance().getServer().getPluginManager().callEvent(event);
-
-                        }
+                        InventoryMoveItemEvent event = new InventoryMoveItemEvent(
+                                pipeInput.getDispenser().getInventory(), item, output.getInventoryHolder().getInventory(), true);
+                        Pipes.getInstance().getServer().getPluginManager().callEvent(event);
                     }
                 }
             }

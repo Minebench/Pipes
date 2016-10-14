@@ -37,10 +37,19 @@ public class PipesConfig {
         if (!plugin.getDataFolder().exists()) {
             plugin.getDataFolder().mkdirs();
         }
-//        plugin.saveDefaultConfig();
+        plugin.saveDefaultConfig();
         plugin.saveResource("lang.de.yml", false);
 
         languageConfig = YamlConfiguration.loadConfiguration(new File(plugin.getDataFolder() + "/lang.de.yml"));
+    }
+
+    /**
+     * returns the time of the delay of pipe recalculation when e.g. a hopper transfers items into a dispenser.
+     * with this it is only checked every 10 seconds if there is a pipe
+     * @return the delay of pipe recalculation
+     */
+    public static Long getPipeCacheDuration() {
+        return plugin.getConfig().getLong("pipeCacheDuration");
     }
 
     /**

@@ -1,7 +1,11 @@
 package io.github.apfelcreme.Pipes.Pipe;
 
+import io.github.apfelcreme.Pipes.Pipes;
+import org.bukkit.Effect;
+import org.bukkit.Location;
 import org.bukkit.block.Block;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -76,13 +80,40 @@ public class Pipe {
     }
 
     /**
+     * displays particles around a pipe
+     */
+    public void highlight() {
+        List<Block> blocks = new ArrayList<>();
+        for (Block block : pipeBlocks) {
+            blocks.add(block);
+        }
+        for (PipeInput input : inputs) {
+            blocks.add(input.getDispenser().getBlock());
+        }
+        for (PipeOutput output : outputs) {
+            blocks.add(output.getDropper().getBlock());
+            blocks.add(output.getDropper().getBlock().getRelative(Pipes.getDropperFace(output.getDropper())));
+        }
+        for (Block block : blocks) {
+            Location location = block.getLocation();
+            location.setX(location.getX() + 0.5);
+            location.setY(location.getY() + 0.5);
+            location.setZ(location.getZ() + 0.5);
+            for (int i = 0; i < 3; i++) {
+                block.getWorld().spigot().playEffect(location, Effect.FIREWORKS_SPARK, 0, 0,
+                        0.1f, 0.1f, 0.1f, 0, 1, 50);
+            }
+            location = null;
+        }
+    }
+    /**
      * returns a string with some info in it
      *
      * @return a string with some info in it
      */
     public String getString() {
         return " In: " + inputs.size()
-                + ", Out: " + (outputs.size())
-                + ", Länge: " + (pipeBlocks.size());
+                + ", Out: " + outputs.size()
+                + ", Länge: " + pipeBlocks.size();
     }
 }

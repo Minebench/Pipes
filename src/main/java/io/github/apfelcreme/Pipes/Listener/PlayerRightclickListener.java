@@ -1,6 +1,6 @@
 package io.github.apfelcreme.Pipes.Listener;
 
-import io.github.apfelcreme.Pipes.Exception.LoopException;
+import io.github.apfelcreme.Pipes.Exception.ChunkNotLoadedException;
 import io.github.apfelcreme.Pipes.Pipe.Pipe;
 import io.github.apfelcreme.Pipes.Pipes;
 import io.github.apfelcreme.Pipes.PipesConfig;
@@ -35,15 +35,19 @@ public class PlayerRightclickListener implements Listener {
         if (event.getAction() == Action.RIGHT_CLICK_BLOCK) {
             BukkitTask task = Pipes.getInstance().getRegisteredRightClicks().get(event.getPlayer());
             if (task != null) {
-                Pipes.getInstance().getRegisteredRightClicks().remove(event.getPlayer());
-                task.cancel();
+                try {
+                    Pipes.getInstance().getRegisteredRightClicks().remove(event.getPlayer());
+                    task.cancel();
                     Pipe pipe = Pipes.isPipe(event.getClickedBlock());
                     if (pipe != null) {
                         Pipes.sendMessage(event.getPlayer(), pipe.getString());
-                        Pipes.getInstance().highlightPipe(pipe);
+                        pipe.highlight();
                     } else {
                         Pipes.sendMessage(event.getPlayer(), PipesConfig.getText("error.noPipe"));
                     }
+                } catch (ChunkNotLoadedException e) {
+                    Pipes.sendMessage(event.getPlayer(), PipesConfig.getText("error.chunkNotLoaded"));
+                }
             }
 
         }

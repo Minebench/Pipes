@@ -1,19 +1,20 @@
 package io.github.apfelcreme.Pipes;
 
-import io.github.apfelcreme.Pipes.Exception.LoopException;
+import io.github.apfelcreme.Pipes.Exception.ChunkNotLoadedException;
+import io.github.apfelcreme.Pipes.Listener.BlockListener;
 import io.github.apfelcreme.Pipes.Listener.InventoryChangeListener;
 import io.github.apfelcreme.Pipes.Listener.PlayerRightclickListener;
 import io.github.apfelcreme.Pipes.Pipe.Pipe;
 import io.github.apfelcreme.Pipes.Pipe.PipeInput;
 import io.github.apfelcreme.Pipes.Pipe.PipeOutput;
-import org.bukkit.Bukkit;
-import org.bukkit.Effect;
-import org.bukkit.Location;
-import org.bukkit.Material;
+import io.github.apfelcreme.Pipes.Pipe.SimpleLocation;
+import org.bukkit.*;
 import org.bukkit.block.*;
 import org.bukkit.command.CommandSender;
+import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
-import org.bukkit.inventory.InventoryHolder;
+import org.bukkit.inventory.*;
+import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitTask;
 
@@ -44,14 +45,28 @@ public class Pipes extends JavaPlugin {
      */
     private Map<Player, BukkitTask> registeredRightClicks;
 
+    private static Pipes instance = null;
+
     @Override
     public void onEnable() {
+        instance = this;
         registeredRightClicks = new HashMap<>();
         getServer().getPluginManager().registerEvents(new InventoryChangeListener(), this);
         getServer().getPluginManager().registerEvents(new PlayerRightclickListener(), this);
+        getServer().getPluginManager().registerEvents(new BlockListener(), this);
         getServer().getPluginCommand("pipe").setExecutor(new PipeCommand());
         PipesConfig.load();
 
+        //create the custom recipes
+        ShapelessRecipe dispenserRecipe = new ShapelessRecipe(getCustomDispenserItem())
+                .addIngredient(1, Material.IRON_BLOCK)
+                .addIngredient(1, Material.DISPENSER);
+        getServer().addRecipe(dispenserRecipe);
+
+        ShapelessRecipe dropperRecipe = new ShapelessRecipe(getCustomDropperItem())
+                .addIngredient(1, Material.IRON_BLOCK)
+                .addIngredient(1, Material.DROPPER);
+        getServer().addRecipe(dropperRecipe);
     }
 
     /**
@@ -79,8 +94,41 @@ public class Pipes extends JavaPlugin {
      * @return the plugin instance
      */
     public static Pipes getInstance() {
-        return (Pipes) Bukkit.getServer().getPluginManager()
-                .getPlugin("Pipes");
+        return instance;
+    }
+
+    /**
+     * returns an ItemStack of the custom dispenser item
+     *
+     * @return an ItemStack of the custom dispenser item
+     */
+    public static ItemStack getCustomDispenserItem() {
+        ItemStack customDispenser = new ItemStack(Material.DISPENSER);
+        ItemMeta meta = customDispenser.getItemMeta();
+        List<String> lore = Arrays.asList(hideString("Pipes", ""), ChatColor.BLUE + "" + ChatColor.ITALIC + "Pipes");
+        meta.setLore(lore);
+        meta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
+        meta.addEnchant(Enchantment.ARROW_DAMAGE, 1, true);
+        meta.setDisplayName("Pipe Input");
+        customDispenser.setItemMeta(meta);
+        return customDispenser;
+    }
+
+    /**
+     * returns an ItemStack of the custom dropper item
+     *
+     * @return an ItemStack of the custom dropper item
+     */
+    public static ItemStack getCustomDropperItem() {
+        ItemStack customDropper = new ItemStack(Material.DROPPER);
+        ItemMeta meta = customDropper.getItemMeta();
+        List<String> lore = Arrays.asList(hideString("Pipes", ""), ChatColor.BLUE + "" + ChatColor.ITALIC + "Pipes");
+        meta.setLore(lore);
+        meta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
+        meta.addEnchant(Enchantment.ARROW_DAMAGE, 1, true);
+        meta.setDisplayName("Pipe Output");
+        customDropper.setItemMeta(meta);
+        return customDropper;
     }
 
     /**
@@ -89,9 +137,9 @@ public class Pipes extends JavaPlugin {
      * @param startingPoint a block
      * @return a pipe, if there is one
      */
-    public static Pipe isPipe(Block startingPoint) {
+    public static Pipe isPipe(Block startingPoint) throws ChunkNotLoadedException {
 
-        Queue<Block> queue = new LinkedList<>();
+        Queue<SimpleLocation> queue = new LinkedList<>();
         List<Block> found = new ArrayList<>();
 
         List<PipeInput> inputs = new ArrayList<>();
@@ -100,10 +148,16 @@ public class Pipes extends JavaPlugin {
 
         Byte color = null;
 
-        queue.add(startingPoint);
+        World world = startingPoint.getWorld();
+
+        queue.add(new SimpleLocation(startingPoint.getX(), startingPoint.getY(), startingPoint.getZ()));
 
         while (!queue.isEmpty()) {
-            Block block = queue.remove();
+            SimpleLocation simpleLocation = queue.remove();
+            if (!world.isChunkLoaded(simpleLocation.getX() >> 4, simpleLocation.getZ() >> 4)) {
+                throw new ChunkNotLoadedException(simpleLocation);
+            }
+            Block block = world.getBlockAt(simpleLocation.getX(), simpleLocation.getY(), simpleLocation.getZ());
             if (!found.contains(block)) {
                 if (block.getType() == Material.STAINED_GLASS) {
                     if (color == null) {
@@ -111,25 +165,31 @@ public class Pipes extends JavaPlugin {
                     }
                     pipeBlocks.add(block);
                     found.add(block);
-                    queue.add(block.getRelative(BlockFace.NORTH));
-                    queue.add(block.getRelative(BlockFace.EAST));
-                    queue.add(block.getRelative(BlockFace.SOUTH));
-                    queue.add(block.getRelative(BlockFace.WEST));
-                    queue.add(block.getRelative(BlockFace.UP));
-                    queue.add(block.getRelative(BlockFace.DOWN));
+                    queue.add(simpleLocation.getRelative(BlockFace.NORTH));
+                    queue.add(simpleLocation.getRelative(BlockFace.EAST));
+                    queue.add(simpleLocation.getRelative(BlockFace.SOUTH));
+                    queue.add(simpleLocation.getRelative(BlockFace.WEST));
+                    queue.add(simpleLocation.getRelative(BlockFace.UP));
+                    queue.add(simpleLocation.getRelative(BlockFace.DOWN));
                 } else if (block.getState() instanceof InventoryHolder) {
                     if (block.getType() == Material.DROPPER) {
-                        if (block.getRelative(getDropperFace((Dropper) block.getState())).getState() instanceof InventoryHolder) {
-                            outputs.add(new PipeOutput((Dropper) block.getState(),
-                                    (InventoryHolder) block.getRelative(getDropperFace((Dropper) block.getState())).getState()));
-                            found.add(block);
-                            found.add(block.getRelative(getDropperFace((Dropper) block.getState())));
+                        Dropper dropper = (Dropper) block.getState();
+                        if (block.getRelative(getDropperFace(dropper)).getState() instanceof InventoryHolder) {
+                            if (InputOutputLocationManager.isBlockListed(block)) {
+                                outputs.add(new PipeOutput(dropper,
+                                        (InventoryHolder) block.getRelative(getDropperFace(dropper)).getState()));
+                                found.add(block);
+                                found.add(block.getRelative(getDropperFace(dropper)));
+                            }
                         }
                     } else if (block.getState() instanceof Dispenser) {
-                        if (block.getRelative(getDispenserFace((Dispenser) block.getState())).getType() == Material.STAINED_GLASS) {
-                            inputs.add(new PipeInput((Dispenser) block.getState()));
-                            found.add(block);
-                            queue.add(block.getRelative(getDispenserFace((Dispenser)block.getState())));
+                        Dispenser dispenser = (Dispenser) block.getState();
+                        if (block.getRelative(getDispenserFace(dispenser)).getType() == Material.STAINED_GLASS) {
+                            if (InputOutputLocationManager.isBlockListed(block)) {
+                                inputs.add(new PipeInput(dispenser));
+                                found.add(block);
+                                queue.add(simpleLocation.getRelative(getDispenserFace(dispenser)));
+                            }
                         }
                     }
                 }
@@ -139,37 +199,6 @@ public class Pipes extends JavaPlugin {
             return new Pipe(inputs, outputs, pipeBlocks);
         }
         return null;
-    }
-
-
-    /**
-     * displays particles around a pipe
-     *
-     * @param pipe the pipe
-     */
-    public void highlightPipe(Pipe pipe) {
-        List<Block> blocks = new ArrayList<>();
-        for (Block block : pipe.getPipeBlocks()) {
-            blocks.add(block);
-        }
-        for (PipeInput input : pipe.getInputs()) {
-            blocks.add(input.getDispenser().getBlock());
-        }
-        for (PipeOutput output : pipe.getOutputs()) {
-            blocks.add(output.getDropper().getBlock());
-            blocks.add(output.getDropper().getBlock().getRelative(getDropperFace(output.getDropper())));
-        }
-        for (Block block : blocks) {
-            Location location = block.getLocation();
-            location.setX(location.getX() + 0.5);
-            location.setY(location.getY() + 0.5);
-            location.setZ(location.getZ() + 0.5);
-            for (int i = 0; i < 3; i++) {
-                block.getWorld().spigot().playEffect(location, Effect.FIREWORKS_SPARK, 0, 0,
-                        0.1f, 0.1f, 0.1f, 0, 1, 50);
-            }
-            location = null;
-        }
     }
 
     /**
@@ -218,5 +247,26 @@ public class Pipes extends JavaPlugin {
             return BlockFace.EAST;
         }
         return null;
+    }
+
+    /**
+     * Hide a string inside another string with chat color characters
+     *
+     * @param hidden The string to hide
+     * @param string The string to hide in
+     * @return The string with the hidden string appended
+     */
+    public static String hideString(String hidden, String string) {
+        for (int i = string.length() - 1; i >= 0; i--) {
+            if (string.length() - i > 2)
+                break;
+            if (string.charAt(i) == ChatColor.COLOR_CHAR)
+                string = string.substring(0, i);
+        }
+        // Add hidden string
+        for (int i = 0; i < hidden.length(); i++) {
+            string += ChatColor.COLOR_CHAR + hidden.substring(i, i + 1);
+        }
+        return string;
     }
 }

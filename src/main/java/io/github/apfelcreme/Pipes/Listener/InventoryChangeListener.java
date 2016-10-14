@@ -161,6 +161,16 @@ public class InventoryChangeListener implements Listener {
         }
 
         //Check all outputs and distribute the items
+        // add the current transfer to all the running detections
+        for (Detection detection : Pipes.getInstance().getRunningDetections().values()) {
+            detection.addLocation(
+                    new SimpleLocation(
+                            pipeInput.getDispenser().getWorld().getName(),
+                            pipeInput.getDispenser().getX(),
+                            pipeInput.getDispenser().getY(),
+                            pipeInput.getDispenser().getZ()));
+        }
+
         while (!itemQueue.isEmpty()) {
             ItemStack item = itemQueue.remove();
             boolean itemTransferred = false;

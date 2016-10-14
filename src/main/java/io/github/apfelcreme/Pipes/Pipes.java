@@ -4,6 +4,7 @@ import io.github.apfelcreme.Pipes.Exception.ChunkNotLoadedException;
 import io.github.apfelcreme.Pipes.Listener.BlockListener;
 import io.github.apfelcreme.Pipes.Listener.InventoryChangeListener;
 import io.github.apfelcreme.Pipes.Listener.PlayerRightclickListener;
+import io.github.apfelcreme.Pipes.LoopDetection.Detection;
 import io.github.apfelcreme.Pipes.Pipe.Pipe;
 import io.github.apfelcreme.Pipes.Pipe.PipeInput;
 import io.github.apfelcreme.Pipes.Pipe.PipeOutput;
@@ -45,12 +46,14 @@ public class Pipes extends JavaPlugin {
      */
     private Map<Player, BukkitTask> registeredRightClicks;
 
+    private Map<CommandSender, Detection> runningDetections;
     private static Pipes instance = null;
 
     @Override
     public void onEnable() {
         instance = this;
         registeredRightClicks = new HashMap<>();
+        runningDetections = new HashMap<>();
         getServer().getPluginManager().registerEvents(new InventoryChangeListener(), this);
         getServer().getPluginManager().registerEvents(new PlayerRightclickListener(), this);
         getServer().getPluginManager().registerEvents(new BlockListener(), this);
@@ -76,6 +79,15 @@ public class Pipes extends JavaPlugin {
      */
     public Map<Player, BukkitTask> getRegisteredRightClicks() {
         return registeredRightClicks;
+    }
+
+    /**
+     * returns a map of all currently running detections
+     *
+     * @return a map of all currently running detections
+     */
+    public Map<CommandSender, Detection> getRunningDetections() {
+        return runningDetections;
     }
 
     /**

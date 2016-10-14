@@ -5,6 +5,7 @@ import io.github.apfelcreme.Pipes.InputOutputLocationManager;
 import io.github.apfelcreme.Pipes.Pipe.Pipe;
 import io.github.apfelcreme.Pipes.Pipes;
 import io.github.apfelcreme.Pipes.PipesConfig;
+import io.github.apfelcreme.Pipes.PipesUtil;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.Dispenser;
@@ -44,7 +45,7 @@ public class BlockListener implements Listener {
             if (InputOutputLocationManager.isBlockListed(event.getBlock())) {
                 InputOutputLocationManager.removeLocation(event.getBlock());
                 ItemStack drop =  event.getBlock().getType() == Material.DISPENSER ?
-                        Pipes.getCustomDispenserItem() : Pipes.getCustomDropperItem();
+                        PipesUtil.getCustomDispenserItem() : PipesUtil.getCustomDropperItem();
                 event.setCancelled(true);
                 event.getBlock().setType(Material.AIR);
                 event.getBlock().getWorld().dropItemNaturally(event.getBlock().getLocation(), drop);
@@ -58,12 +59,12 @@ public class BlockListener implements Listener {
             if (event.getItemInHand() != null
                     && event.getItemInHand().getItemMeta() != null
                     && event.getItemInHand().getItemMeta().getLore() != null
-                    && event.getItemInHand().getItemMeta().getLore().contains(Pipes.hideString("Pipes", ""))) {
+                    && event.getItemInHand().getItemMeta().getLore().contains(PipesUtil.hideString("Pipes", ""))) {
                 InputOutputLocationManager.saveLocation(event.getBlock());
                 try {
                     Pipe pipe = Pipes.isPipe(event.getBlock());
                     if (pipe != null) {
-                        Pipes.sendMessage(event.getPlayer(), PipesConfig.getText("info.pipeBuilt")
+                        Pipes.sendMessage(event.getPlayer(), PipesConfig.getText("info.pipe.pipeBuilt")
                                 .replace("{0}", pipe.getString()));
                         pipe.highlight();
                     }

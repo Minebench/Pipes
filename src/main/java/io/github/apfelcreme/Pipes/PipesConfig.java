@@ -40,6 +40,7 @@ public class PipesConfig {
         plugin.saveDefaultConfig();
         plugin.saveResource("lang.de.yml", false);
 
+        plugin.reloadConfig();
         languageConfig = YamlConfiguration.loadConfiguration(new File(plugin.getDataFolder() + "/lang.de.yml"));
     }
 

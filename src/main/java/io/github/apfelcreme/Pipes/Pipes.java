@@ -47,6 +47,10 @@ public class Pipes extends JavaPlugin {
     private Map<Player, BukkitTask> registeredRightClicks;
 
     private Map<CommandSender, Detection> runningDetections;
+
+    /**
+     * the plugin instance
+     */
     private static Pipes instance = null;
 
     @Override
@@ -61,12 +65,12 @@ public class Pipes extends JavaPlugin {
         PipesConfig.load();
 
         //create the custom recipes
-        ShapelessRecipe dispenserRecipe = new ShapelessRecipe(getCustomDispenserItem())
+        ShapelessRecipe dispenserRecipe = new ShapelessRecipe(PipesUtil.getCustomDispenserItem())
                 .addIngredient(1, Material.IRON_BLOCK)
                 .addIngredient(1, Material.DISPENSER);
         getServer().addRecipe(dispenserRecipe);
 
-        ShapelessRecipe dropperRecipe = new ShapelessRecipe(getCustomDropperItem())
+        ShapelessRecipe dropperRecipe = new ShapelessRecipe(PipesUtil.getCustomDropperItem())
                 .addIngredient(1, Material.IRON_BLOCK)
                 .addIngredient(1, Material.DROPPER);
         getServer().addRecipe(dropperRecipe);
@@ -109,39 +113,6 @@ public class Pipes extends JavaPlugin {
         return instance;
     }
 
-    /**
-     * returns an ItemStack of the custom dispenser item
-     *
-     * @return an ItemStack of the custom dispenser item
-     */
-    public static ItemStack getCustomDispenserItem() {
-        ItemStack customDispenser = new ItemStack(Material.DISPENSER);
-        ItemMeta meta = customDispenser.getItemMeta();
-        List<String> lore = Arrays.asList(hideString("Pipes", ""), ChatColor.BLUE + "" + ChatColor.ITALIC + "Pipes");
-        meta.setLore(lore);
-        meta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
-        meta.addEnchant(Enchantment.ARROW_DAMAGE, 1, true);
-        meta.setDisplayName("Pipe Input");
-        customDispenser.setItemMeta(meta);
-        return customDispenser;
-    }
-
-    /**
-     * returns an ItemStack of the custom dropper item
-     *
-     * @return an ItemStack of the custom dropper item
-     */
-    public static ItemStack getCustomDropperItem() {
-        ItemStack customDropper = new ItemStack(Material.DROPPER);
-        ItemMeta meta = customDropper.getItemMeta();
-        List<String> lore = Arrays.asList(hideString("Pipes", ""), ChatColor.BLUE + "" + ChatColor.ITALIC + "Pipes");
-        meta.setLore(lore);
-        meta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
-        meta.addEnchant(Enchantment.ARROW_DAMAGE, 1, true);
-        meta.setDisplayName("Pipe Output");
-        customDropper.setItemMeta(meta);
-        return customDropper;
-    }
 
     /**
      * checks if the block is part of a pipe.
@@ -162,7 +133,11 @@ public class Pipes extends JavaPlugin {
 
         World world = startingPoint.getWorld();
 
-        queue.add(new SimpleLocation(startingPoint.getX(), startingPoint.getY(), startingPoint.getZ()));
+        queue.add(new SimpleLocation(
+                startingPoint.getWorld().getName(),
+                startingPoint.getX(),
+                startingPoint.getY(),
+                startingPoint.getZ()));
 
         while (!queue.isEmpty()) {
             SimpleLocation simpleLocation = queue.remove();
@@ -186,21 +161,21 @@ public class Pipes extends JavaPlugin {
                 } else if (block.getState() instanceof InventoryHolder) {
                     if (block.getType() == Material.DROPPER) {
                         Dropper dropper = (Dropper) block.getState();
-                        if (block.getRelative(getDropperFace(dropper)).getState() instanceof InventoryHolder) {
+                        if (block.getRelative(PipesUtil.getDropperFace(dropper)).getState() instanceof InventoryHolder) {
                             if (InputOutputLocationManager.isBlockListed(block)) {
                                 outputs.add(new PipeOutput(dropper,
-                                        (InventoryHolder) block.getRelative(getDropperFace(dropper)).getState()));
+                                        (InventoryHolder) block.getRelative(PipesUtil.getDropperFace(dropper)).getState()));
                                 found.add(block);
-                                found.add(block.getRelative(getDropperFace(dropper)));
+                                found.add(block.getRelative(PipesUtil.getDropperFace(dropper)));
                             }
                         }
                     } else if (block.getState() instanceof Dispenser) {
                         Dispenser dispenser = (Dispenser) block.getState();
-                        if (block.getRelative(getDispenserFace(dispenser)).getType() == Material.STAINED_GLASS) {
+                        if (block.getRelative(PipesUtil.getDispenserFace(dispenser)).getType() == Material.STAINED_GLASS) {
                             if (InputOutputLocationManager.isBlockListed(block)) {
                                 inputs.add(new PipeInput(dispenser));
                                 found.add(block);
-                                queue.add(simpleLocation.getRelative(getDispenserFace(dispenser)));
+                                queue.add(simpleLocation.getRelative(PipesUtil.getDispenserFace(dispenser)));
                             }
                         }
                     }
@@ -211,74 +186,5 @@ public class Pipes extends JavaPlugin {
             return new Pipe(inputs, outputs, pipeBlocks);
         }
         return null;
-    }
-
-    /**
-     * returns the direction a dropper is facing, as there is no way to get that information from the current API
-     *
-     * @param dropper the dropper block
-     * @return the BlockFace the dropper is facing to
-     */
-    public static BlockFace getDropperFace(Dropper dropper) {
-        byte data = dropper.getData().getData();
-        if (data == 0) {
-            return BlockFace.DOWN;
-        } else if (data == 1) {
-            return BlockFace.UP;
-        } else if (data == 2) {
-            return BlockFace.NORTH;
-        } else if (data == 3) {
-            return BlockFace.SOUTH;
-        } else if (data == 4) {
-            return BlockFace.WEST;
-        } else if (data == 5) {
-            return BlockFace.EAST;
-        }
-        return null;
-    }
-
-    /**
-     * returns the direction a dispenser is facing
-     *
-     * @param dispenser the dispenser block
-     * @return the BlockFace the dispenser is facing to
-     */
-    public static BlockFace getDispenserFace(Dispenser dispenser) {
-        byte data = dispenser.getData().getData();
-        if (data == 0) {
-            return BlockFace.DOWN;
-        } else if (data == 1) {
-            return BlockFace.UP;
-        } else if (data == 2) {
-            return BlockFace.NORTH;
-        } else if (data == 3) {
-            return BlockFace.SOUTH;
-        } else if (data == 4) {
-            return BlockFace.WEST;
-        } else if (data == 5) {
-            return BlockFace.EAST;
-        }
-        return null;
-    }
-
-    /**
-     * Hide a string inside another string with chat color characters
-     *
-     * @param hidden The string to hide
-     * @param string The string to hide in
-     * @return The string with the hidden string appended
-     */
-    public static String hideString(String hidden, String string) {
-        for (int i = string.length() - 1; i >= 0; i--) {
-            if (string.length() - i > 2)
-                break;
-            if (string.charAt(i) == ChatColor.COLOR_CHAR)
-                string = string.substring(0, i);
-        }
-        // Add hidden string
-        for (int i = 0; i < hidden.length(); i++) {
-            string += ChatColor.COLOR_CHAR + hidden.substring(i, i + 1);
-        }
-        return string;
     }
 }

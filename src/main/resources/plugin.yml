@@ -18,5 +18,9 @@ permissions:
     description: package of all user permissions
     children:
       Pipes.info: true
+  Pipes.detect:
+    description: detect all ongoing transfers for a given period of time
   Pipes.info:
     description: check a dispenser
+  Pipes.reload:
+    description: reload the configs

@@ -1,5 +1,6 @@
 package io.github.apfelcreme.Pipes;
 
+import io.github.apfelcreme.Pipes.Command.DetectCommand;
 import io.github.apfelcreme.Pipes.Command.InfoCommand;
 import io.github.apfelcreme.Pipes.Command.ReloadCommand;
 import io.github.apfelcreme.Pipes.Command.SubCommand;
@@ -35,6 +36,9 @@ public class PipeCommand implements CommandExecutor {
             Operation operation = Operation.getOperation(strings[0]);
             if (operation != null) {
                 switch (operation) {
+                    case DETECT:
+                        subCommand = new DetectCommand();
+                        break;
                     case INFO:
                         subCommand = new InfoCommand();
                         break;
@@ -57,6 +61,7 @@ public class PipeCommand implements CommandExecutor {
      */
     public enum Operation {
 
+        DETECT,
         INFO,
         RELOAD;
 

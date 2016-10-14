@@ -49,12 +49,4 @@ public class PipeOutput {
         return inventoryHolder;
     }
 
-    @Override
-    public String toString() {
-        return "Dropper:" + dropper.getX() + "," + dropper.getY() + "," + dropper.getZ() +
-                " -> InvH:" +
-                inventoryHolder.getInventory().getLocation().getX() + "," +
-                inventoryHolder.getInventory().getLocation().getY() + "," +
-                inventoryHolder.getInventory().getLocation().getZ();
-    }
 }

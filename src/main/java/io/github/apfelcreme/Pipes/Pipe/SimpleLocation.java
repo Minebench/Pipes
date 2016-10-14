@@ -22,14 +22,25 @@ import org.bukkit.block.BlockFace;
  */
 public class SimpleLocation {
 
+    private final String worldName;
     private final int x;
     private final int y;
     private final int z;
 
-    public SimpleLocation(int x, int y, int z) {
+    public SimpleLocation(String worldName, int x, int y, int z) {
+        this.worldName = worldName;
         this.x = x;
         this.y = y;
         this.z = z;
+    }
+
+    /**
+     * returns the world name
+     *
+     * @return the world name
+     */
+    public String getWorldName() {
+        return worldName;
     }
 
     /**
@@ -70,18 +81,31 @@ public class SimpleLocation {
     public SimpleLocation getRelative(BlockFace face) {
         switch (face) {
             case NORTH:
-                return new SimpleLocation(x, y, z - 1);
+                return new SimpleLocation(worldName, x, y, z - 1);
             case EAST:
-                return new SimpleLocation(x + 1, y, z);
+                return new SimpleLocation(worldName, x + 1, y, z);
             case SOUTH:
-                return new SimpleLocation(x, y, z + 1);
+                return new SimpleLocation(worldName, x, y, z + 1);
             case WEST:
-                return new SimpleLocation(x - 1, y, z);
+                return new SimpleLocation(worldName, x - 1, y, z);
             case UP:
-                return new SimpleLocation(x, y + 1, z);
+                return new SimpleLocation(worldName, x, y + 1, z);
             case DOWN:
-                return new SimpleLocation(x, y - 1, z);
+                return new SimpleLocation(worldName, x, y - 1, z);
         }
-        return new SimpleLocation(x, y, z);
+        return null;
+    }
+
+    /**
+     * checks if this objects equals another object
+     *
+     * @param other another SimpleLocation
+     * @return true or false
+     */
+    public boolean equals(SimpleLocation other) {
+        return worldName.equals(other.getWorldName())
+                && (x == other.getX())
+                && (y == other.getY())
+                && (z == other.getZ());
     }
 }

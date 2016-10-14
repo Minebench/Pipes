@@ -33,7 +33,7 @@ public class ReloadCommand implements SubCommand {
      */
     @Override
     public void execute(CommandSender commandSender, String[] strings) {
-        if (commandSender.hasPermission("Pipes.reload") || commandSender instanceof ConsoleCommandSender) {
+        if (commandSender.hasPermission("Pipes.reload")) {
             PipesConfig.load();
             Pipes.sendMessage(commandSender, PipesConfig.getText("info.reload.reloaded"));
         } else {

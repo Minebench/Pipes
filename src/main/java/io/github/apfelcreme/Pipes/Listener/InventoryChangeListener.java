@@ -2,6 +2,7 @@ package io.github.apfelcreme.Pipes.Listener;
 
 import io.github.apfelcreme.Pipes.Exception.ChunkNotLoadedException;
 import io.github.apfelcreme.Pipes.InputOutputLocationManager;
+import io.github.apfelcreme.Pipes.LoopDetection.Detection;
 import io.github.apfelcreme.Pipes.Pipe.Pipe;
 import io.github.apfelcreme.Pipes.Pipe.PipeInput;
 import io.github.apfelcreme.Pipes.Pipe.PipeOutput;
@@ -69,7 +70,11 @@ public class InventoryChangeListener implements Listener {
                 return;
             }
             Pipe pipe;
-            SimpleLocation dispenserLocation = new SimpleLocation(dispenserBlock.getX(), dispenserBlock.getY(), dispenserBlock.getZ());
+            SimpleLocation dispenserLocation = new SimpleLocation(
+                    dispenserBlock.getWorld().getName(),
+                    dispenserBlock.getX(),
+                    dispenserBlock.getY(),
+                    dispenserBlock.getZ());
 
             // cache the pipe
             if (!lastChecked.containsKey(dispenserLocation)
@@ -106,6 +111,11 @@ public class InventoryChangeListener implements Listener {
 
     }
 
+    /**
+     * gets fired on every inventory close
+     *
+     * @param event the event
+     */
     @EventHandler
     private void onInventoryClose(InventoryCloseEvent event) {
         final Block dispenserBlock = event.getInventory().getLocation().getWorld().getBlockAt(
@@ -120,7 +130,11 @@ public class InventoryChangeListener implements Listener {
         }
 
         Pipe pipe;
-        SimpleLocation dispenserLocation = new SimpleLocation(dispenserBlock.getX(), dispenserBlock.getY(), dispenserBlock.getZ());
+        SimpleLocation dispenserLocation = new SimpleLocation(
+                dispenserBlock.getWorld().getName(),
+                dispenserBlock.getX(),
+                dispenserBlock.getY(),
+                dispenserBlock.getZ());
 
         // cache the pipe
         if (!lastChecked.containsKey(dispenserLocation)
@@ -152,7 +166,7 @@ public class InventoryChangeListener implements Listener {
      * @param pipeInput the input the item was injected in
      */
     private void transferItems(Pipe pipe, PipeInput pipeInput) {
-        //Store all items that should be moved to a queue
+        // store all items that should be moved to a queue
         Queue<ItemStack> itemQueue = new LinkedList<>();
         for (ItemStack itemStack : pipeInput.getDispenser().getInventory()) {
             if (itemStack != null) {
@@ -160,7 +174,6 @@ public class InventoryChangeListener implements Listener {
             }
         }
 
-        //Check all outputs and distribute the items
         // add the current transfer to all the running detections
         for (Detection detection : Pipes.getInstance().getRunningDetections().values()) {
             detection.addLocation(
@@ -171,6 +184,7 @@ public class InventoryChangeListener implements Listener {
                             pipeInput.getDispenser().getZ()));
         }
 
+        // check all outputs and distribute the items
         while (!itemQueue.isEmpty()) {
             ItemStack item = itemQueue.remove();
             boolean itemTransferred = false;
@@ -197,7 +211,7 @@ public class InventoryChangeListener implements Listener {
                     }
                 }
             }
-            //item could not be sorted! try to find a chest where no sorting is active
+            // item could not be sorted! try to find a chest where no sorting is active
             if (!itemTransferred) {
                 for (PipeOutput output : pipe.getOutputs()) {
                     List<String> sortMaterials = new ArrayList<>();

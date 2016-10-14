@@ -1,6 +1,8 @@
 package io.github.apfelcreme.Pipes.Pipe;
 
 import io.github.apfelcreme.Pipes.Pipes;
+import io.github.apfelcreme.Pipes.PipesConfig;
+import io.github.apfelcreme.Pipes.PipesUtil;
 import org.bukkit.Effect;
 import org.bukkit.Location;
 import org.bukkit.block.Block;
@@ -92,7 +94,7 @@ public class Pipe {
         }
         for (PipeOutput output : outputs) {
             blocks.add(output.getDropper().getBlock());
-            blocks.add(output.getDropper().getBlock().getRelative(Pipes.getDropperFace(output.getDropper())));
+            blocks.add(output.getDropper().getBlock().getRelative(PipesUtil.getDropperFace(output.getDropper())));
         }
         for (Block block : blocks) {
             Location location = block.getLocation();
@@ -106,14 +108,16 @@ public class Pipe {
             location = null;
         }
     }
+
     /**
      * returns a string with some info in it
      *
      * @return a string with some info in it
      */
     public String getString() {
-        return " In: " + inputs.size()
-                + ", Out: " + outputs.size()
-                + ", Länge: " + pipeBlocks.size();
+        return PipesConfig.getText("info.pipe.pipeData")
+                .replace("{0}", String.valueOf(inputs.size()))
+                .replace("{1}", String.valueOf(outputs.size()))
+                .replace("{2}", String.valueOf(pipeBlocks.size()));
     }
 }

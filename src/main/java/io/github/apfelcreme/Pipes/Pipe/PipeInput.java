@@ -38,8 +38,4 @@ public class PipeInput {
         return dispenser;
     }
 
-    @Override
-    public String toString() {
-        return "Dispenser:" + dispenser.getX() + "," + dispenser.getY() + "," + dispenser.getZ();
-    }
 }

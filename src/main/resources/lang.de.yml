@@ -5,14 +5,14 @@ texts:
     noPermission: '&c Du hast keine ausreichende Berechtigung'
     noPipe: '&c Es konnte keine Pipe gefunden werden!'
   info:
-    pipeBuilt: '&a Du hast eine Pipe gebaut: &f{0}'
     detect:
       started: '&a Detektion gestartet! (&f{0}&a Sekunden)'
       finished: '&a Detektion abgeschlossen! Folgende Objekte wurden gefunden: '
       element: '&a {0}. &f{1}&a - [&f{2}&a, &f{3}&a, &f{4}&a]&f -> &a{5} &fItem-Transfers '
     info:
-      cooldownStarted: '&a Klicke in 10 Sekunden eine Pipe'
+      cooldownStarted: '&a Rechtsklicke in 10 Sekunden eine Pipe'
+    pipe:
+      pipeBuilt: '&a Du hast eine Pipe gebaut:&f{0}'
+      pipeData: '&f In: &a{0}&f, Out: &a{1}&f, Länge: &a{2}'
     reload:
       reloaded: '&a Die Config wurde neu geladen'
-  log:
-    loop: 'Loop detected at {0}'

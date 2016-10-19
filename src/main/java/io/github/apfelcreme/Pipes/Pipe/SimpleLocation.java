@@ -108,4 +108,14 @@ public class SimpleLocation {
                 && (y == other.getY())
                 && (z == other.getZ());
     }
+
+    @Override
+    public String toString() {
+        return "world:" + worldName + ",x: " + x + ",y:" + y + ",z:" + z;
+    }
+
+    @Override
+    public int hashCode() {
+        return toString().hashCode();
+    }
 }

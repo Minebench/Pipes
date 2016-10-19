@@ -228,6 +228,7 @@ public class InventoryChangeListener implements Listener {
                         InventoryMoveItemEvent event = new InventoryMoveItemEvent(
                                 pipeInput.getDispenser().getInventory(), item, output.getInventoryHolder().getInventory(), true);
                         Pipes.getInstance().getServer().getPluginManager().callEvent(event);
+                            break;
                     }
                 }
             }

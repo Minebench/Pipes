@@ -1,9 +1,12 @@
 package io.github.apfelcreme.Pipes;
 
 import org.bukkit.ChatColor;
+import org.bukkit.configuration.Configuration;
+import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.YamlConfiguration;
 
 import java.io.File;
+import java.io.IOException;
 
 /**
  * Copyright (C) 2016 Lord36 aka Apfelcreme
@@ -26,27 +29,51 @@ import java.io.File;
 public class PipesConfig {
 
     private static YamlConfiguration languageConfig;
+    private static YamlConfiguration locationConfig;
 
     private static Pipes plugin;
 
     /**
      * loads the config
      */
-    public static void load(){
+    public static void load() {
         plugin = Pipes.getInstance();
         if (!plugin.getDataFolder().exists()) {
             plugin.getDataFolder().mkdirs();
         }
         plugin.saveDefaultConfig();
         plugin.saveResource("lang.de.yml", false);
+        plugin.saveResource("locations.yml", false);
 
         plugin.reloadConfig();
         languageConfig = YamlConfiguration.loadConfiguration(new File(plugin.getDataFolder() + "/lang.de.yml"));
+        locationConfig = YamlConfiguration.loadConfiguration(new File(plugin.getDataFolder() + "/locations.yml"));
+    }
+
+    /**
+     * returns the list of registered dispensers
+     *
+     * @return the list of registered dispensers
+     */
+    public static Configuration getLocationConfig() {
+        return locationConfig;
+    }
+
+    /**
+     * saves the location config
+     */
+    public static void saveLocationConfig() {
+        try {
+            locationConfig.save(new File(plugin.getDataFolder() + "/locations.yml"));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     /**
      * returns the time of the delay of pipe recalculation when e.g. a hopper transfers items into a dispenser.
      * with this it is only checked every 10 seconds if there is a pipe
+     *
      * @return the delay of pipe recalculation
      */
     public static Long getPipeCacheDuration() {

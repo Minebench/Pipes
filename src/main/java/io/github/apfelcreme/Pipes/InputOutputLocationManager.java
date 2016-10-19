@@ -32,10 +32,11 @@ public class InputOutputLocationManager {
 
     /**
      * saves a block location to the plugin config
+     *
      * @param block a block
      */
     public static void saveLocation(Block block) {
-        List<String> locations = Pipes.getInstance().getConfig().getStringList(block.getType().name());
+        List<String> locations = PipesConfig.getLocationConfig().getStringList(block.getType().name());
         String location = block.getWorld().getName() + "/" + block.getX() + "/" + block.getY() + "/" + block.getZ();
         if (locations == null) {
             locations = new ArrayList<>();
@@ -43,30 +44,32 @@ public class InputOutputLocationManager {
         if (!locations.contains(location)) {
             locations.add(location);
         }
-        Pipes.getInstance().getConfig().set(block.getType().name(), locations);
-        Pipes.getInstance().saveConfig();
+        PipesConfig.getLocationConfig().set(block.getType().name(), locations);
+        PipesConfig.saveLocationConfig();
     }
 
     /**
      * removes a block location from the plugin config
+     *
      * @param block a block
      */
     public static void removeLocation(Block block) {
-        List<String> locations = Pipes.getInstance().getConfig().getStringList(block.getType().name());
+        List<String> locations = PipesConfig.getLocationConfig().getStringList(block.getType().name());
         String location = block.getWorld().getName() + "/" + block.getX() + "/" + block.getY() + "/" + block.getZ();
         if (locations != null) {
             locations.remove(location);
-            Pipes.getInstance().getConfig().set(block.getType().name(), locations);
-            Pipes.getInstance().saveConfig();
+            PipesConfig.getLocationConfig().set(block.getType().name(), locations);
+            PipesConfig.saveLocationConfig();
         }
     }
 
     /**
      * checks whether a block is part of the saved locations
+     *
      * @param block a block
      */
     public static boolean isBlockListed(Block block) {
-        List<String> locations = Pipes.getInstance().getConfig().getStringList(block.getType().name());
+        List<String> locations = PipesConfig.getLocationConfig().getStringList(block.getType().name());
         String location = block.getWorld().getName() + "/" + block.getX() + "/" + block.getY() + "/" + block.getZ();
         return locations != null && locations.contains(location);
     }

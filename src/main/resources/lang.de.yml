@@ -9,6 +9,8 @@ texts:
       started: '&a Detektion gestartet! (&f{0}&a Sekunden)'
       finished: '&a Detektion abgeschlossen! Folgende Objekte wurden gefunden: '
       element: '&a {0}. &f{1}&a - [&f{2}&a, &f{3}&a, &f{4}&a]&f -> &a{5} &fItem-Transfers '
+    dispenserLore: 'Item-Input für eine Item-Pipe'
+    dropperLore: 'Item-Output für eine Item-Pipe'
     info:
       cooldownStarted: '&a Rechtsklicke in 10 Sekunden eine Pipe'
     pipe:

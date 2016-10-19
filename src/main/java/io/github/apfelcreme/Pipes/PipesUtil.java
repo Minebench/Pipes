@@ -11,6 +11,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.regex.Pattern;
 
@@ -121,7 +122,8 @@ public class PipesUtil {
     public static ItemStack getCustomDispenserItem() {
         ItemStack customDispenser = new ItemStack(Material.DISPENSER);
         ItemMeta meta = customDispenser.getItemMeta();
-        List<String> lore = Arrays.asList(hideString("Pipes", ""), ChatColor.BLUE + "" + ChatColor.ITALIC + "Pipes");
+        List<String> lore = Arrays.asList(ChatColor.BLUE + "" + ChatColor.ITALIC + hideString("Pipes", "Pipes"),
+                PipesConfig.getText("info.dispenserLore"));
         meta.setLore(lore);
         meta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
         meta.addEnchant(Enchantment.ARROW_DAMAGE, 1, true);
@@ -138,7 +140,8 @@ public class PipesUtil {
     public static ItemStack getCustomDropperItem() {
         ItemStack customDropper = new ItemStack(Material.DROPPER);
         ItemMeta meta = customDropper.getItemMeta();
-        List<String> lore = Arrays.asList(hideString("Pipes", ""), ChatColor.BLUE + "" + ChatColor.ITALIC + "Pipes");
+        List<String> lore = Arrays.asList(ChatColor.BLUE + "" + ChatColor.ITALIC + hideString("Pipes", "Pipes"),
+                PipesConfig.getText("info.dropperLore"));
         meta.setLore(lore);
         meta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
         meta.addEnchant(Enchantment.ARROW_DAMAGE, 1, true);

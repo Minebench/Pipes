@@ -1,1 +1,9 @@
 pipeCacheDuration: 10000 #ms
+dispenserRecipe:
+  IRON_BLOCK: 1
+  DISPENSER: 1
+  HOPPER: 1
+dropperRecipe:
+  IRON_BLOCK: 1
+  DROPPER: 1
+  HOPPER: 1

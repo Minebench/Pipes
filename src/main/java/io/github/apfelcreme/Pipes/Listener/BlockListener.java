@@ -6,6 +6,7 @@ import io.github.apfelcreme.Pipes.Pipe.Pipe;
 import io.github.apfelcreme.Pipes.Pipes;
 import io.github.apfelcreme.Pipes.PipesConfig;
 import io.github.apfelcreme.Pipes.PipesUtil;
+import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.Dispenser;
@@ -59,7 +60,8 @@ public class BlockListener implements Listener {
             if (event.getItemInHand() != null
                     && event.getItemInHand().getItemMeta() != null
                     && event.getItemInHand().getItemMeta().getLore() != null
-                    && event.getItemInHand().getItemMeta().getLore().contains(PipesUtil.hideString("Pipes", ""))) {
+                    && event.getItemInHand().getItemMeta().getLore().contains(
+                    ChatColor.BLUE + "" + ChatColor.ITALIC + PipesUtil.hideString("Pipes", "Pipes"))) {
                 InputOutputLocationManager.saveLocation(event.getBlock());
                 try {
                     Pipe pipe = Pipes.isPipe(event.getBlock());

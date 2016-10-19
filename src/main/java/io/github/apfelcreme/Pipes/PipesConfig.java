@@ -1,12 +1,15 @@
 package io.github.apfelcreme.Pipes;
 
 import org.bukkit.ChatColor;
+import org.bukkit.Material;
 import org.bukkit.configuration.Configuration;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.YamlConfiguration;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Copyright (C) 2016 Lord36 aka Apfelcreme
@@ -78,6 +81,38 @@ public class PipesConfig {
      */
     public static Long getPipeCacheDuration() {
         return plugin.getConfig().getLong("pipeCacheDuration");
+    }
+
+    /**
+     * returns the materials and their quantity for the custom dispenser recipe
+     *
+     * @return the materials and their quantity for the custom dispenser recipe
+     */
+    public static Map<Material, Integer> getDispenserMaterials() {
+        Map<Material, Integer> ret = new HashMap<>();
+        ConfigurationSection section = plugin.getConfig().getConfigurationSection("dispenserRecipe");
+        if (section != null) {
+            for (String key : section.getKeys(false)) {
+                ret.put(Material.getMaterial(key), section.getInt(key));
+            }
+        }
+        return ret;
+    }
+
+    /**
+     * returns the materials and their quantity for the custom dropper recipe
+     *
+     * @return the materials and their quantity for the custom dropper recipe
+     */
+    public static Map<Material, Integer> getDropperMaterials() {
+        Map<Material, Integer> ret = new HashMap<>();
+        ConfigurationSection section = plugin.getConfig().getConfigurationSection("dropperRecipe");
+        if (section != null) {
+            for (String key : section.getKeys(false)) {
+                ret.put(Material.getMaterial(key), section.getInt(key));
+            }
+        }
+        return ret;
     }
 
     /**

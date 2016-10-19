@@ -65,14 +65,16 @@ public class Pipes extends JavaPlugin {
         PipesConfig.load();
 
         //create the custom recipes
-        ShapelessRecipe dispenserRecipe = new ShapelessRecipe(PipesUtil.getCustomDispenserItem())
-                .addIngredient(1, Material.IRON_BLOCK)
-                .addIngredient(1, Material.DISPENSER);
+        ShapelessRecipe dispenserRecipe = new ShapelessRecipe(PipesUtil.getCustomDispenserItem());
+        for (Map.Entry<Material, Integer> material : PipesConfig.getDispenserMaterials().entrySet()) {
+            dispenserRecipe.addIngredient(material.getValue(), material.getKey());
+        }
         getServer().addRecipe(dispenserRecipe);
 
-        ShapelessRecipe dropperRecipe = new ShapelessRecipe(PipesUtil.getCustomDropperItem())
-                .addIngredient(1, Material.IRON_BLOCK)
-                .addIngredient(1, Material.DROPPER);
+        ShapelessRecipe dropperRecipe = new ShapelessRecipe(PipesUtil.getCustomDropperItem());
+        for (Map.Entry<Material, Integer> material : PipesConfig.getDropperMaterials().entrySet()) {
+            dropperRecipe.addIngredient(material.getValue(), material.getKey());
+        }
         getServer().addRecipe(dropperRecipe);
     }
 

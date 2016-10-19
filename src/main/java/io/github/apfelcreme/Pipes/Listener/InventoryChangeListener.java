@@ -221,14 +221,16 @@ public class InventoryChangeListener implements Listener {
                         }
                     }
                     if (sortMaterials.isEmpty()) {
-                        //no sorting function
-                        output.getInventoryHolder().getInventory().addItem(item);
-                        pipeInput.getDispenser().getInventory().remove(item);
+                        if (output.getInventoryHolder().getInventory().firstEmpty() != -1) {
+                            //no sorting function
+                            output.getInventoryHolder().getInventory().addItem(item);
+                            pipeInput.getDispenser().getInventory().remove(item);
 
-                        InventoryMoveItemEvent event = new InventoryMoveItemEvent(
-                                pipeInput.getDispenser().getInventory(), item, output.getInventoryHolder().getInventory(), true);
-                        Pipes.getInstance().getServer().getPluginManager().callEvent(event);
+                            InventoryMoveItemEvent event = new InventoryMoveItemEvent(
+                                    pipeInput.getDispenser().getInventory(), item, output.getInventoryHolder().getInventory(), true);
+                            Pipes.getInstance().getServer().getPluginManager().callEvent(event);
                             break;
+                        }
                     }
                 }
             }

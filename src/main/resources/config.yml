@@ -1,4 +1,5 @@
 pipeCacheDuration: 10000 #ms
+transferCooldown: 20 #ticks
 dispenserRecipe:
   IRON_BLOCK: 1
   DISPENSER: 1

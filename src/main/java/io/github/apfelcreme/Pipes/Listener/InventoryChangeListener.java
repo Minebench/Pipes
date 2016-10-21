@@ -9,6 +9,8 @@ import io.github.apfelcreme.Pipes.Pipe.PipeOutput;
 import io.github.apfelcreme.Pipes.Pipe.SimpleLocation;
 import io.github.apfelcreme.Pipes.Pipes;
 import io.github.apfelcreme.Pipes.PipesConfig;
+import io.github.apfelcreme.Pipes.Scheduler.ItemMoveScheduler;
+import io.github.apfelcreme.Pipes.Scheduler.ScheduledItemTransfer;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.Dispenser;
@@ -52,6 +54,14 @@ public class InventoryChangeListener implements Listener {
      */
     private Map<SimpleLocation, Pipe> pipeCache = new HashMap<>();
 
+    /**
+     * the scheduler that transfers items
+     */
+    private ItemMoveScheduler itemMoveScheduler;
+
+    public InventoryChangeListener() {
+        itemMoveScheduler = new ItemMoveScheduler();
+    }
 
     @EventHandler(priority = EventPriority.LOWEST)
     private void onInventoryItemMove(final InventoryMoveItemEvent event) {
@@ -70,7 +80,7 @@ public class InventoryChangeListener implements Listener {
                 return;
             }
             Pipe pipe;
-            SimpleLocation dispenserLocation = new SimpleLocation(
+            final SimpleLocation dispenserLocation = new SimpleLocation(
                     dispenserBlock.getWorld().getName(),
                     dispenserBlock.getX(),
                     dispenserBlock.getY(),
@@ -99,7 +109,7 @@ public class InventoryChangeListener implements Listener {
                     public void run() {
                         PipeInput pipeInput = finalPipe.getInput(dispenserBlock);
                         if (pipeInput != null) {
-                            transferItems(finalPipe, pipeInput);
+                            itemMoveScheduler.add(new ScheduledItemTransfer(finalPipe, pipeInput, event.getItem()));
                         }
                     }
 
@@ -154,83 +164,9 @@ public class InventoryChangeListener implements Listener {
         if (pipe != null) {
             PipeInput pipeInput = pipe.getInput(dispenserBlock);
             if (pipeInput != null) {
-                transferItems(pipe, pipeInput);
-            }
-        }
-    }
-
-    /**
-     * processes all the items in a dispenser into a connected pipe
-     *
-     * @param pipe      the pipe
-     * @param pipeInput the input the item was injected in
-     */
-    private void transferItems(Pipe pipe, PipeInput pipeInput) {
-        // store all items that should be moved to a queue
-        Queue<ItemStack> itemQueue = new LinkedList<>();
-        for (ItemStack itemStack : pipeInput.getDispenser().getInventory()) {
-            if (itemStack != null) {
-                itemQueue.add(itemStack);
-            }
-        }
-
-        // add the current transfer to all the running detections
-        for (Detection detection : Pipes.getInstance().getRunningDetections().values()) {
-            detection.addLocation(
-                    new SimpleLocation(
-                            pipeInput.getDispenser().getWorld().getName(),
-                            pipeInput.getDispenser().getX(),
-                            pipeInput.getDispenser().getY(),
-                            pipeInput.getDispenser().getZ()));
-        }
-
-        // check all outputs and distribute the items
-        while (!itemQueue.isEmpty()) {
-            ItemStack item = itemQueue.remove();
-            boolean itemTransferred = false;
-            for (PipeOutput output : pipe.getOutputs()) {
-
-                // look if it can be sorted anywhere
-                List<String> sortMaterials = new ArrayList<>();
-                for (ItemStack i : output.getDropper().getInventory().getContents()) {
-                    if (i != null) {
-                        sortMaterials.add(i.getType() + ":" + i.getData().getData());
-                    }
-                }
-                // sort!
-                if (sortMaterials.contains(item.getType() + ":" + item.getData().getData())) {
-                    if (output.getInventoryHolder().getInventory().firstEmpty() != -1) {
-                        output.getInventoryHolder().getInventory().addItem(item);
-                        pipeInput.getDispenser().getInventory().remove(item);
-
-                        InventoryMoveItemEvent event = new InventoryMoveItemEvent(
-                                pipeInput.getDispenser().getInventory(), item, output.getInventoryHolder().getInventory(), true);
-                        Pipes.getInstance().getServer().getPluginManager().callEvent(event);
-                        itemTransferred = true;
-                        break;
-                    }
-                }
-            }
-            // item could not be sorted! try to find a chest where no sorting is active
-            if (!itemTransferred) {
-                for (PipeOutput output : pipe.getOutputs()) {
-                    List<String> sortMaterials = new ArrayList<>();
-                    for (ItemStack i : output.getDropper().getInventory().getContents()) {
-                        if (i != null) {
-                            sortMaterials.add(i.getType() + ":" + i.getData().getData());
-                        }
-                    }
-                    if (sortMaterials.isEmpty()) {
-                        if (output.getInventoryHolder().getInventory().firstEmpty() != -1) {
-                            //no sorting function
-                            output.getInventoryHolder().getInventory().addItem(item);
-                            pipeInput.getDispenser().getInventory().remove(item);
-
-                            InventoryMoveItemEvent event = new InventoryMoveItemEvent(
-                                    pipeInput.getDispenser().getInventory(), item, output.getInventoryHolder().getInventory(), true);
-                            Pipes.getInstance().getServer().getPluginManager().callEvent(event);
-                            break;
-                        }
+                for (ItemStack itemStack : pipeInput.getDispenser().getInventory().getContents()) {
+                    if (itemStack != null) {
+                        itemMoveScheduler.add(new ScheduledItemTransfer(pipe, pipeInput, itemStack));
                     }
                 }
             }

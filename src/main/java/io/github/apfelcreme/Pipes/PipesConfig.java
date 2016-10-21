@@ -80,7 +80,16 @@ public class PipesConfig {
      * @return the delay of pipe recalculation
      */
     public static Long getPipeCacheDuration() {
-        return plugin.getConfig().getLong("pipeCacheDuration");
+        return plugin.getConfig().getLong("pipeCacheDuration", 10000L);
+    }
+
+    /**
+     * returns the delay between item transfers
+     *
+     * @return the delay between item transfers
+     */
+    public static Long getTransferCooldown() {
+        return plugin.getConfig().getLong("transferCooldown", 1000L);
     }
 
     /**

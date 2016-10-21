@@ -2,6 +2,7 @@ texts:
   prefix: '&f[&aP&f]'
   error:
     chunkNotLoaded: '&c Teile der Pipe befinden sich in nicht geladenen Chunks!'
+    commandCanOnlyBeRunByAPlayer: '&c Command can only be run by a player!'
     noDetection: '&c Keine Detektion gefunden! Führe zunächst /pipe detect <Zeit> aus!'
     noPermission: '&c Du hast keine ausreichende Berechtigung'
     noPipe: '&c Es konnte keine Pipe gefunden werden!'
@@ -22,6 +23,6 @@ texts:
       pipeBuilt: '&a Du hast eine Pipe gebaut:&f{0}'
       pipeData: '&f In: &a{0}&f, Out: &a{1}&f, Länge: &a{2}'
     reload:
-      reloaded: '&a Die Config wurde neu geladen'      reloaded: '&a Die Config wurde neu geladen'
+      reloaded: '&a Die Config wurde neu geladen'
     tp:
       teleported: '&a Du wurdest teleportiert!'

@@ -120,4 +120,25 @@ public class Pipe {
                 .replace("{1}", String.valueOf(outputs.size()))
                 .replace("{2}", String.valueOf(pipeBlocks.size()));
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        Pipe pipe = (Pipe) o;
+
+        if (!inputs.equals(pipe.inputs)) return false;
+        if (!outputs.equals(pipe.outputs)) return false;
+        return pipeBlocks.equals(pipe.pipeBlocks);
+
+    }
+
+    @Override
+    public int hashCode() {
+        int result = inputs.hashCode();
+        result = 31 * result + outputs.hashCode();
+        result = 31 * result + pipeBlocks.hashCode();
+        return result;
+    }
 }

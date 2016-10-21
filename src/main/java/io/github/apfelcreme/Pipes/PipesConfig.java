@@ -139,5 +139,4 @@ public class PipesConfig {
             return "Missing text node: " + key;
         }
     }
-
 }

@@ -2,10 +2,8 @@ package io.github.apfelcreme.Pipes.Listener;
 
 import io.github.apfelcreme.Pipes.Exception.ChunkNotLoadedException;
 import io.github.apfelcreme.Pipes.InputOutputLocationManager;
-import io.github.apfelcreme.Pipes.LoopDetection.Detection;
 import io.github.apfelcreme.Pipes.Pipe.Pipe;
 import io.github.apfelcreme.Pipes.Pipe.PipeInput;
-import io.github.apfelcreme.Pipes.Pipe.PipeOutput;
 import io.github.apfelcreme.Pipes.Pipe.SimpleLocation;
 import io.github.apfelcreme.Pipes.Pipes;
 import io.github.apfelcreme.Pipes.PipesConfig;
@@ -112,13 +110,12 @@ public class InventoryChangeListener implements Listener {
                             itemMoveScheduler.add(new ScheduledItemTransfer(finalPipe, pipeInput, event.getItem()));
                         }
                     }
-
+//
                 }, 2L);
+            } else {
+                event.setCancelled(true);
             }
-
-
         }
-
     }
 
     /**
@@ -171,6 +168,5 @@ public class InventoryChangeListener implements Listener {
                 }
             }
         }
-
     }
 }

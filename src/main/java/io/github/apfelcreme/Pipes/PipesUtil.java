@@ -11,7 +11,6 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.regex.Pattern;
 
@@ -127,7 +126,7 @@ public class PipesUtil {
         meta.setLore(lore);
         meta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
         meta.addEnchant(Enchantment.ARROW_DAMAGE, 1, true);
-        meta.setDisplayName("Pipe Input");
+        meta.setDisplayName(ChatColor.RESET + "" + ChatColor.WHITE + "Pipe Input");
         customDispenser.setItemMeta(meta);
         return customDispenser;
     }
@@ -145,7 +144,7 @@ public class PipesUtil {
         meta.setLore(lore);
         meta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
         meta.addEnchant(Enchantment.ARROW_DAMAGE, 1, true);
-        meta.setDisplayName("Pipe Output");
+        meta.setDisplayName(ChatColor.RESET + "" + ChatColor.WHITE + "Pipe Output");
         customDropper.setItemMeta(meta);
         return customDropper;
     }

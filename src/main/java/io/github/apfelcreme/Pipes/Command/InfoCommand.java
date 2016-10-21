@@ -49,7 +49,7 @@ public class InfoCommand implements SubCommand {
                 Pipes.sendMessage(player, PipesConfig.getText("error.noPermission"));
             }
         } else {
-            commandSender.sendMessage("Command can only be run by a player!");
+            Pipes.sendMessage(commandSender, PipesConfig.getText("error.commandCanOnlyBeRunByAPlayer"));
         }
     }
 }

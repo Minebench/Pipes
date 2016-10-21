@@ -102,17 +102,24 @@ public class SimpleLocation {
      * @param other another SimpleLocation
      * @return true or false
      */
-    public boolean equals(SimpleLocation other) {
-        return worldName.equals(other.getWorldName())
-                && (x == other.getX())
-                && (y == other.getY())
-                && (z == other.getZ());
+    @Override
+    public boolean equals(Object other) {
+        if (this == other) return true;
+        if (other == null || getClass() != other.getClass()) return false;
+
+        SimpleLocation that = (SimpleLocation) other;
+
+        if (x != that.x) return false;
+        if (y != that.y) return false;
+        if (z != that.z) return false;
+        return worldName.equals(that.worldName);
     }
 
     @Override
     public String toString() {
-        return "world:" + worldName + ",x: " + x + ",y:" + y + ",z:" + z;
+        return "world: " + worldName + ",x: " + x + ",y:" + y + ",z:" + z;
     }
+
 
     @Override
     public int hashCode() {

@@ -46,8 +46,6 @@ public class Pipes extends JavaPlugin {
      */
     private Map<Player, BukkitTask> registeredRightClicks;
 
-    private Map<CommandSender, Detection> runningDetections;
-
     /**
      * the plugin instance
      */
@@ -57,12 +55,11 @@ public class Pipes extends JavaPlugin {
     public void onEnable() {
         instance = this;
         registeredRightClicks = new HashMap<>();
-        runningDetections = new HashMap<>();
+        PipesConfig.load();
         getServer().getPluginManager().registerEvents(new InventoryChangeListener(), this);
         getServer().getPluginManager().registerEvents(new PlayerRightclickListener(), this);
         getServer().getPluginManager().registerEvents(new BlockListener(), this);
         getServer().getPluginCommand("pipe").setExecutor(new PipeCommand());
-        PipesConfig.load();
 
         //create the custom recipes
         ShapelessRecipe dispenserRecipe = new ShapelessRecipe(PipesUtil.getCustomDispenserItem());

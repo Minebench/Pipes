@@ -88,15 +88,6 @@ public class Pipes extends JavaPlugin {
     }
 
     /**
-     * returns a map of all currently running detections
-     *
-     * @return a map of all currently running detections
-     */
-    public Map<CommandSender, Detection> getRunningDetections() {
-        return runningDetections;
-    }
-
-    /**
      * sends a message to a player
      *
      * @param player  the player the message shall be sent to

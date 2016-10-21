@@ -2,7 +2,6 @@ name: Pipes
 version: '${minecraft.plugin.version}'
 main: io.github.apfelcreme.Pipes.Pipes
 author: Lord36
-
 commands:
    pipe:
       description: Creating and inspecting Pipes
@@ -13,7 +12,14 @@ permissions:
   Pipes.*:
     description: All
     children:
+      Pipes.mod: true
       Pipes.user: true
+  Pipes.mod:
+    description: all mod permissions
+    children:
+      Pipes.detect: true
+      Pipes.reload: true
+      Pipes.tp: true
   Pipes.user:
     description: package of all user permissions
     children:
@@ -24,3 +30,5 @@ permissions:
     description: check a dispenser
   Pipes.reload:
     description: reload the configs
+  Pipes.tp:
+    description: teleport to the location of a detection result

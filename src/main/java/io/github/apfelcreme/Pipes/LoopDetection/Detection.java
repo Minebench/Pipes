@@ -24,19 +24,16 @@ import java.util.*;
  */
 public class Detection {
 
+    /**
+     * a list of locations that were found
+     */
     private List<TickingLocation> tickingLocations;
 
+    /**
+     * constructor
+     */
     public Detection() {
         tickingLocations = new ArrayList<>();
-    }
-
-    /**
-     * returns the list of found dispensers that were active while the detection was running
-     *
-     * @return the list of found dispensers that were active while the detection was running
-     */
-    public List<TickingLocation> getTickingLocations() {
-        return tickingLocations;
     }
 
     /**
@@ -53,5 +50,16 @@ public class Detection {
         }
         //no location found
         tickingLocations.add(new TickingLocation(location, 1));
+    }
+
+    /**
+     * returns the sorted result
+     *
+     * @return the sorted result
+     */
+    public List<TickingLocation> getResult() {
+        List<TickingLocation> result = new ArrayList<>(tickingLocations);
+        Collections.sort(result);
+        return result;
     }
 }

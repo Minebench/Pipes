@@ -1,9 +1,6 @@
 package io.github.apfelcreme.Pipes;
 
-import io.github.apfelcreme.Pipes.Command.DetectCommand;
-import io.github.apfelcreme.Pipes.Command.InfoCommand;
-import io.github.apfelcreme.Pipes.Command.ReloadCommand;
-import io.github.apfelcreme.Pipes.Command.SubCommand;
+import io.github.apfelcreme.Pipes.Command.*;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -45,6 +42,9 @@ public class PipeCommand implements CommandExecutor {
                     case RELOAD:
                         subCommand = new ReloadCommand();
                         break;
+                    case TP:
+                        subCommand = new TpCommand();
+                        break;
                 }
             }
             if (subCommand != null) {
@@ -63,7 +63,8 @@ public class PipeCommand implements CommandExecutor {
 
         DETECT,
         INFO,
-        RELOAD;
+        RELOAD,
+        TP;
 
         /**
          * returns the matching operation

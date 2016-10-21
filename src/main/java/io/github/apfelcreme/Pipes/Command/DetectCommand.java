@@ -1,20 +1,16 @@
 package io.github.apfelcreme.Pipes.Command;
 
 import io.github.apfelcreme.Pipes.LoopDetection.Detection;
+import io.github.apfelcreme.Pipes.LoopDetection.DetectionManager;
 import io.github.apfelcreme.Pipes.LoopDetection.TickingLocation;
-import io.github.apfelcreme.Pipes.Pipe.SimpleLocation;
 import io.github.apfelcreme.Pipes.Pipes;
 import io.github.apfelcreme.Pipes.PipesConfig;
 import io.github.apfelcreme.Pipes.PipesUtil;
 import org.bukkit.command.CommandSender;
-import org.bukkit.command.ConsoleCommandSender;
-import org.bukkit.entity.Player;
-import org.bukkit.scheduler.BukkitTask;
 
 import java.text.DecimalFormat;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 
 /**
  * Copyright (C) 2016 Lord36 aka Apfelcreme
@@ -49,27 +45,30 @@ public class DetectCommand implements SubCommand {
             if (strings.length > 1 && PipesUtil.isNumeric(strings[1])) {
                 duration = 20L * Integer.parseInt(strings[1]);
             }
-            Pipes.getInstance().getRunningDetections().put(commandSender, new Detection());
+            DetectionManager.getInstance().createDetection(commandSender);
             Pipes.sendMessage(commandSender, PipesConfig.getText("info.detect.started")
                     .replace("{0}", new DecimalFormat("0").format(duration / 20)));
             Pipes.getInstance().getServer().getScheduler().runTaskLaterAsynchronously(Pipes.getInstance(), new Runnable() {
                 @Override
                 public void run() {
-                    Detection detection = Pipes.getInstance().getRunningDetections().get(commandSender);
+                    Detection detection = DetectionManager.getInstance().getDetection(commandSender);
                     if (detection != null) {
-                        List<TickingLocation> tickingLocations = detection.getTickingLocations();
-                        Collections.sort(tickingLocations);
-                        Pipes.sendMessage(commandSender, PipesConfig.getText("info.detect.finished"));
-                        int i = 1;
-                        for (TickingLocation tickingLocation : tickingLocations) {
-                            Pipes.sendMessage(commandSender, PipesConfig.getText("info.detect.element")
-                                    .replace("{0}", String.valueOf(i))
-                                    .replace("{1}", String.valueOf(tickingLocation.getLocation().getWorldName()))
-                                    .replace("{2}", String.valueOf(tickingLocation.getLocation().getX()))
-                                    .replace("{3}", String.valueOf(tickingLocation.getLocation().getY()))
-                                    .replace("{4}", String.valueOf(tickingLocation.getLocation().getZ()))
-                                    .replace("{5}", String.valueOf(tickingLocation.getTimesTicked())));
-                            i++;
+                        List<TickingLocation> result = detection.getResult();
+                        if (!result.isEmpty()) {
+                            Pipes.sendMessage(commandSender, PipesConfig.getText("info.detect.finished"));
+                            int i = 0;
+                            for (TickingLocation tickingLocation : result) {
+                                Pipes.sendMessage(commandSender, PipesConfig.getText("info.detect.element")
+                                        .replace("{0}", String.valueOf(i))
+                                        .replace("{1}", String.valueOf(tickingLocation.getLocation().getWorldName()))
+                                        .replace("{2}", String.valueOf(tickingLocation.getLocation().getX()))
+                                        .replace("{3}", String.valueOf(tickingLocation.getLocation().getY()))
+                                        .replace("{4}", String.valueOf(tickingLocation.getLocation().getZ()))
+                                        .replace("{5}", String.valueOf(tickingLocation.getTimesTicked())));
+                                i++;
+                            }
+                        } else {
+                            Pipes.sendMessage(commandSender, PipesConfig.getText("info.detect.noElements"));
                         }
                     }
                 }

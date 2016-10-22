@@ -18,6 +18,7 @@ permissions:
     description: all mod permissions
     children:
       Pipes.detect: true
+      Pipes.monitor: true
       Pipes.reload: true
       Pipes.tp: true
   Pipes.user:
@@ -28,6 +29,8 @@ permissions:
     description: detect all ongoing transfers for a given period of time
   Pipes.info:
     description: check a dispenser
+  Pipes.monitor:
+    description: show the current plugin status
   Pipes.reload:
     description: reload the configs
   Pipes.tp:

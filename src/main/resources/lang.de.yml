@@ -19,6 +19,11 @@ texts:
     dropperLore: 'Item-Output für eine Item-Pipe'
     info:
       cooldownStarted: '&a Rechtsklicke in 10 Sekunden eine Pipe'
+    monitor:
+      pipeCache: '&a Pipe-Cache: &f{0} &aItems'
+      schedulerActive: '&a Item-Move-Scheduler: &2aktiv'
+      schedulerNotActive: '&a Item-Move-Scheduler: &cnicht aktiv'
+      version: '&a Version: &f{0}'
     pipe:
       pipeBuilt: '&a Du hast eine Pipe gebaut:&f{0}'
       pipeData: '&f In: &a{0}&f, Out: &a{1}&f, Länge: &a{2}'

@@ -39,6 +39,9 @@ public class PipeCommand implements CommandExecutor {
                     case INFO:
                         subCommand = new InfoCommand();
                         break;
+                    case MONITOR:
+                        subCommand = new MonitorCommand();
+                        break;
                     case RELOAD:
                         subCommand = new ReloadCommand();
                         break;
@@ -63,6 +66,7 @@ public class PipeCommand implements CommandExecutor {
 
         DETECT,
         INFO,
+        MONITOR,
         RELOAD,
         TP;
 

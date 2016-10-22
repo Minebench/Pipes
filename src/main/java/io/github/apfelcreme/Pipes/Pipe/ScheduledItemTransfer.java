@@ -1,7 +1,7 @@
-package io.github.apfelcreme.Pipes.Scheduler;
+package io.github.apfelcreme.Pipes.Pipe;
 
 import io.github.apfelcreme.Pipes.LoopDetection.Detection;
-import io.github.apfelcreme.Pipes.LoopDetection.DetectionManager;
+import io.github.apfelcreme.Pipes.Manager.DetectionManager;
 import io.github.apfelcreme.Pipes.Pipe.Pipe;
 import io.github.apfelcreme.Pipes.Pipe.PipeInput;
 import io.github.apfelcreme.Pipes.Pipe.PipeOutput;
@@ -11,7 +11,9 @@ import org.bukkit.event.inventory.InventoryMoveItemEvent;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Queue;
 
 /**
  * Copyright (C) 2016 Lord36 aka Apfelcreme
@@ -35,20 +37,22 @@ public class ScheduledItemTransfer {
 
     private Pipe pipe;
     private PipeInput input;
-    private ItemStack item;
 
-    public ScheduledItemTransfer(Pipe pipe, PipeInput input, ItemStack item) {
+    public ScheduledItemTransfer(Pipe pipe, PipeInput input) {
         this.pipe = pipe;
         this.input = input;
-        this.item = item;
     }
 
     /**
      * executes the item transfer
      */
     public void execute() {
-        if (!input.getDispenser().getInventory().contains(item)) {
-            return;
+
+        Queue<ItemStack> itemQueue = new LinkedList<>();
+        for (ItemStack itemStack : input.getDispenser().getInventory()) {
+            if (itemStack != null) {
+                itemQueue.add(itemStack);
+            }
         }
 
         // createDetection the current transfer to all the running detections
@@ -61,54 +65,55 @@ public class ScheduledItemTransfer {
                             input.getDispenser().getZ()));
         }
 
-        boolean itemTransferred = false;
-        for (PipeOutput output : pipe.getOutputs()) {
-
-            // look if it can be sorted anywhere
-            List<String> sortMaterials = new ArrayList<>();
-            for (ItemStack i : output.getDropper().getInventory().getContents()) {
-                if (i != null) {
-                    sortMaterials.add(i.getType() + ":" + i.getData().getData());
-                }
-            }
-            // sort!
-            if (sortMaterials.contains(item.getType() + ":" + item.getData().getData())) {
-                if (output.getInventoryHolder().getInventory().firstEmpty() != -1) {
-                    output.getInventoryHolder().getInventory().addItem(item);
-                    input.getDispenser().getInventory().remove(item);
-
-                    InventoryMoveItemEvent event = new InventoryMoveItemEvent(
-                            input.getDispenser().getInventory(), item, output.getInventoryHolder().getInventory(), true);
-                    Pipes.getInstance().getServer().getPluginManager().callEvent(event);
-                    itemTransferred = true;
-                    break;
-                }
-            }
-        }
-        // item could not be sorted! try to find a chest where no sorting is active
-        if (!itemTransferred) {
+        for (ItemStack item : itemQueue) {
+            boolean itemTransferred = false;
             for (PipeOutput output : pipe.getOutputs()) {
+
+                // look if it can be sorted anywhere
                 List<String> sortMaterials = new ArrayList<>();
                 for (ItemStack i : output.getDropper().getInventory().getContents()) {
                     if (i != null) {
                         sortMaterials.add(i.getType() + ":" + i.getData().getData());
                     }
                 }
-                if (sortMaterials.isEmpty()) {
+                // sort!
+                if (sortMaterials.contains(item.getType() + ":" + item.getData().getData())) {
                     if (output.getInventoryHolder().getInventory().firstEmpty() != -1) {
-                        //no sorting function
                         output.getInventoryHolder().getInventory().addItem(item);
                         input.getDispenser().getInventory().remove(item);
 
                         InventoryMoveItemEvent event = new InventoryMoveItemEvent(
                                 input.getDispenser().getInventory(), item, output.getInventoryHolder().getInventory(), true);
                         Pipes.getInstance().getServer().getPluginManager().callEvent(event);
+                        itemTransferred = true;
                         break;
                     }
                 }
             }
-        }
+            // item could not be sorted! try to find a chest where no sorting is active
+            if (!itemTransferred) {
+                for (PipeOutput output : pipe.getOutputs()) {
+                    List<String> sortMaterials = new ArrayList<>();
+                    for (ItemStack i : output.getDropper().getInventory().getContents()) {
+                        if (i != null) {
+                            sortMaterials.add(i.getType() + ":" + i.getData().getData());
+                        }
+                    }
+                    if (sortMaterials.isEmpty()) {
+                        if (output.getInventoryHolder().getInventory().firstEmpty() != -1) {
+                            //no sorting function
+                            output.getInventoryHolder().getInventory().addItem(item);
+                            input.getDispenser().getInventory().remove(item);
 
+                            InventoryMoveItemEvent event = new InventoryMoveItemEvent(
+                                    input.getDispenser().getInventory(), item, output.getInventoryHolder().getInventory(), true);
+                            Pipes.getInstance().getServer().getPluginManager().callEvent(event);
+                            break;
+                        }
+                    }
+                }
+            }
+        }
     }
 
 

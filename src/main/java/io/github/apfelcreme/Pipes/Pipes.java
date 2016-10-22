@@ -4,18 +4,20 @@ import io.github.apfelcreme.Pipes.Exception.ChunkNotLoadedException;
 import io.github.apfelcreme.Pipes.Listener.BlockListener;
 import io.github.apfelcreme.Pipes.Listener.InventoryChangeListener;
 import io.github.apfelcreme.Pipes.Listener.PlayerRightclickListener;
-import io.github.apfelcreme.Pipes.LoopDetection.Detection;
 import io.github.apfelcreme.Pipes.Pipe.Pipe;
 import io.github.apfelcreme.Pipes.Pipe.PipeInput;
 import io.github.apfelcreme.Pipes.Pipe.PipeOutput;
 import io.github.apfelcreme.Pipes.Pipe.SimpleLocation;
-import org.bukkit.*;
-import org.bukkit.block.*;
+import org.bukkit.Material;
+import org.bukkit.World;
+import org.bukkit.block.Block;
+import org.bukkit.block.BlockFace;
+import org.bukkit.block.Dispenser;
+import org.bukkit.block.Dropper;
 import org.bukkit.command.CommandSender;
-import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
-import org.bukkit.inventory.*;
-import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.inventory.InventoryHolder;
+import org.bukkit.inventory.ShapelessRecipe;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitTask;
 
@@ -103,78 +105,4 @@ public class Pipes extends JavaPlugin {
         return instance;
     }
 
-
-    /**
-     * checks if the block is part of a pipe.
-     *
-     * @param startingPoint a block
-     * @return a pipe, if there is one
-     */
-    public static Pipe isPipe(Block startingPoint) throws ChunkNotLoadedException {
-
-        Queue<SimpleLocation> queue = new LinkedList<>();
-        List<Block> found = new ArrayList<>();
-
-        List<PipeInput> inputs = new ArrayList<>();
-        List<PipeOutput> outputs = new ArrayList<>();
-        List<Block> pipeBlocks = new ArrayList<>();
-
-        Byte color = null;
-
-        World world = startingPoint.getWorld();
-
-        queue.add(new SimpleLocation(
-                startingPoint.getWorld().getName(),
-                startingPoint.getX(),
-                startingPoint.getY(),
-                startingPoint.getZ()));
-
-        while (!queue.isEmpty()) {
-            SimpleLocation simpleLocation = queue.remove();
-            if (!world.isChunkLoaded(simpleLocation.getX() >> 4, simpleLocation.getZ() >> 4)) {
-                throw new ChunkNotLoadedException(simpleLocation);
-            }
-            Block block = world.getBlockAt(simpleLocation.getX(), simpleLocation.getY(), simpleLocation.getZ());
-            if (!found.contains(block)) {
-                if (block.getType() == Material.STAINED_GLASS) {
-                    if (color == null) {
-                        color = block.getData();
-                    }
-                    pipeBlocks.add(block);
-                    found.add(block);
-                    queue.add(simpleLocation.getRelative(BlockFace.NORTH));
-                    queue.add(simpleLocation.getRelative(BlockFace.EAST));
-                    queue.add(simpleLocation.getRelative(BlockFace.SOUTH));
-                    queue.add(simpleLocation.getRelative(BlockFace.WEST));
-                    queue.add(simpleLocation.getRelative(BlockFace.UP));
-                    queue.add(simpleLocation.getRelative(BlockFace.DOWN));
-                } else if (block.getState() instanceof InventoryHolder) {
-                    if (block.getType() == Material.DROPPER) {
-                        Dropper dropper = (Dropper) block.getState();
-                        if (block.getRelative(PipesUtil.getDropperFace(dropper)).getState() instanceof InventoryHolder) {
-                            if (InputOutputLocationManager.isBlockListed(block)) {
-                                outputs.add(new PipeOutput(dropper,
-                                        (InventoryHolder) block.getRelative(PipesUtil.getDropperFace(dropper)).getState()));
-                                found.add(block);
-                                found.add(block.getRelative(PipesUtil.getDropperFace(dropper)));
-                            }
-                        }
-                    } else if (block.getState() instanceof Dispenser) {
-                        Dispenser dispenser = (Dispenser) block.getState();
-                        if (block.getRelative(PipesUtil.getDispenserFace(dispenser)).getType() == Material.STAINED_GLASS) {
-                            if (InputOutputLocationManager.isBlockListed(block)) {
-                                inputs.add(new PipeInput(dispenser));
-                                found.add(block);
-                                queue.add(simpleLocation.getRelative(PipesUtil.getDispenserFace(dispenser)));
-                            }
-                        }
-                    }
-                }
-            }
-        }
-        if ((outputs.size() > 0) && (inputs.size() > 0) && pipeBlocks.size() > 0) {
-            return new Pipe(inputs, outputs, pipeBlocks);
-        }
-        return null;
-    }
 }

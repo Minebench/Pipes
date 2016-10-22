@@ -1,13 +1,12 @@
 package io.github.apfelcreme.Pipes.Pipe;
 
-import io.github.apfelcreme.Pipes.Pipes;
 import io.github.apfelcreme.Pipes.PipesConfig;
-import io.github.apfelcreme.Pipes.PipesUtil;
 import org.bukkit.Effect;
 import org.bukkit.Location;
 import org.bukkit.block.Block;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -32,12 +31,14 @@ public class Pipe {
 
     private final List<PipeInput> inputs;
     private final List<PipeOutput> outputs;
-    private final List<Block> pipeBlocks;
+    private final List<SimpleLocation> pipeBlocks;
+    private final Date timestamp;
 
-    public Pipe(List<PipeInput> inputs, List<PipeOutput> outputs, List<Block> pipeBlocks) {
+    public Pipe(List<PipeInput> inputs, List<PipeOutput> outputs, List<SimpleLocation> pipeBlocks) {
         this.inputs = inputs;
         this.outputs = outputs;
         this.pipeBlocks = pipeBlocks;
+        this.timestamp = new Date();
     }
 
     /**
@@ -63,12 +64,22 @@ public class Pipe {
      *
      * @return the list of pipe blocks
      */
-    public List<Block> getPipeBlocks() {
+    public List<SimpleLocation> getPipeBlocks() {
         return pipeBlocks;
     }
 
     /**
+     * returns the date when the object was created
+     *
+     * @return the date when the object was created
+     */
+    public Date getTimestamp() {
+        return timestamp;
+    }
+
+    /**
      * returns the pipe input object if there is one at the given blocks location
+     *
      * @param block a block
      * @return a pipeinput
      */
@@ -85,27 +96,26 @@ public class Pipe {
      * displays particles around a pipe
      */
     public void highlight() {
-        List<Block> blocks = new ArrayList<>();
-        for (Block block : pipeBlocks) {
-            blocks.add(block);
+        List<SimpleLocation> locations = new ArrayList<>();
+        for (SimpleLocation simpleLocation : pipeBlocks) {
+            locations.add(simpleLocation);
         }
         for (PipeInput input : inputs) {
-            blocks.add(input.getDispenser().getBlock());
+            locations.add(input.getDispenserLocation());
         }
         for (PipeOutput output : outputs) {
-            blocks.add(output.getDropper().getBlock());
-            blocks.add(output.getDropper().getBlock().getRelative(PipesUtil.getDropperFace(output.getDropper())));
+            locations.add(output.getDropperLocation());
+            locations.add(output.getInventoryHolderLocation());
         }
-        for (Block block : blocks) {
-            Location location = block.getLocation();
+        for (SimpleLocation simpleLocation : locations) {
+            Location location = simpleLocation.getLocation();
             location.setX(location.getX() + 0.5);
             location.setY(location.getY() + 0.5);
             location.setZ(location.getZ() + 0.5);
             for (int i = 0; i < 3; i++) {
-                block.getWorld().spigot().playEffect(location, Effect.FIREWORKS_SPARK, 0, 0,
+                location.getWorld().spigot().playEffect(location, Effect.FIREWORKS_SPARK, 0, 0,
                         0.1f, 0.1f, 0.1f, 0, 1, 50);
             }
-            location = null;
         }
     }
 

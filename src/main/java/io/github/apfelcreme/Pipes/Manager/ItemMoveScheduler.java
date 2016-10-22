@@ -1,11 +1,10 @@
-package io.github.apfelcreme.Pipes.Scheduler;
+package io.github.apfelcreme.Pipes.Manager;
 
 import io.github.apfelcreme.Pipes.Pipes;
 import io.github.apfelcreme.Pipes.PipesConfig;
+import io.github.apfelcreme.Pipes.Pipe.ScheduledItemTransfer;
 
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.*;
 
 /**
  * Copyright (C) 2016 Lord36 aka Apfelcreme
@@ -27,11 +26,43 @@ import java.util.List;
  */
 public class ItemMoveScheduler {
 
-    private int taskId = -1;
+    /**
+     * the task id of the repeating task
+     */
+    private int taskId;
 
-    private List<ScheduledItemTransfer> scheduledItemTransfers = new ArrayList<>();
+    /**
+     * the queue that holds the items that are waiting to be transferred
+     */
+    private List<ScheduledItemTransfer> scheduledItemTransfers;
 
-    private int emptyRuns = 0;
+    /**
+     * the number of consecutive runs without any transfers (cancels at 4)
+     */
+    private int emptyRuns;
+
+    /**
+     * the scheduler instance
+     */
+    private static ItemMoveScheduler instance = null;
+
+    private ItemMoveScheduler() {
+        taskId = -1;
+        scheduledItemTransfers = new ArrayList<>();
+        emptyRuns = 0;
+    }
+
+    /**
+     * returns the scheduler instance
+     *
+     * @return the scheduler instance
+     */
+    public static ItemMoveScheduler getInstance() {
+        if (instance == null) {
+            instance = new ItemMoveScheduler();
+        }
+        return instance;
+    }
 
     /**
      * starts a task
@@ -80,9 +111,11 @@ public class ItemMoveScheduler {
      */
     public void add(ScheduledItemTransfer scheduledItemTransfer) {
         emptyRuns = 0;
-        scheduledItemTransfers.add(scheduledItemTransfer);
-        if (!isActive()) {
-            create();
+        if (!scheduledItemTransfers.contains(scheduledItemTransfer)) {
+            scheduledItemTransfers.add(scheduledItemTransfer);
+            if (!isActive()) {
+                create();
+            }
         }
     }
 

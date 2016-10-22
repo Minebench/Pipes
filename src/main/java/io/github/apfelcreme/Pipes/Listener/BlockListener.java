@@ -2,6 +2,7 @@ package io.github.apfelcreme.Pipes.Listener;
 
 import io.github.apfelcreme.Pipes.Exception.ChunkNotLoadedException;
 import io.github.apfelcreme.Pipes.InputOutputLocationManager;
+import io.github.apfelcreme.Pipes.Manager.PipeManager;
 import io.github.apfelcreme.Pipes.Pipe.Pipe;
 import io.github.apfelcreme.Pipes.Pipes;
 import io.github.apfelcreme.Pipes.PipesConfig;
@@ -64,7 +65,7 @@ public class BlockListener implements Listener {
                     ChatColor.BLUE + "" + ChatColor.ITALIC + PipesUtil.hideString("Pipes", "Pipes"))) {
                 InputOutputLocationManager.saveLocation(event.getBlock());
                 try {
-                    Pipe pipe = Pipes.isPipe(event.getBlock());
+                    Pipe pipe = PipeManager.isPipe(event.getBlock());
                     if (pipe != null) {
                         Pipes.sendMessage(event.getPlayer(), PipesConfig.getText("info.pipe.pipeBuilt")
                                 .replace("{0}", pipe.getString()));

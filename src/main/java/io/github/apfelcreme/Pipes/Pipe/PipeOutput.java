@@ -23,30 +23,66 @@ import org.bukkit.inventory.InventoryHolder;
  */
 public class PipeOutput {
 
-    private final Dropper dropper;
-    private final InventoryHolder inventoryHolder;
+    private final SimpleLocation dropperLocation;
+    private final SimpleLocation inventoryHolderLocation;
 
-    public PipeOutput(Dropper dropper, InventoryHolder inventoryHolder) {
-        this.dropper = dropper;
-        this.inventoryHolder = inventoryHolder;
+    public PipeOutput(SimpleLocation dropperLocation, SimpleLocation inventoryHolderLocation) {
+        this.dropperLocation = dropperLocation;
+        this.inventoryHolderLocation = inventoryHolderLocation;
     }
 
     /**
-     * returns the dropper
+     * returns the Dropper
      *
-     * @return the dropper
+     * @return the Dropper
      */
     public Dropper getDropper() {
-        return dropper;
+        if (dropperLocation.getBlock() != null) {
+            return (Dropper) dropperLocation.getBlock().getState();
+        }
+        return null;
     }
 
     /**
-     * returns the inventoryHolder
+     * returns the InventoryHolder
      *
-     * @return the inventoryHolder
+     * @return the InventoryHolder
      */
     public InventoryHolder getInventoryHolder() {
-        return inventoryHolder;
+        if (inventoryHolderLocation.getBlock() != null) {
+            return (InventoryHolder) inventoryHolderLocation.getBlock().getState();
+        }
+        return null;
     }
 
+    /**
+     * returns the dropper location
+     *
+     * @return the dropper location
+     */
+    public SimpleLocation getDropperLocation() {
+        return dropperLocation;
+    }
+
+    /**
+     * returns the inventoryholder location
+     *
+     * @return the inventoryholder location
+     */
+    public SimpleLocation getInventoryHolderLocation() {
+        return inventoryHolderLocation;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        PipeOutput that = (PipeOutput) o;
+
+        if (dropperLocation != null ? !dropperLocation.equals(that.dropperLocation) : that.dropperLocation != null)
+            return false;
+        return !(inventoryHolderLocation != null ? !inventoryHolderLocation.equals(that.inventoryHolderLocation) : that.inventoryHolderLocation != null);
+
+    }
 }

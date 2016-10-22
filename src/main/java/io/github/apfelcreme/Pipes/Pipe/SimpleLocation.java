@@ -1,5 +1,9 @@
 package io.github.apfelcreme.Pipes.Pipe;
 
+import org.bukkit.Bukkit;
+import org.bukkit.Location;
+import org.bukkit.World;
+import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 
 /**
@@ -97,17 +101,38 @@ public class SimpleLocation {
     }
 
     /**
+     * returns a bukkit location
+     *
+     * @return a bukkit location
+     */
+    public Location getLocation() {
+        return new Location(Bukkit.getServer().getWorld(worldName), x, y, z);
+    }
+
+    /**
+     * returns a bukkit block
+     * @return a bukkit block
+     */
+    public Block getBlock() {
+        World world = Bukkit.getServer().getWorld(worldName);
+        if (world != null) {
+            return world.getBlockAt(x, y, z);
+        }
+        return null;
+    }
+
+    /**
      * checks if this objects equals another object
      *
-     * @param other another SimpleLocation
+     * @param o another SimpleLocation
      * @return true or false
      */
     @Override
-    public boolean equals(Object other) {
-        if (this == other) return true;
-        if (other == null || getClass() != other.getClass()) return false;
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
 
-        SimpleLocation that = (SimpleLocation) other;
+        SimpleLocation that = (SimpleLocation) o;
 
         if (x != that.x) return false;
         if (y != that.y) return false;
@@ -116,13 +141,17 @@ public class SimpleLocation {
     }
 
     @Override
-    public String toString() {
-        return "world: " + worldName + ",x: " + x + ",y:" + y + ",z:" + z;
-    }
-
-
-    @Override
     public int hashCode() {
         return toString().hashCode();
+    }
+
+    @Override
+    public String toString() {
+        return "SimpleLocation{" +
+                "worldName='" + worldName + '\'' +
+                ", x=" + x +
+                ", y=" + y +
+                ", z=" + z +
+                '}';
     }
 }

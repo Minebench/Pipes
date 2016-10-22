@@ -1,7 +1,6 @@
 package io.github.apfelcreme.Pipes.Pipe;
 
 import org.bukkit.block.Dispenser;
-import org.bukkit.inventory.InventoryHolder;
 
 /**
  * Copyright (C) 2016 Lord36 aka Apfelcreme
@@ -23,10 +22,10 @@ import org.bukkit.inventory.InventoryHolder;
  */
 public class PipeInput {
 
-    private final Dispenser dispenser;
+    private SimpleLocation dispenserLocation;
 
-    public PipeInput(Dispenser dispenser) {
-        this.dispenser = dispenser;
+    public PipeInput(SimpleLocation dispenserLocation) {
+        this.dispenserLocation = dispenserLocation;
     }
 
     /**
@@ -35,7 +34,30 @@ public class PipeInput {
      * @return the dispenser
      */
     public Dispenser getDispenser() {
-        return dispenser;
+        if (dispenserLocation.getBlock() != null) {
+            return (Dispenser) dispenserLocation.getBlock().getState();
+        }
+        return null;
+    }
+
+    /**
+     * returns the dispenser dispenserLocation
+     *
+     * @return the dispenser dispenserLocation
+     */
+    public SimpleLocation getDispenserLocation() {
+        return dispenserLocation;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        PipeInput pipeInput = (PipeInput) o;
+
+        return !(dispenserLocation != null ? !dispenserLocation.equals(pipeInput.dispenserLocation) : pipeInput.dispenserLocation != null);
+
     }
 
 }

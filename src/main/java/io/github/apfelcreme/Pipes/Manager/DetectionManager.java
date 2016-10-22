@@ -1,5 +1,6 @@
-package io.github.apfelcreme.Pipes.LoopDetection;
+package io.github.apfelcreme.Pipes.Manager;
 
+import io.github.apfelcreme.Pipes.LoopDetection.Detection;
 import org.bukkit.command.CommandSender;
 
 import java.util.HashMap;

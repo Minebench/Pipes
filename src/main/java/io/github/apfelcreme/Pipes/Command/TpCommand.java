@@ -1,7 +1,7 @@
 package io.github.apfelcreme.Pipes.Command;
 
 import io.github.apfelcreme.Pipes.LoopDetection.Detection;
-import io.github.apfelcreme.Pipes.LoopDetection.DetectionManager;
+import io.github.apfelcreme.Pipes.Manager.DetectionManager;
 import io.github.apfelcreme.Pipes.LoopDetection.TickingLocation;
 import io.github.apfelcreme.Pipes.Pipes;
 import io.github.apfelcreme.Pipes.PipesConfig;

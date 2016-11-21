@@ -19,6 +19,7 @@ permissions:
     children:
       Pipes.detect: true
       Pipes.monitor: true
+      Pipes.placeChunkLoader: true
       Pipes.reload: true
       Pipes.tp: true
   Pipes.user:
@@ -31,6 +32,8 @@ permissions:
     description: check a dispenser
   Pipes.monitor:
     description: show the current plugin status
+  Pipes.placeChunkLoader:
+    description: place a beacon to work as a chunk loader
   Pipes.reload:
     description: reload the configs
   Pipes.tp:

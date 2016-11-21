@@ -2,10 +2,7 @@ package io.github.apfelcreme.Pipes.Manager;
 
 import io.github.apfelcreme.Pipes.Exception.ChunkNotLoadedException;
 import io.github.apfelcreme.Pipes.InputOutputLocationManager;
-import io.github.apfelcreme.Pipes.Pipe.Pipe;
-import io.github.apfelcreme.Pipes.Pipe.PipeInput;
-import io.github.apfelcreme.Pipes.Pipe.PipeOutput;
-import io.github.apfelcreme.Pipes.Pipe.SimpleLocation;
+import io.github.apfelcreme.Pipes.Pipe.*;
 import io.github.apfelcreme.Pipes.PipesUtil;
 import org.bukkit.Material;
 import org.bukkit.World;
@@ -105,6 +102,7 @@ public class PipeManager {
 
         List<PipeInput> inputs = new ArrayList<>();
         List<PipeOutput> outputs = new ArrayList<>();
+        List<ChunkLoader> chunkLoaders = new ArrayList<>();
         List<SimpleLocation> pipeBlocks = new ArrayList<>();
 
         Byte color = null;
@@ -119,7 +117,8 @@ public class PipeManager {
 
         while (!queue.isEmpty()) {
             SimpleLocation location = queue.remove();
-            if (!world.isChunkLoaded(location.getX() >> 4, location.getZ() >> 4)) {
+            if (!world.isChunkLoaded(location.getX() >> 4, location.getZ() >> 4)
+                    && (chunkLoaders.size() == 0)) {
                 throw new ChunkNotLoadedException(location);
             }
             Block block = world.getBlockAt(location.getX(), location.getY(), location.getZ());
@@ -129,6 +128,17 @@ public class PipeManager {
                         color = block.getData();
                     }
                     pipeBlocks.add(location);
+                    found.add(block);
+                    queue.add(location.getRelative(BlockFace.NORTH));
+                    queue.add(location.getRelative(BlockFace.EAST));
+                    queue.add(location.getRelative(BlockFace.SOUTH));
+                    queue.add(location.getRelative(BlockFace.WEST));
+                    queue.add(location.getRelative(BlockFace.UP));
+                    queue.add(location.getRelative(BlockFace.DOWN));
+                } else if (block.getType() == Material.BEACON) {
+                    if (InputOutputLocationManager.isBlockListed(location.getBlock())) {
+                        chunkLoaders.add(new ChunkLoader(location));
+                    }
                     found.add(block);
                     queue.add(location.getRelative(BlockFace.NORTH));
                     queue.add(location.getRelative(BlockFace.EAST));
@@ -161,7 +171,7 @@ public class PipeManager {
             }
         }
         if ((outputs.size() > 0) && (inputs.size() > 0) && pipeBlocks.size() > 0) {
-            return new Pipe(inputs, outputs, pipeBlocks);
+            return new Pipe(inputs, outputs, chunkLoaders, pipeBlocks);
         }
         return null;
     }

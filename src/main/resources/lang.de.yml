@@ -10,6 +10,7 @@ texts:
     wrongUsage:
       tp: '&c Falsche Eingabe! Probiere /pipe tp <#>'
   info:
+    chunkLoaderLore: 'ChunkLoader für eine Item-Pipe'
     detect:
       started: '&a Detektion gestartet! (&f{0}&a Sekunden)'
       finished: '&a Detektion abgeschlossen! Folgende Objekte wurden gefunden: '

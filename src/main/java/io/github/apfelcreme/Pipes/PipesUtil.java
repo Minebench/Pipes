@@ -148,4 +148,22 @@ public class PipesUtil {
         customDropper.setItemMeta(meta);
         return customDropper;
     }
+
+    /**
+     * returns an ItemStack of the custom chunkLoader item
+     *
+     * @return an ItemStack of the custom chunkLoader item
+     */
+    public static ItemStack getCustomChunkLoaderItem() {
+        ItemStack customChunkLoader = new ItemStack(Material.BEACON);
+        ItemMeta meta = customChunkLoader.getItemMeta();
+        List<String> lore = Arrays.asList(ChatColor.BLUE + "" + ChatColor.ITALIC + hideString("Pipes", "Pipes"),
+                PipesConfig.getText("info.chunkLoaderLore"));
+        meta.setLore(lore);
+        meta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
+        meta.addEnchant(Enchantment.ARROW_DAMAGE, 1, true);
+        meta.setDisplayName(ChatColor.RESET + "" + ChatColor.WHITE + "Chunk Loader");
+        customChunkLoader.setItemMeta(meta);
+        return customChunkLoader;
+    }
 }

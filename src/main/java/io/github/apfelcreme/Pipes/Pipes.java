@@ -75,6 +75,12 @@ public class Pipes extends JavaPlugin {
             dropperRecipe.addIngredient(material.getValue(), material.getKey());
         }
         getServer().addRecipe(dropperRecipe);
+
+        ShapelessRecipe chunkLoaderRecipe = new ShapelessRecipe(PipesUtil.getCustomChunkLoaderItem());
+        for (Map.Entry<Material, Integer> material : PipesConfig.getRecipeMaterials("chunkLoaderRecipe").entrySet()) {
+            chunkLoaderRecipe.addIngredient(material.getValue(), material.getKey());
+        }
+        getServer().addRecipe(chunkLoaderRecipe);
     }
 
     /**

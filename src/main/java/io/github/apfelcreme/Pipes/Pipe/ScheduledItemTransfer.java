@@ -2,10 +2,6 @@ package io.github.apfelcreme.Pipes.Pipe;
 
 import io.github.apfelcreme.Pipes.LoopDetection.Detection;
 import io.github.apfelcreme.Pipes.Manager.DetectionManager;
-import io.github.apfelcreme.Pipes.Pipe.Pipe;
-import io.github.apfelcreme.Pipes.Pipe.PipeInput;
-import io.github.apfelcreme.Pipes.Pipe.PipeOutput;
-import io.github.apfelcreme.Pipes.Pipe.SimpleLocation;
 import io.github.apfelcreme.Pipes.Pipes;
 import org.bukkit.event.inventory.InventoryMoveItemEvent;
 import org.bukkit.inventory.ItemStack;

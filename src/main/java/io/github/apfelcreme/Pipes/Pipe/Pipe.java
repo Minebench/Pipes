@@ -31,12 +31,15 @@ public class Pipe {
 
     private final List<PipeInput> inputs;
     private final List<PipeOutput> outputs;
+    private final List<ChunkLoader> chunkLoaders;
     private final List<SimpleLocation> pipeBlocks;
     private final Date timestamp;
 
-    public Pipe(List<PipeInput> inputs, List<PipeOutput> outputs, List<SimpleLocation> pipeBlocks) {
+    public Pipe(List<PipeInput> inputs, List<PipeOutput> outputs,
+                List<ChunkLoader> chunkLoaders, List<SimpleLocation> pipeBlocks) {
         this.inputs = inputs;
         this.outputs = outputs;
+        this.chunkLoaders = chunkLoaders;
         this.pipeBlocks = pipeBlocks;
         this.timestamp = new Date();
     }
@@ -57,6 +60,15 @@ public class Pipe {
      */
     public List<PipeOutput> getOutputs() {
         return outputs;
+    }
+
+    /**
+     * returns the list of beacons that are connected to a pipe that allows the
+     * server to load chunks if parts of the pipe are located in unloaded chunks
+     * @return a list of chunk loaders
+     */
+    public List<ChunkLoader> getChunkLoaders() {
+        return chunkLoaders;
     }
 
     /**
@@ -140,6 +152,7 @@ public class Pipe {
 
         if (!inputs.equals(pipe.inputs)) return false;
         if (!outputs.equals(pipe.outputs)) return false;
+        if (!chunkLoaders.equals(pipe.chunkLoaders)) return false;
         return pipeBlocks.equals(pipe.pipeBlocks);
 
     }
@@ -148,6 +161,7 @@ public class Pipe {
     public int hashCode() {
         int result = inputs.hashCode();
         result = 31 * result + outputs.hashCode();
+        result = 31 * result + chunkLoaders.hashCode();
         result = 31 * result + pipeBlocks.hashCode();
         return result;
     }

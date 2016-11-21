@@ -1,27 +1,17 @@
 package io.github.apfelcreme.Pipes;
 
-import io.github.apfelcreme.Pipes.Exception.ChunkNotLoadedException;
 import io.github.apfelcreme.Pipes.Listener.BlockListener;
 import io.github.apfelcreme.Pipes.Listener.InventoryChangeListener;
 import io.github.apfelcreme.Pipes.Listener.PlayerRightclickListener;
-import io.github.apfelcreme.Pipes.Pipe.Pipe;
-import io.github.apfelcreme.Pipes.Pipe.PipeInput;
-import io.github.apfelcreme.Pipes.Pipe.PipeOutput;
-import io.github.apfelcreme.Pipes.Pipe.SimpleLocation;
 import org.bukkit.Material;
-import org.bukkit.World;
-import org.bukkit.block.Block;
-import org.bukkit.block.BlockFace;
-import org.bukkit.block.Dispenser;
-import org.bukkit.block.Dropper;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
-import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ShapelessRecipe;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitTask;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Copyright (C) 2016 Lord36 aka Apfelcreme
@@ -65,13 +55,13 @@ public class Pipes extends JavaPlugin {
 
         //create the custom recipes
         ShapelessRecipe dispenserRecipe = new ShapelessRecipe(PipesUtil.getCustomDispenserItem());
-        for (Map.Entry<Material, Integer> material : PipesConfig.getDispenserMaterials().entrySet()) {
+        for (Map.Entry<Material, Integer> material : PipesConfig.getRecipeMaterials("dispenserRecipe").entrySet()) {
             dispenserRecipe.addIngredient(material.getValue(), material.getKey());
         }
         getServer().addRecipe(dispenserRecipe);
 
         ShapelessRecipe dropperRecipe = new ShapelessRecipe(PipesUtil.getCustomDropperItem());
-        for (Map.Entry<Material, Integer> material : PipesConfig.getDropperMaterials().entrySet()) {
+        for (Map.Entry<Material, Integer> material : PipesConfig.getRecipeMaterials("dropperRecipe").entrySet()) {
             dropperRecipe.addIngredient(material.getValue(), material.getKey());
         }
         getServer().addRecipe(dropperRecipe);

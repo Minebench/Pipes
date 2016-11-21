@@ -92,30 +92,15 @@ public class PipesConfig {
         return plugin.getConfig().getLong("transferCooldown", 1000L);
     }
 
-    /**
-     * returns the materials and their quantity for the custom dispenser recipe
-     *
-     * @return the materials and their quantity for the custom dispenser recipe
-     */
-    public static Map<Material, Integer> getDispenserMaterials() {
-        Map<Material, Integer> ret = new HashMap<>();
-        ConfigurationSection section = plugin.getConfig().getConfigurationSection("dispenserRecipe");
-        if (section != null) {
-            for (String key : section.getKeys(false)) {
-                ret.put(Material.getMaterial(key), section.getInt(key));
-            }
-        }
-        return ret;
-    }
 
     /**
-     * returns the materials and their quantity for the custom dropper recipe
+     * returns the materials and their quantity for a custom recipe
      *
-     * @return the materials and their quantity for the custom dropper recipe
+     * @return the materials and their quantity for a custom recipe
      */
-    public static Map<Material, Integer> getDropperMaterials() {
+    public static Map<Material, Integer> getRecipeMaterials(String path) {
         Map<Material, Integer> ret = new HashMap<>();
-        ConfigurationSection section = plugin.getConfig().getConfigurationSection("dropperRecipe");
+        ConfigurationSection section = plugin.getConfig().getConfigurationSection(path);
         if (section != null) {
             for (String key : section.getKeys(false)) {
                 ret.put(Material.getMaterial(key), section.getInt(key));

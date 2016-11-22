@@ -1,6 +1,6 @@
 package io.github.apfelcreme.Pipes.Pipe;
 
-import org.bukkit.block.Beacon;
+import org.bukkit.block.Furnace;
 
 /**
  * Copyright (C) 2016 Lord36 aka Apfelcreme
@@ -34,9 +34,9 @@ public class ChunkLoader {
      *
      * @return the chunkLoader
      */
-    public Beacon getChunkLoader() {
+    public Furnace getChunkLoader() {
         if (chunkLoaderLocation.getBlock() != null) {
-            return (Beacon) chunkLoaderLocation.getBlock().getState();
+            return (Furnace) chunkLoaderLocation.getBlock().getState();
         }
         return null;
     }
@@ -55,9 +55,9 @@ public class ChunkLoader {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
 
-        ChunkLoader pipeInput = (ChunkLoader) o;
+        ChunkLoader chunkLoader = (ChunkLoader) o;
 
-        return !(chunkLoaderLocation != null ? !chunkLoaderLocation.equals(pipeInput.chunkLoaderLocation) : pipeInput.chunkLoaderLocation != null);
+        return !(chunkLoaderLocation != null ? !chunkLoaderLocation.equals(chunkLoader.chunkLoaderLocation) : chunkLoader.chunkLoaderLocation != null);
 
     }
 

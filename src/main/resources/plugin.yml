@@ -33,7 +33,7 @@ permissions:
   Pipes.monitor:
     description: show the current plugin status
   Pipes.placeChunkLoader:
-    description: place a beacon to work as a chunk loader
+    description: place a furnace to work as a chunk loader
   Pipes.reload:
     description: reload the configs
   Pipes.tp:

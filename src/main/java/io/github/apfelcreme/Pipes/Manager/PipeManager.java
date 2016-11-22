@@ -135,17 +135,17 @@ public class PipeManager {
                     queue.add(location.getRelative(BlockFace.WEST));
                     queue.add(location.getRelative(BlockFace.UP));
                     queue.add(location.getRelative(BlockFace.DOWN));
-                } else if (block.getType() == Material.BEACON) {
-                    if (isChunkLoader((Beacon) block.getState())) {
+                } else if (block.getType() == Material.FURNACE) {
+                    if (isChunkLoader((Furnace) block.getState())) {
                         chunkLoaders.add(new ChunkLoader(location));
+                        found.add(block);
+                        queue.add(location.getRelative(BlockFace.NORTH));
+                        queue.add(location.getRelative(BlockFace.EAST));
+                        queue.add(location.getRelative(BlockFace.SOUTH));
+                        queue.add(location.getRelative(BlockFace.WEST));
+                        queue.add(location.getRelative(BlockFace.UP));
+                        queue.add(location.getRelative(BlockFace.DOWN));
                     }
-                    found.add(block);
-                    queue.add(location.getRelative(BlockFace.NORTH));
-                    queue.add(location.getRelative(BlockFace.EAST));
-                    queue.add(location.getRelative(BlockFace.SOUTH));
-                    queue.add(location.getRelative(BlockFace.WEST));
-                    queue.add(location.getRelative(BlockFace.UP));
-                    queue.add(location.getRelative(BlockFace.DOWN));
                 } else if (block.getState() instanceof InventoryHolder) {
                     if (block.getType() == Material.DROPPER) {
                         Dropper dropper = (Dropper) block.getState();
@@ -197,12 +197,13 @@ public class PipeManager {
     }
 
     /**
-     * checks whether the given beacon block is a chunk loader
+     * checks whether the given furnace block is a chunk loader
      *
-     * @param beacon a beacon block
+     * @param furnace a furnace block
      * @return true or false
      */
-    public static boolean isChunkLoader(Beacon beacon) {
-        return beacon.getInventory().getName().equals(PipesUtil.getCustomChunkLoaderItem().getItemMeta().getDisplayName());
+    public static boolean isChunkLoader(Furnace furnace) {
+        System.out.println(furnace.getInventory().getName());
+        return furnace.getInventory().getName().equals(PipesUtil.getCustomChunkLoaderItem().getItemMeta().getDisplayName());
     }
 }

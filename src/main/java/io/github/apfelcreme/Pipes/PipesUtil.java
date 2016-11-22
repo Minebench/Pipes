@@ -155,7 +155,7 @@ public class PipesUtil {
      * @return an ItemStack of the custom chunkLoader item
      */
     public static ItemStack getCustomChunkLoaderItem() {
-        ItemStack customChunkLoader = new ItemStack(Material.BEACON);
+        ItemStack customChunkLoader = new ItemStack(Material.FURNACE);
         ItemMeta meta = customChunkLoader.getItemMeta();
         List<String> lore = Arrays.asList(ChatColor.BLUE + "" + ChatColor.ITALIC + hideString("Pipes", "Pipes"),
                 PipesConfig.getText("info.chunkLoaderLore"));

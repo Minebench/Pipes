@@ -8,9 +8,9 @@ import io.github.apfelcreme.Pipes.PipesConfig;
 import io.github.apfelcreme.Pipes.PipesUtil;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
-import org.bukkit.block.Beacon;
 import org.bukkit.block.Dispenser;
 import org.bukkit.block.Dropper;
+import org.bukkit.block.Furnace;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
@@ -51,8 +51,8 @@ public class BlockListener implements Listener {
             event.setCancelled(true);
             event.getBlock().setType(Material.AIR);
             event.getBlock().getWorld().dropItemNaturally(event.getBlock().getLocation(), PipesUtil.getCustomDropperItem());
-        } else if ((event.getBlock().getType() == Material.BEACON)
-                && PipeManager.isChunkLoader((Beacon) event.getBlock().getState())) {
+        } else if ((event.getBlock().getType() == Material.FURNACE)
+                && PipeManager.isChunkLoader((Furnace) event.getBlock().getState())) {
             // a pipe input was destroyed
             event.setCancelled(true);
             event.getBlock().setType(Material.AIR);
@@ -64,13 +64,13 @@ public class BlockListener implements Listener {
     private void onBlockPlace(BlockPlaceEvent event) {
         if (event.getItemInHand().getType() == Material.DISPENSER
                 || event.getItemInHand().getType() == Material.DROPPER
-                || event.getItemInHand().getType() == Material.BEACON) {
+                || event.getItemInHand().getType() == Material.FURNACE) {
             if (event.getItemInHand() != null
                     && event.getItemInHand().getItemMeta() != null
                     && event.getItemInHand().getItemMeta().getLore() != null
                     && event.getItemInHand().getItemMeta().getLore().contains(
                     ChatColor.BLUE + "" + ChatColor.ITALIC + PipesUtil.hideString("Pipes", "Pipes"))) {
-                if ((event.getItemInHand().getType() == Material.BEACON)
+                if ((event.getItemInHand().getType() == Material.FURNACE)
                         && !event.getPlayer().hasPermission("Pipes.placeChunkLoader")) {
                     Pipes.sendMessage(event.getPlayer(), PipesConfig.getText("error.noPermission"));
                     event.setCancelled(true);

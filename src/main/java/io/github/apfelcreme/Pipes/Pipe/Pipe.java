@@ -63,8 +63,9 @@ public class Pipe {
     }
 
     /**
-     * returns the list of beacons that are connected to a pipe that allows the
+     * returns the list of furnaces that are connected to a pipe that allows the
      * server to load chunks if parts of the pipe are located in unloaded chunks
+     *
      * @return a list of chunk loaders
      */
     public List<ChunkLoader> getChunkLoaders() {

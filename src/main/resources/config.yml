@@ -9,7 +9,7 @@ dropperRecipe:
   DROPPER: 1
   HOPPER: 1
 chunkLoaderRecipe:
-  BEACON: 1
+  FURNACE: 1
   OBSIDIAN: 1
   GOLD_BLOCK: 1
 

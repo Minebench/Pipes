@@ -1,7 +1,6 @@
 package io.github.apfelcreme.Pipes.Listener;
 
 import io.github.apfelcreme.Pipes.Exception.ChunkNotLoadedException;
-import io.github.apfelcreme.Pipes.InputOutputLocationManager;
 import io.github.apfelcreme.Pipes.Manager.PipeManager;
 import io.github.apfelcreme.Pipes.Pipe.Pipe;
 import io.github.apfelcreme.Pipes.Pipe.PipeInput;
@@ -12,6 +11,7 @@ import io.github.apfelcreme.Pipes.Manager.ItemMoveScheduler;
 import io.github.apfelcreme.Pipes.Pipe.ScheduledItemTransfer;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
+import org.bukkit.block.Dispenser;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
@@ -54,7 +54,7 @@ public class InventoryChangeListener implements Listener {
             if (dispenserBlock.getType() != Material.DISPENSER) {
                 return;
             }
-            if (!InputOutputLocationManager.isBlockListed(dispenserBlock)) {
+            if (!PipeManager.isPipeInput((Dispenser)dispenserBlock.getState())) {
                 return;
             }
             final SimpleLocation dispenserLocation = new SimpleLocation(
@@ -104,7 +104,7 @@ public class InventoryChangeListener implements Listener {
         if (dispenserBlock.getType() != Material.DISPENSER) {
             return;
         }
-        if (!InputOutputLocationManager.isBlockListed(dispenserBlock)) {
+        if (!PipeManager.isPipeInput((Dispenser)dispenserBlock.getState())) {
             return;
         }
 

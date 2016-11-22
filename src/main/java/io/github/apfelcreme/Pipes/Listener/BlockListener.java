@@ -1,7 +1,6 @@
 package io.github.apfelcreme.Pipes.Listener;
 
 import io.github.apfelcreme.Pipes.Exception.ChunkNotLoadedException;
-import io.github.apfelcreme.Pipes.InputOutputLocationManager;
 import io.github.apfelcreme.Pipes.Manager.PipeManager;
 import io.github.apfelcreme.Pipes.Pipe.Pipe;
 import io.github.apfelcreme.Pipes.Pipes;
@@ -9,12 +8,14 @@ import io.github.apfelcreme.Pipes.PipesConfig;
 import io.github.apfelcreme.Pipes.PipesUtil;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
+import org.bukkit.block.Beacon;
+import org.bukkit.block.Dispenser;
+import org.bukkit.block.Dropper;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.inventory.CraftItemEvent;
-import org.bukkit.inventory.ItemStack;
 
 /**
  * Copyright (C) 2016 Lord36 aka Apfelcreme
@@ -38,23 +39,24 @@ public class BlockListener implements Listener {
 
     @EventHandler
     private void onBlockBreak(BlockBreakEvent event) {
-        if (event.getBlock().getType() == Material.DISPENSER
-                || event.getBlock().getType() == Material.DROPPER
-                || event.getBlock().getType() == Material.BEACON) {
-            if (InputOutputLocationManager.isBlockListed(event.getBlock())) {
-                InputOutputLocationManager.removeLocation(event.getBlock());
-                ItemStack drop = null;
-                if (event.getBlock().getType() == Material.DISPENSER) {
-                    drop = PipesUtil.getCustomDispenserItem();
-                } else if (event.getBlock().getType() == Material.DROPPER) {
-                    drop = PipesUtil.getCustomDropperItem();
-                } else if (event.getBlock().getType() == Material.BEACON) {
-                    drop = PipesUtil.getCustomChunkLoaderItem();
-                }
-                event.setCancelled(true);
-                event.getBlock().setType(Material.AIR);
-                event.getBlock().getWorld().dropItemNaturally(event.getBlock().getLocation(), drop);
-            }
+        if ((event.getBlock().getType() == Material.DISPENSER)
+                && PipeManager.isPipeInput((Dispenser) event.getBlock().getState())) {
+            // a pipe input was destroyed
+            event.setCancelled(true);
+            event.getBlock().setType(Material.AIR);
+            event.getBlock().getWorld().dropItemNaturally(event.getBlock().getLocation(), PipesUtil.getCustomDispenserItem());
+        } else if ((event.getBlock().getType() == Material.DROPPER)
+                && PipeManager.isPipeOutput((Dropper) event.getBlock().getState())) {
+            // a pipe input was destroyed
+            event.setCancelled(true);
+            event.getBlock().setType(Material.AIR);
+            event.getBlock().getWorld().dropItemNaturally(event.getBlock().getLocation(), PipesUtil.getCustomDropperItem());
+        } else if ((event.getBlock().getType() == Material.BEACON)
+                && PipeManager.isChunkLoader((Beacon) event.getBlock().getState())) {
+            // a pipe input was destroyed
+            event.setCancelled(true);
+            event.getBlock().setType(Material.AIR);
+            event.getBlock().getWorld().dropItemNaturally(event.getBlock().getLocation(), PipesUtil.getCustomChunkLoaderItem());
         }
     }
 
@@ -74,7 +76,6 @@ public class BlockListener implements Listener {
                     event.setCancelled(true);
                     return;
                 }
-                InputOutputLocationManager.saveLocation(event.getBlock());
                 try {
                     Pipe pipe = PipeManager.isPipe(event.getBlock());
                     if (pipe != null) {

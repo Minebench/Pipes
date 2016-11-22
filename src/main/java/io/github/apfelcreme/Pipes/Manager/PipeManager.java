@@ -1,15 +1,11 @@
 package io.github.apfelcreme.Pipes.Manager;
 
 import io.github.apfelcreme.Pipes.Exception.ChunkNotLoadedException;
-import io.github.apfelcreme.Pipes.InputOutputLocationManager;
 import io.github.apfelcreme.Pipes.Pipe.*;
 import io.github.apfelcreme.Pipes.PipesUtil;
 import org.bukkit.Material;
 import org.bukkit.World;
-import org.bukkit.block.Block;
-import org.bukkit.block.BlockFace;
-import org.bukkit.block.Dispenser;
-import org.bukkit.block.Dropper;
+import org.bukkit.block.*;
 import org.bukkit.inventory.InventoryHolder;
 
 import java.util.*;
@@ -53,6 +49,7 @@ public class PipeManager {
 
     /**
      * returns the pipe cache
+     *
      * @return the pipe cache
      */
     public Map<SimpleLocation, Pipe> getPipeCache() {
@@ -61,16 +58,19 @@ public class PipeManager {
 
     /**
      * adds a pipe to the pipe cache
+     *
      * @param dispenserLocation the location
-     * @param pipe the pipe object
+     * @param pipe              the pipe object
      */
     public void addPipeToCache(SimpleLocation dispenserLocation, Pipe pipe) {
         if (pipe != null) {
             pipeCache.put(dispenserLocation, pipe);
         }
     }
+
     /**
      * removes a pipe from the pipe cache
+     *
      * @param dispenserLocation the location
      */
     public void removeFromPipeCache(SimpleLocation dispenserLocation) {
@@ -136,7 +136,7 @@ public class PipeManager {
                     queue.add(location.getRelative(BlockFace.UP));
                     queue.add(location.getRelative(BlockFace.DOWN));
                 } else if (block.getType() == Material.BEACON) {
-                    if (InputOutputLocationManager.isBlockListed(location.getBlock())) {
+                    if (isChunkLoader((Beacon) block.getState())) {
                         chunkLoaders.add(new ChunkLoader(location));
                     }
                     found.add(block);
@@ -150,7 +150,7 @@ public class PipeManager {
                     if (block.getType() == Material.DROPPER) {
                         Dropper dropper = (Dropper) block.getState();
                         if (block.getRelative(PipesUtil.getDropperFace(dropper)).getState() instanceof InventoryHolder) {
-                            if (InputOutputLocationManager.isBlockListed(block)) {
+                            if (isPipeOutput(dropper)) {
                                 outputs.add(new PipeOutput(location,
                                         location.getRelative(PipesUtil.getDropperFace(dropper))));
                                 found.add(block);
@@ -160,7 +160,7 @@ public class PipeManager {
                     } else if (block.getState() instanceof Dispenser) {
                         Dispenser dispenser = (Dispenser) block.getState();
                         if (block.getRelative(PipesUtil.getDispenserFace(dispenser)).getType() == Material.STAINED_GLASS) {
-                            if (InputOutputLocationManager.isBlockListed(block)) {
+                            if (isPipeInput(dispenser)) {
                                 inputs.add(new PipeInput(location));
                                 found.add(block);
                                 queue.add(location.getRelative(PipesUtil.getDispenserFace(dispenser)));
@@ -174,5 +174,35 @@ public class PipeManager {
             return new Pipe(inputs, outputs, chunkLoaders, pipeBlocks);
         }
         return null;
+    }
+
+    /**
+     * checks whether the given dispenser block is a pipe input
+     *
+     * @param dispenser a dispenser block
+     * @return true or false
+     */
+    public static boolean isPipeInput(Dispenser dispenser) {
+        return dispenser.getInventory().getName().equals(PipesUtil.getCustomDispenserItem().getItemMeta().getDisplayName());
+    }
+
+    /**
+     * checks whether the given dropper block is a pipe output
+     *
+     * @param dropper a dropper block
+     * @return true or false
+     */
+    public static boolean isPipeOutput(Dropper dropper) {
+        return dropper.getInventory().getName().equals(PipesUtil.getCustomDropperItem().getItemMeta().getDisplayName());
+    }
+
+    /**
+     * checks whether the given beacon block is a chunk loader
+     *
+     * @param beacon a beacon block
+     * @return true or false
+     */
+    public static boolean isChunkLoader(Beacon beacon) {
+        return beacon.getInventory().getName().equals(PipesUtil.getCustomChunkLoaderItem().getItemMeta().getDisplayName());
     }
 }

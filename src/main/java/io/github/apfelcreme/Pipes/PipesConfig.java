@@ -2,12 +2,10 @@ package io.github.apfelcreme.Pipes;
 
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
-import org.bukkit.configuration.Configuration;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.YamlConfiguration;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -32,7 +30,6 @@ import java.util.Map;
 public class PipesConfig {
 
     private static YamlConfiguration languageConfig;
-    private static YamlConfiguration locationConfig;
 
     private static Pipes plugin;
 
@@ -46,31 +43,8 @@ public class PipesConfig {
         }
         plugin.saveDefaultConfig();
         plugin.saveResource("lang.de.yml", false);
-        plugin.saveResource("locations.yml", false);
-
         plugin.reloadConfig();
         languageConfig = YamlConfiguration.loadConfiguration(new File(plugin.getDataFolder() + "/lang.de.yml"));
-        locationConfig = YamlConfiguration.loadConfiguration(new File(plugin.getDataFolder() + "/locations.yml"));
-    }
-
-    /**
-     * returns the list of registered dispensers
-     *
-     * @return the list of registered dispensers
-     */
-    public static Configuration getLocationConfig() {
-        return locationConfig;
-    }
-
-    /**
-     * saves the location config
-     */
-    public static void saveLocationConfig() {
-        try {
-            locationConfig.save(new File(plugin.getDataFolder() + "/locations.yml"));
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
     }
 
     /**

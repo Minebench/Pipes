@@ -135,17 +135,6 @@ public class PipeManager {
                     queue.add(location.getRelative(BlockFace.WEST));
                     queue.add(location.getRelative(BlockFace.UP));
                     queue.add(location.getRelative(BlockFace.DOWN));
-                } else if (block.getType() == Material.FURNACE) {
-                    if (isChunkLoader((Furnace) block.getState())) {
-                        chunkLoaders.add(new ChunkLoader(location));
-                        found.add(block);
-                        queue.add(location.getRelative(BlockFace.NORTH));
-                        queue.add(location.getRelative(BlockFace.EAST));
-                        queue.add(location.getRelative(BlockFace.SOUTH));
-                        queue.add(location.getRelative(BlockFace.WEST));
-                        queue.add(location.getRelative(BlockFace.UP));
-                        queue.add(location.getRelative(BlockFace.DOWN));
-                    }
                 } else if (block.getState() instanceof InventoryHolder) {
                     if (block.getType() == Material.DROPPER) {
                         Dropper dropper = (Dropper) block.getState();
@@ -157,7 +146,7 @@ public class PipeManager {
                                 found.add(block.getRelative(PipesUtil.getDropperFace(dropper)));
                             }
                         }
-                    } else if (block.getState() instanceof Dispenser) {
+                    } else if (block.getType() == Material.DISPENSER) {
                         Dispenser dispenser = (Dispenser) block.getState();
                         if (block.getRelative(PipesUtil.getDispenserFace(dispenser)).getType() == Material.STAINED_GLASS) {
                             if (isPipeInput(dispenser)) {
@@ -165,6 +154,12 @@ public class PipeManager {
                                 found.add(block);
                                 queue.add(location.getRelative(PipesUtil.getDispenserFace(dispenser)));
                             }
+                        }
+                    } else if (block.getType() == Material.FURNACE) {
+                        Furnace furnace = (Furnace) block.getState();
+                        if (isChunkLoader(furnace)) {
+                            chunkLoaders.add(new ChunkLoader(location));
+                            found.add(block);
                         }
                     }
                 }
@@ -203,7 +198,6 @@ public class PipeManager {
      * @return true or false
      */
     public static boolean isChunkLoader(Furnace furnace) {
-        System.out.println(furnace.getInventory().getName());
         return furnace.getInventory().getName().equals(PipesUtil.getCustomChunkLoaderItem().getItemMeta().getDisplayName());
     }
 }

@@ -126,7 +126,7 @@ public class PipesUtil {
         meta.setLore(lore);
         meta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
         meta.addEnchant(Enchantment.ARROW_DAMAGE, 1, true);
-        meta.setDisplayName(PipesUtil.hideString("Pipes", "Pipe Input"));
+        meta.setDisplayName(ChatColor.RESET + "" + ChatColor.WHITE + PipesUtil.hideString("Pipes", "Pipe Input"));
         customDispenser.setItemMeta(meta);
         return customDispenser;
     }
@@ -144,7 +144,7 @@ public class PipesUtil {
         meta.setLore(lore);
         meta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
         meta.addEnchant(Enchantment.ARROW_DAMAGE, 1, true);
-        meta.setDisplayName(PipesUtil.hideString("Pipes", "Pipe Output"));
+        meta.setDisplayName(ChatColor.RESET + "" + ChatColor.WHITE + PipesUtil.hideString("Pipes", "Pipe Output"));
         customDropper.setItemMeta(meta);
         return customDropper;
     }
@@ -162,7 +162,7 @@ public class PipesUtil {
         meta.setLore(lore);
         meta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
         meta.addEnchant(Enchantment.ARROW_DAMAGE, 1, true);
-        meta.setDisplayName(PipesUtil.hideString("Pipes", "Chunk Loader"));
+        meta.setDisplayName(ChatColor.RESET + "" + ChatColor.WHITE + PipesUtil.hideString("Pipes", "Chunk Loader"));
         customChunkLoader.setItemMeta(meta);
         return customChunkLoader;
     }

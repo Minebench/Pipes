@@ -35,7 +35,7 @@ public class ChunkLoader {
      * @return the chunkLoader
      */
     public Furnace getChunkLoader() {
-        if (chunkLoaderLocation.getBlock() != null) {
+        if ((chunkLoaderLocation.getBlock() != null) && (chunkLoaderLocation.getBlock().getState() instanceof Furnace)) {
             return (Furnace) chunkLoaderLocation.getBlock().getState();
         }
         return null;

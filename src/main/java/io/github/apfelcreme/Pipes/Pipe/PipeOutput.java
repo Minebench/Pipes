@@ -37,7 +37,7 @@ public class PipeOutput {
      * @return the Dropper
      */
     public Dropper getDropper() {
-        if (dropperLocation.getBlock() != null) {
+        if ((dropperLocation.getBlock() != null) && (dropperLocation.getBlock().getState() instanceof Dropper)) {
             return (Dropper) dropperLocation.getBlock().getState();
         }
         return null;

@@ -34,7 +34,7 @@ public class PipeInput {
      * @return the dispenser
      */
     public Dispenser getDispenser() {
-        if (dispenserLocation.getBlock() != null) {
+        if ((dispenserLocation.getBlock() != null) && (dispenserLocation.getBlock().getState() instanceof Dispenser)) {
             return (Dispenser) dispenserLocation.getBlock().getState();
         }
         return null;

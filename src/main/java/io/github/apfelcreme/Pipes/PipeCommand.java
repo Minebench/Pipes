@@ -33,11 +33,12 @@ public class PipeCommand implements CommandExecutor {
             Operation operation = Operation.getOperation(strings[0]);
             if (operation != null) {
                 switch (operation) {
-                    case DETECT:
-                        subCommand = new DetectCommand();
-                        break;
+                    case CHECK:
                     case INFO:
                         subCommand = new InfoCommand();
+                        break;
+                    case DETECT:
+                        subCommand = new DetectCommand();
                         break;
                     case MONITOR:
                         subCommand = new MonitorCommand();
@@ -64,6 +65,7 @@ public class PipeCommand implements CommandExecutor {
      */
     public enum Operation {
 
+        CHECK,
         DETECT,
         INFO,
         MONITOR,

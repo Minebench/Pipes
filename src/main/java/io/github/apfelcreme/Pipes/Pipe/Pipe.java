@@ -4,6 +4,7 @@ import io.github.apfelcreme.Pipes.PipesConfig;
 import org.bukkit.Effect;
 import org.bukkit.Location;
 import org.bukkit.block.Block;
+import org.bukkit.event.inventory.InventoryType;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -60,6 +61,27 @@ public class Pipe {
      */
     public List<PipeOutput> getOutputs() {
         return outputs;
+    }
+
+    /**
+     * returns a list of outputs with the given inventory types, with or
+     * without a sorting function
+     *
+     * @param inventoryType the type inventory holder you wish to get, null for all
+     * @param filtering     only get outputs with a filtering function
+     * @return a list of outputs matching the given parameters
+     */
+    public List<PipeOutput> getOutputs(InventoryType inventoryType, boolean filtering) {
+        List<PipeOutput> sorterOutputs = new ArrayList<>();
+        for (PipeOutput output : outputs) {
+            if (output.getInventoryHolder().getInventory().getType() == inventoryType || inventoryType == null) {
+                if ((!output.getFilterItems().isEmpty() && filtering) // there are items as fiters + user wants sorters
+                        || (output.getFilterItems().isEmpty() && !filtering)) { // there are no items + user doesnt want sorters
+                    sorterOutputs.add(output);
+                }
+            }
+        }
+        return sorterOutputs;
     }
 
     /**

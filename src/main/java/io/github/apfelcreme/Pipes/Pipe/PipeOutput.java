@@ -2,6 +2,10 @@ package io.github.apfelcreme.Pipes.Pipe;
 
 import org.bukkit.block.Dropper;
 import org.bukkit.inventory.InventoryHolder;
+import org.bukkit.inventory.ItemStack;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Copyright (C) 2016 Lord36 aka Apfelcreme
@@ -71,6 +75,21 @@ public class PipeOutput {
      */
     public SimpleLocation getInventoryHolderLocation() {
         return inventoryHolderLocation;
+    }
+
+    /**
+     * returns the list of items in the dropper
+     *
+     * @return the list of items in the dropper
+     */
+    public List<ItemStack> getFilterItems() {
+        List<ItemStack> sorterItems = new ArrayList<>();
+        for (ItemStack itemStack : getDropper().getInventory()) {
+            if (itemStack != null) {
+                sorterItems.add(itemStack);
+            }
+        }
+        return sorterItems;
     }
 
     @Override

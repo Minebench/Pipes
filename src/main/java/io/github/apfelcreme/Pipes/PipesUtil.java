@@ -6,6 +6,7 @@ import org.bukkit.block.BlockFace;
 import org.bukkit.block.Dispenser;
 import org.bukkit.block.Dropper;
 import org.bukkit.enchantments.Enchantment;
+import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -111,6 +112,33 @@ public class PipesUtil {
             string += ChatColor.COLOR_CHAR + hidden.substring(i, i + 1);
         }
         return string;
+    }
+
+
+    /**
+     * Remove a specific material from an inventory
+     *
+     * @param inventory     the inventory
+     * @param material      the material
+     * @param count         the amount to remove
+     * @param removeSpecial should we remove items that have meta/enchantments/are damaged?
+     */
+    public static void removeItems(Inventory inventory, Material material, int count, boolean removeSpecial) {
+        for (int i = 0; i < inventory.getContents().length && count > 0; i++) {
+            ItemStack itemStack = inventory.getContents()[i];
+            if (itemStack != null && itemStack.getType() == material) {
+                if (removeSpecial || (!itemStack.hasItemMeta() && itemStack.getDurability() == 0)) {
+                    if (itemStack.getAmount() > count) {
+                        itemStack.setAmount(itemStack.getAmount() - count);
+                        inventory.setItem(i, itemStack);
+                        count = 0;
+                    } else {
+                        count -= itemStack.getAmount();
+                        inventory.clear(i);
+                    }
+                }
+            }
+        }
     }
 
     /**

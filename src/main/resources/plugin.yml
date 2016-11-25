@@ -12,15 +12,19 @@ permissions:
   Pipes.*:
     description: All
     children:
+      Pipes.admin: true
       Pipes.mod: true
       Pipes.user: true
+  Pipes.admin:
+    description: all admin permissions
+    children:
+      Pipes.placeChunkLoader: true
+      Pipes.reload: true
   Pipes.mod:
     description: all mod permissions
     children:
       Pipes.detect: true
       Pipes.monitor: true
-      Pipes.placeChunkLoader: true
-      Pipes.reload: true
       Pipes.tp: true
   Pipes.user:
     description: package of all user permissions

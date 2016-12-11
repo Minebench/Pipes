@@ -200,4 +200,43 @@ public class PipeManager {
     public static boolean isChunkLoader(Furnace furnace) {
         return furnace.getInventory().getName().equals(PipesUtil.getCustomChunkLoaderItem().getItemMeta().getDisplayName());
     }
+
+    /**
+     * checks whether the given block location is a pipe input
+     *
+     * @param location a block location
+     * @return true or false
+     */
+    public static boolean isPipeInput(SimpleLocation location) {
+//        System.out.println(location.getBlock().getState() instanceof Dispenser);
+//        if (location.getBlock().getState() instanceof Dispenser)
+//            System.out.println(isPipeOutput((Dropper) location.getBlock().getState()));
+        return location.getBlock().getState() instanceof Dispenser
+                && isPipeInput((Dispenser) location.getBlock().getState());
+    }
+
+    /**
+     * checks whether the given block location is a pipe output
+     *
+     * @param location a block location
+     * @return true or false
+     */
+    public static boolean isPipeOutput(SimpleLocation location) {
+//        System.out.println(location.getBlock().getState() instanceof Dropper);
+//        if (location.getBlock().getState() instanceof Dropper)
+//          System.out.println(isPipeOutput((Dropper) location.getBlock().getState()));
+        return location.getBlock().getState() instanceof Dropper
+                && isPipeOutput((Dropper) location.getBlock().getState());
+    }
+
+    /**
+     * checks whether the given block location is a chunk loader
+     *
+     * @param location a block location
+     * @return true or false
+     */
+    public static boolean isChunkLoader(SimpleLocation location) {
+        return location.getBlock().getState() instanceof Furnace
+                && isChunkLoader((Furnace) location.getBlock().getState());
+    }
 }

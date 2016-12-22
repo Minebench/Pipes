@@ -85,7 +85,7 @@ public class ScheduledItemTransfer {
      */
     private boolean processItemTransfer(ItemStack itemStack, List<PipeOutput> outputs) {
         for (PipeOutput output : outputs) {
-            if (containsSimilar(output.getFilterItems(), itemStack) || output.getFilterItems().isEmpty()) {
+            if (PipesUtil.containsSimilar(output.getFilterItems(), itemStack) || output.getFilterItems().isEmpty()) {
                 boolean success = false;
                 switch (output.getInventoryHolder().getInventory().getType()) {
                     case FURNACE:
@@ -94,7 +94,7 @@ public class ScheduledItemTransfer {
                      */
                         // try to put coal etc in the correct place
                         Furnace furnace = (Furnace) output.getInventoryHolder();
-                        if (isFuel(itemStack.getType())) {
+                        if (PipesUtil.isFuel(itemStack.getType())) {
                             // the transported item is either coal, or a coal block or a lava bucket
                             ItemStack fuel = furnace.getInventory().getFuel();
                             if (fuel != null && fuel.isSimilar(itemStack)) {
@@ -175,39 +175,6 @@ public class ScheduledItemTransfer {
 
         }
         return false;
-    }
-
-    /**
-     * checks if the given list of items contains an itemstack similar to the given item stack
-     *
-     * @param items     a list of item stacks
-     * @param itemStack an item stack
-     * @return true if there is an item stack of the same type with the same data. Amount may vary
-     */
-    private boolean containsSimilar(List<ItemStack> items, ItemStack itemStack) {
-        for (ItemStack item : items) {
-            if (item.isSimilar(itemStack)) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    /**
-     * checks if a type can be used for smelting in a furnace
-     *
-     * @param type a material type
-     * @return true or false
-     */
-    private boolean isFuel(Material type) {
-        switch (type) {
-            case COAL:
-            case COAL_BLOCK:
-            case LAVA_BUCKET:
-                return true;
-            default:
-                return false;
-        }
     }
 
 }

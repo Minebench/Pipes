@@ -142,6 +142,39 @@ public class PipesUtil {
     }
 
     /**
+     * checks if the given list of items contains an item stack similar to the given item stack
+     *
+     * @param items     a list of item stacks
+     * @param itemStack an item stack
+     * @return true if there is an item stack of the same type with the same data. Amount may vary
+     */
+    public static boolean containsSimilar(List<ItemStack> items, ItemStack itemStack) {
+        for (ItemStack item : items) {
+            if ((item.getType() == itemStack.getType()) && (item.getData().getData() == itemStack.getData().getData())) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * checks if a type can be used for smelting in a furnace
+     *
+     * @param type a material type
+     * @return true or false
+     */
+    public static boolean isFuel(Material type) {
+        switch (type) {
+            case COAL:
+            case COAL_BLOCK:
+            case LAVA_BUCKET:
+                return true;
+            default:
+                return false;
+        }
+    }
+
+    /**
      * returns an ItemStack of the custom dispenser item
      *
      * @return an ItemStack of the custom dispenser item

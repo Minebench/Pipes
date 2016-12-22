@@ -54,7 +54,7 @@ public class InventoryChangeListener implements Listener {
             if (dispenserBlock.getType() != Material.DISPENSER) {
                 return;
             }
-            if (!PipeManager.isPipeInput((Dispenser)dispenserBlock.getState())) {
+            if (!PipeManager.isPipeInput((Dispenser) dispenserBlock.getState())) {
                 return;
             }
             final SimpleLocation dispenserLocation = new SimpleLocation(
@@ -104,7 +104,7 @@ public class InventoryChangeListener implements Listener {
         if (dispenserBlock.getType() != Material.DISPENSER) {
             return;
         }
-        if (!PipeManager.isPipeInput((Dispenser)dispenserBlock.getState())) {
+        if (!PipeManager.isPipeInput((Dispenser) dispenserBlock.getState())) {
             return;
         }
 

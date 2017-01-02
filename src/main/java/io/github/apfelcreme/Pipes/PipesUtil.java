@@ -137,7 +137,7 @@ public class PipesUtil {
      */
     public static boolean containsSimilar(List<ItemStack> items, ItemStack itemStack) {
         for (ItemStack item : items) {
-            if ((item.getType() == itemStack.getType()) && (item.getData().getData() == itemStack.getData().getData())) {
+            if (item.getType() == itemStack.getType() && item.getData().equals(itemStack.getData())) {
                 return true;
             }
         }

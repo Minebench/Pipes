@@ -36,6 +36,7 @@ public class PlayerRightclickListener implements Listener {
         if (event.getAction() == Action.RIGHT_CLICK_BLOCK) {
             String action = Pipes.getInstance().getRegisterRightClick(event.getPlayer());
             if ("info".equals(action)) {
+                event.setCancelled(true);
                 try {
                     Pipes.getInstance().unregisterRightClick(event.getPlayer());
                     Pipe pipe = PipeManager.isPipe(event.getClickedBlock());

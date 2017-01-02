@@ -1,7 +1,10 @@
 package io.github.apfelcreme.Pipes.Manager;
 
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
 import io.github.apfelcreme.Pipes.Exception.ChunkNotLoadedException;
 import io.github.apfelcreme.Pipes.Pipe.*;
+import io.github.apfelcreme.Pipes.PipesConfig;
 import io.github.apfelcreme.Pipes.PipesUtil;
 import org.bukkit.Material;
 import org.bukkit.World;
@@ -9,6 +12,7 @@ import org.bukkit.block.*;
 import org.bukkit.inventory.InventoryHolder;
 
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Copyright (C) 2016 Lord36 aka Apfelcreme
@@ -38,13 +42,13 @@ public class PipeManager {
     /**
      * a cache to stop endless pipe checks
      */
-    private Map<SimpleLocation, Pipe> pipeCache = new HashMap<>();
+    private final Cache<SimpleLocation, Pipe> pipeCache;
 
     /**
      * constructor
      */
     private PipeManager() {
-        pipeCache = new HashMap<>();
+        pipeCache = CacheBuilder.newBuilder().expireAfterWrite(PipesConfig.getPipeCacheDuration(), TimeUnit.MILLISECONDS).build();
     }
 
     /**
@@ -52,7 +56,7 @@ public class PipeManager {
      *
      * @return the pipe cache
      */
-    public Map<SimpleLocation, Pipe> getPipeCache() {
+    public Cache<SimpleLocation, Pipe> getPipeCache() {
         return pipeCache;
     }
 
@@ -74,7 +78,7 @@ public class PipeManager {
      * @param dispenserLocation the location
      */
     public void removeFromPipeCache(SimpleLocation dispenserLocation) {
-        pipeCache.remove(dispenserLocation);
+        pipeCache.invalidate(dispenserLocation);
     }
 
     /**

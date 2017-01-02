@@ -37,13 +37,7 @@ public class InfoCommand implements SubCommand {
         if (commandSender instanceof Player) {
             final Player player = (Player) commandSender;
             if (player.hasPermission("Pipes.info")) {
-                BukkitTask task = Pipes.getInstance().getServer().getScheduler().runTaskLaterAsynchronously(Pipes.getInstance(), new Runnable() {
-                    @Override
-                    public void run() {
-                        Pipes.getInstance().getRegisteredRightClicks().remove(player);
-                    }
-                }, 200L);
-                Pipes.getInstance().getRegisteredRightClicks().put(player, task);
+                Pipes.getInstance().registerRightClick(player, "info");
                 Pipes.sendMessage(player, PipesConfig.getText("info.info.cooldownStarted"));
             } else {
                 Pipes.sendMessage(player, PipesConfig.getText("error.noPermission"));

@@ -34,11 +34,10 @@ public class PlayerRightclickListener implements Listener {
     @EventHandler
     public void onPlayerRightclick(PlayerInteractEvent event) {
         if (event.getAction() == Action.RIGHT_CLICK_BLOCK) {
-            BukkitTask task = Pipes.getInstance().getRegisteredRightClicks().get(event.getPlayer());
-            if (task != null) {
+            String action = Pipes.getInstance().getRegisterRightClick(event.getPlayer());
+            if ("info".equals(action)) {
                 try {
-                    Pipes.getInstance().getRegisteredRightClicks().remove(event.getPlayer());
-                    task.cancel();
+                    Pipes.getInstance().unregisterRightClick(event.getPlayer());
                     Pipe pipe = PipeManager.isPipe(event.getClickedBlock());
                     if (pipe != null) {
                         Pipes.sendMessage(event.getPlayer(), pipe.getString());

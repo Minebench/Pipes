@@ -1,5 +1,7 @@
 package io.github.apfelcreme.Pipes;
 
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
 import io.github.apfelcreme.Pipes.Listener.BlockListener;
 import io.github.apfelcreme.Pipes.Listener.InventoryChangeListener;
 import io.github.apfelcreme.Pipes.Listener.PlayerRightclickListener;
@@ -12,6 +14,8 @@ import org.bukkit.scheduler.BukkitTask;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Copyright (C) 2016 Lord36 aka Apfelcreme
@@ -36,7 +40,7 @@ public class Pipes extends JavaPlugin {
     /**
      * the players who have registered a right click for /pipe info
      */
-    private Map<Player, BukkitTask> registeredRightClicks;
+    private Cache<UUID, String> registeredRightClicks;
 
     /**
      * the plugin instance
@@ -46,7 +50,7 @@ public class Pipes extends JavaPlugin {
     @Override
     public void onEnable() {
         instance = this;
-        registeredRightClicks = new HashMap<>();
+        registeredRightClicks = CacheBuilder.newBuilder().expireAfterWrite(10, TimeUnit.SECONDS).build();
         PipesConfig.load();
         getServer().getPluginManager().registerEvents(new InventoryChangeListener(), this);
         getServer().getPluginManager().registerEvents(new PlayerRightclickListener(), this);
@@ -74,12 +78,24 @@ public class Pipes extends JavaPlugin {
     }
 
     /**
-     * returns the registered rightclick map for /pipe info
-     *
-     * @return a map of registered rightclicks
+     * Register a right click action
      */
-    public Map<Player, BukkitTask> getRegisteredRightClicks() {
-        return registeredRightClicks;
+    public void registerRightClick(Player player, String action) {
+        registeredRightClicks.put(player.getUniqueId(), action);
+    }
+
+    /**
+     * Get a registered a right click action
+     */
+    public String getRegisterRightClick(Player player) {
+        return registeredRightClicks.getIfPresent(player.getUniqueId());
+    }
+
+    /**
+     * Unregister a right click action
+     */
+    public void unregisterRightClick(Player player) {
+        registeredRightClicks.invalidate(player.getUniqueId());
     }
 
     /**
@@ -100,5 +116,4 @@ public class Pipes extends JavaPlugin {
     public static Pipes getInstance() {
         return instance;
     }
-
 }

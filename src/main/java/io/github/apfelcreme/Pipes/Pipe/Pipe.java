@@ -34,7 +34,6 @@ public class Pipe {
     private final List<PipeOutput> outputs;
     private final List<ChunkLoader> chunkLoaders;
     private final List<SimpleLocation> pipeBlocks;
-    private final Date timestamp;
 
     public Pipe(List<PipeInput> inputs, List<PipeOutput> outputs,
                 List<ChunkLoader> chunkLoaders, List<SimpleLocation> pipeBlocks) {
@@ -42,7 +41,6 @@ public class Pipe {
         this.outputs = outputs;
         this.chunkLoaders = chunkLoaders;
         this.pipeBlocks = pipeBlocks;
-        this.timestamp = new Date();
     }
 
     /**
@@ -101,15 +99,6 @@ public class Pipe {
      */
     public List<SimpleLocation> getPipeBlocks() {
         return pipeBlocks;
-    }
-
-    /**
-     * returns the date when the object was created
-     *
-     * @return the date when the object was created
-     */
-    public Date getTimestamp() {
-        return timestamp;
     }
 
     /**

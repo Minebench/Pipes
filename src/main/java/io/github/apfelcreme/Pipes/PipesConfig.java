@@ -51,9 +51,9 @@ public class PipesConfig {
      * returns the time of the delay of pipe recalculation when e.g. a hopper transfers items into a dispenser.
      * with this it is only checked every 10 seconds if there is a pipe
      *
-     * @return the delay of pipe recalculation
+     * @return the delay of pipe recalculation in ms
      */
-    public static Long getPipeCacheDuration() {
+    public static long getPipeCacheDuration() {
         return plugin.getConfig().getLong("pipeCacheDuration", 10000L);
     }
 
@@ -62,7 +62,7 @@ public class PipesConfig {
      *
      * @return the delay between item transfers
      */
-    public static Long getTransferCooldown() {
+    public static long getTransferCooldown() {
         return plugin.getConfig().getLong("transferCooldown", 1000L);
     }
 

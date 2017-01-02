@@ -64,8 +64,8 @@ public class InventoryChangeListener implements Listener {
                     dispenserBlock.getZ());
 
             // cache the pipe
-            Pipe pipe = PipeManager.getInstance().getPipeCache().get(dispenserLocation);
-            if (pipe == null || (new Date().getTime() > (pipe.getTimestamp().getTime() + PipesConfig.getPipeCacheDuration()))) {
+            Pipe pipe = PipeManager.getInstance().getPipeCache().getIfPresent(dispenserLocation);
+            if (pipe == null) {
                 try {
                     pipe = PipeManager.isPipe(dispenserBlock);
                     PipeManager.getInstance().addPipeToCache(dispenserLocation, pipe);
@@ -116,8 +116,8 @@ public class InventoryChangeListener implements Listener {
 
 
         // cache the pipe
-        Pipe pipe = PipeManager.getInstance().getPipeCache().get(dispenserLocation);
-        if (pipe == null || (new Date().getTime() > (pipe.getTimestamp().getTime() + PipesConfig.getPipeCacheDuration()))) {
+        Pipe pipe = PipeManager.getInstance().getPipeCache().getIfPresent(dispenserLocation);
+        if (pipe == null) {
             try {
                 pipe = PipeManager.isPipe(dispenserBlock);
                 PipeManager.getInstance().addPipeToCache(dispenserLocation, pipe);

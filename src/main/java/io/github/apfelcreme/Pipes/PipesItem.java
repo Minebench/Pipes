@@ -21,7 +21,9 @@ package io.github.apfelcreme.Pipes;
 
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
+import org.bukkit.block.Block;
 import org.bukkit.enchantments.Enchantment;
+import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -78,5 +80,26 @@ public enum PipesItem {
         item.setItemMeta(meta);
         this.item = item;
         return item;
+    }
+
+    public boolean check(Block block) {
+        if (block == null || block.getType() != this.material || !(block.getState() instanceof InventoryHolder)) {
+            return false;
+        }
+
+        String hidden = PipesUtil.getHiddenString(((InventoryHolder) block.getState()).getInventory().getTitle());
+
+        return hidden != null && this.name.equals(hidden) || IDENTIFIER.equals(hidden);
+    }
+
+    public boolean check(ItemStack item) {
+        if (item == null || item.getType() != this.material || !item.hasItemMeta() || !item.getItemMeta().hasLore()) {
+            return false;
+        }
+
+        List<String> lore = item.getItemMeta().getLore();
+        String hidden = PipesUtil.getHiddenString(lore.get(lore.size() - 1));
+
+        return hidden != null && this.name.equals(hidden) || IDENTIFIER.equals(hidden);
     }
 }

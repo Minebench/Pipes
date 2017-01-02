@@ -9,11 +9,13 @@ import io.github.apfelcreme.Pipes.Pipe.PipeInput;
 import io.github.apfelcreme.Pipes.Pipe.PipeOutput;
 import io.github.apfelcreme.Pipes.Pipe.SimpleLocation;
 import io.github.apfelcreme.Pipes.PipesConfig;
+import io.github.apfelcreme.Pipes.PipesItem;
 import io.github.apfelcreme.Pipes.PipesUtil;
 import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.block.*;
 import org.bukkit.inventory.InventoryHolder;
+import org.bukkit.material.Directional;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
@@ -146,31 +148,30 @@ public class PipeManager {
                     queue.add(location.getRelative(BlockFace.WEST));
                     queue.add(location.getRelative(BlockFace.UP));
                     queue.add(location.getRelative(BlockFace.DOWN));
-                } else if (block.getState() instanceof InventoryHolder) {
-                    if (block.getType() == Material.DROPPER) {
-                        Dropper dropper = (Dropper) block.getState();
-                        if (block.getRelative(PipesUtil.getDropperFace(dropper)).getState() instanceof InventoryHolder) {
-                            if (isPipeOutput(dropper)) {
-                                outputs.add(new PipeOutput(location,
-                                        location.getRelative(PipesUtil.getDropperFace(dropper))));
+                } else {
+                    PipesItem pipesItem = PipesUtil.getPipesItem(block);
+                    if (pipesItem != null) {
+                        switch (pipesItem) {
+                            case PIPE_INPUT:
+                                Block relativeToInput = block.getRelative(((Directional) block.getState().getData()).getFacing());
+                                if (relativeToInput.getState() instanceof InventoryHolder) {
+                                    inputs.add(new PipeInput(location));
+                                    found.add(block);
+                                    queue.add(new SimpleLocation(relativeToInput.getLocation()));
+                                }
+                                break;
+                            case PIPE_OUTPUT:
+                                Block relativeToOutput = block.getRelative(((Directional) block.getState().getData()).getFacing());
+                                if (relativeToOutput.getState() instanceof InventoryHolder) {
+                                    outputs.add(new PipeOutput(location, new SimpleLocation(relativeToOutput.getLocation())));
+                                    found.add(block);
+                                    found.add(relativeToOutput);
+                                }
+                                break;
+                            case CHUNK_LOADER:
+                                chunkLoaders.add(new ChunkLoader(location));
                                 found.add(block);
-                                found.add(block.getRelative(PipesUtil.getDropperFace(dropper)));
-                            }
-                        }
-                    } else if (block.getType() == Material.DISPENSER) {
-                        Dispenser dispenser = (Dispenser) block.getState();
-                        if (block.getRelative(PipesUtil.getDispenserFace(dispenser)).getType() == Material.STAINED_GLASS) {
-                            if (isPipeInput(dispenser)) {
-                                inputs.add(new PipeInput(location));
-                                found.add(block);
-                                queue.add(location.getRelative(PipesUtil.getDispenserFace(dispenser)));
-                            }
-                        }
-                    } else if (block.getType() == Material.FURNACE) {
-                        Furnace furnace = (Furnace) block.getState();
-                        if (isChunkLoader(furnace)) {
-                            chunkLoaders.add(new ChunkLoader(location));
-                            found.add(block);
+                                break;
                         }
                     }
                 }
@@ -187,7 +188,9 @@ public class PipeManager {
      *
      * @param dispenser a dispenser block
      * @return true or false
+     * @deprecated Use {@link PipesItem#check(Block)}
      */
+    @Deprecated
     public static boolean isPipeInput(Dispenser dispenser) {
         return dispenser.getInventory().getName().equals(PipesUtil.getCustomDispenserItem().getItemMeta().getDisplayName());
     }
@@ -197,7 +200,9 @@ public class PipeManager {
      *
      * @param dropper a dropper block
      * @return true or false
+     * @deprecated Use {@link PipesItem#check(Block)}
      */
+    @Deprecated
     public static boolean isPipeOutput(Dropper dropper) {
         return dropper.getInventory().getName().equals(PipesUtil.getCustomDropperItem().getItemMeta().getDisplayName());
     }
@@ -207,7 +212,9 @@ public class PipeManager {
      *
      * @param furnace a furnace block
      * @return true or false
+     * @deprecated Use {@link PipesItem#check(Block)}
      */
+    @Deprecated
     public static boolean isChunkLoader(Furnace furnace) {
         return furnace.getInventory().getName().equals(PipesUtil.getCustomChunkLoaderItem().getItemMeta().getDisplayName());
     }
@@ -217,7 +224,9 @@ public class PipeManager {
      *
      * @param location a block location
      * @return true or false
+     * @deprecated Use {@link PipesItem#check(Block)}
      */
+    @Deprecated
     public static boolean isPipeInput(SimpleLocation location) {
 //        System.out.println(location.getBlock().getState() instanceof Dispenser);
 //        if (location.getBlock().getState() instanceof Dispenser)
@@ -231,7 +240,9 @@ public class PipeManager {
      *
      * @param location a block location
      * @return true or false
+     * @deprecated Use {@link PipesItem#check(Block)}
      */
+    @Deprecated
     public static boolean isPipeOutput(SimpleLocation location) {
 //        System.out.println(location.getBlock().getState() instanceof Dropper);
 //        if (location.getBlock().getState() instanceof Dropper)
@@ -245,7 +256,9 @@ public class PipeManager {
      *
      * @param location a block location
      * @return true or false
+     * @deprecated Use {@link PipesItem#check(Block)}
      */
+    @Deprecated
     public static boolean isChunkLoader(SimpleLocation location) {
         return location.getBlock().getState() instanceof Furnace
                 && isChunkLoader((Furnace) location.getBlock().getState());

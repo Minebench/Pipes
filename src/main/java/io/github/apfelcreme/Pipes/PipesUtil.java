@@ -146,9 +146,9 @@ public class PipesUtil {
             return null;
         }
 
-        if (block.getType() != getCustomDispenserItem().getType()
-                && block.getType() != getCustomDropperItem().getType()
-                && block.getType() != getCustomChunkLoaderItem().getType()) {
+        if (block.getType() != PipesItem.PIPE_INPUT.getMaterial()
+                && block.getType() != PipesItem.PIPE_OUTPUT.getMaterial()
+                && block.getType() != PipesItem.CHUNK_LOADER.getMaterial()) {
             return null;
         }
 

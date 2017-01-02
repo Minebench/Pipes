@@ -9,8 +9,11 @@ import io.github.apfelcreme.Pipes.Pipes;
 import io.github.apfelcreme.Pipes.PipesConfig;
 import io.github.apfelcreme.Pipes.Manager.ItemMoveScheduler;
 import io.github.apfelcreme.Pipes.Pipe.ScheduledItemTransfer;
+import io.github.apfelcreme.Pipes.PipesItem;
+import io.github.apfelcreme.Pipes.PipesUtil;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
+import org.bukkit.block.BlockState;
 import org.bukkit.block.Dispenser;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -18,6 +21,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.inventory.InventoryMoveItemEvent;
 import org.bukkit.event.inventory.InventoryType;
+import org.bukkit.inventory.meta.BlockStateMeta;
 
 import java.util.*;
 
@@ -51,10 +55,7 @@ public class InventoryChangeListener implements Listener {
                     event.getDestination().getLocation().getBlockX(),
                     event.getDestination().getLocation().getBlockY(),
                     event.getDestination().getLocation().getBlockZ());
-            if (dispenserBlock.getType() != Material.DISPENSER) {
-                return;
-            }
-            if (!PipeManager.isPipeInput((Dispenser) dispenserBlock.getState())) {
+            if (!PipesItem.PIPE_INPUT.check(dispenserBlock)) {
                 return;
             }
             final SimpleLocation dispenserLocation = new SimpleLocation(
@@ -97,14 +98,11 @@ public class InventoryChangeListener implements Listener {
      */
     @EventHandler(priority = EventPriority.LOWEST)
     private void onInventoryClose(InventoryCloseEvent event) {
-        final Block dispenserBlock = event.getInventory().getLocation().getWorld().getBlockAt(
-                event.getInventory().getLocation().getBlockX(),
-                event.getInventory().getLocation().getBlockY(),
-                event.getInventory().getLocation().getBlockZ());
-        if (dispenserBlock.getType() != Material.DISPENSER) {
+        if (!(event.getInventory().getHolder() instanceof BlockState)) {
             return;
         }
-        if (!PipeManager.isPipeInput((Dispenser) dispenserBlock.getState())) {
+        final Block dispenserBlock = ((BlockState) event.getInventory().getHolder()).getBlock();
+        if (!PipesItem.PIPE_INPUT.check(dispenserBlock)) {
             return;
         }
 
@@ -143,12 +141,8 @@ public class InventoryChangeListener implements Listener {
         if (event.getInitiator().getType() == InventoryType.HOPPER &&
                 (event.getSource().getType() == InventoryType.DISPENSER
                         || event.getSource().getType() == InventoryType.DROPPER)) {
-            SimpleLocation location = new SimpleLocation(
-                    event.getSource().getLocation().getWorld().getName(),
-                    event.getSource().getLocation().getBlockX(),
-                    event.getSource().getLocation().getBlockY(),
-                    event.getSource().getLocation().getBlockZ());
-            if (PipeManager.isPipeInput(location) || PipeManager.isPipeOutput(location)) {
+            if (event.getSource().getHolder() instanceof BlockState
+                    && PipesUtil.getPipesItem(((BlockState) event.getSource().getHolder()).getBlock()) != null) {
                 event.setCancelled(true);
             }
         }

@@ -75,7 +75,7 @@ public class BlockListener implements Listener {
 
     @EventHandler
     public void onItemCraft(CraftItemEvent event) {
-        if (event.getCurrentItem().equals(PipesUtil.getCustomChunkLoaderItem())) {
+        if (PipesUtil.getPipesItem(event.getCurrentItem()) == PipesItem.CHUNK_LOADER) {
             if (!event.getWhoClicked().hasPermission("Pipes.placeChunkLoader")) {
                 event.setCancelled(true);
                 Pipes.sendMessage(event.getWhoClicked(), PipesConfig.getText("error.noPermission"));

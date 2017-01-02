@@ -2,17 +2,15 @@ package io.github.apfelcreme.Pipes;
 
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
+import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.block.Dispenser;
 import org.bukkit.block.Dropper;
-import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.Inventory;
-import org.bukkit.inventory.ItemFlag;
+import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.material.DirectionalContainer;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.regex.Pattern;
 
@@ -35,10 +33,6 @@ import java.util.regex.Pattern;
  * @author Lord36 aka Apfelcreme
  */
 public class PipesUtil {
-
-    private static ItemStack customDispenser;
-    private static ItemStack customDropper;
-    private static ItemStack customChunkLoader;
 
     /**
      * returns whether a string only contains numbers
@@ -99,6 +93,85 @@ public class PipesUtil {
             string += ChatColor.COLOR_CHAR + hidden.substring(i, i + 1);
         }
         return string;
+    }
+
+    /**
+     * Returns a hidden string in the itemstack which is hidden using the last lore line
+     */
+    public static String getHiddenString(String string) {
+        // Only the color chars at the end of the string is it
+        StringBuilder builder = new StringBuilder();
+        char[] chars = string.toCharArray();
+        for (int i = 0; i < chars.length; i++) {
+            char c = chars[i];
+            if (c == org.bukkit.ChatColor.COLOR_CHAR)
+                continue;
+            if (i + 1 < chars.length) {
+                if (chars[i + 1] == org.bukkit.ChatColor.COLOR_CHAR && i > 1 && chars[i - 1] == org.bukkit.ChatColor.COLOR_CHAR)
+                    builder.append(c);
+                else if (builder.length() > 0)
+                    builder = new StringBuilder();
+            } else if (i > 0 && chars[i - 1] == org.bukkit.ChatColor.COLOR_CHAR)
+                builder.append(c);
+        }
+        if (builder.length() == 0)
+            return null;
+        return builder.toString();
+    }
+
+    public static PipesItem getPipesItem(ItemStack item) {
+        if (item == null || !item.hasItemMeta() || !item.getItemMeta().hasLore() || item.getItemMeta().getLore().isEmpty()) {
+            return null;
+        }
+
+        List<String> lore = item.getItemMeta().getLore();
+        if (!lore.get(lore.size() -1).contains(PipesItem.getIdentifier())) {
+            return null;
+        }
+
+        String hidden = getHiddenString(lore.get(lore.size() - 1));
+        if (hidden == null || hidden.isEmpty()) {
+            return null;
+        }
+
+        try {
+            return PipesItem.valueOf(hidden);
+        } catch (IllegalArgumentException e) {
+            return null;
+        }
+    }
+
+    public static PipesItem getPipesItem(Block block) {
+        if (!(block.getState() instanceof InventoryHolder)) {
+            return null;
+        }
+
+        if (block.getType() != getCustomDispenserItem().getType()
+                && block.getType() != getCustomDropperItem().getType()
+                && block.getType() != getCustomChunkLoaderItem().getType()) {
+            return null;
+        }
+
+        String hidden = getHiddenString(((InventoryHolder) block.getState()).getInventory().getTitle());
+        if (hidden == null || hidden.isEmpty()) {
+            return null;
+        }
+
+        try {
+            return PipesItem.valueOf(hidden);
+        } catch (IllegalArgumentException e) {
+            if (PipesItem.getIdentifier().equals(hidden)) {
+                switch (block.getType()) {
+                    case DISPENSER:
+                        return PipesItem.PIPE_INPUT;
+                    case DROPPER:
+                        return PipesItem.PIPE_OUTPUT;
+                    case FURNACE:
+                        return PipesItem.CHUNK_LOADER;
+                }
+            }
+            return null;
+        }
     }
 
 
@@ -165,65 +238,33 @@ public class PipesUtil {
      * returns an ItemStack of the custom dispenser item
      *
      * @return an ItemStack of the custom dispenser item
+     * @deprecated Use {@link PipesItem#PIPE_INPUT} and {@link PipesItem#toItemStack()}
      */
+    @Deprecated
     public static ItemStack getCustomDispenserItem() {
-        if (customDispenser != null) {
-            return customDispenser;
-        }
-
-        customDispenser = new ItemStack(Material.DISPENSER);
-        ItemMeta meta = customDispenser.getItemMeta();
-        List<String> lore = Arrays.asList(ChatColor.BLUE + "" + ChatColor.ITALIC + hideString("Pipes", "Pipes"),
-                PipesConfig.getText("info.dispenserLore"));
-        meta.setLore(lore);
-        meta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
-        meta.addEnchant(Enchantment.ARROW_DAMAGE, 1, true);
-        meta.setDisplayName(ChatColor.RESET + "" + ChatColor.WHITE + PipesUtil.hideString("Pipes", "Pipe Input"));
-        customDispenser.setItemMeta(meta);
-        return customDispenser;
+        return PipesItem.PIPE_INPUT.toItemStack();
     }
 
     /**
      * returns an ItemStack of the custom dropper item
      *
      * @return an ItemStack of the custom dropper item
+     * @deprecated Use {@link PipesItem#PIPE_OUTPUT} and {@link PipesItem#toItemStack()}
      */
+    @Deprecated
     public static ItemStack getCustomDropperItem() {
-        if (customDropper != null) {
-            return customDropper;
-        }
-
-        customDropper = new ItemStack(Material.DROPPER);
-        ItemMeta meta = customDropper.getItemMeta();
-        List<String> lore = Arrays.asList(ChatColor.BLUE + "" + ChatColor.ITALIC + hideString("Pipes", "Pipes"),
-                PipesConfig.getText("info.dropperLore"));
-        meta.setLore(lore);
-        meta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
-        meta.addEnchant(Enchantment.ARROW_DAMAGE, 1, true);
-        meta.setDisplayName(ChatColor.RESET + "" + ChatColor.WHITE + PipesUtil.hideString("Pipes", "Pipe Output"));
-        customDropper.setItemMeta(meta);
-        return customDropper;
+        return PipesItem.PIPE_OUTPUT.toItemStack();
     }
 
     /**
      * returns an ItemStack of the custom chunkLoader item
      *
      * @return an ItemStack of the custom chunkLoader item
+     * @deprecated Use {@link PipesItem#CHUNK_LOADER} and {@link PipesItem#toItemStack()}
      */
+    @Deprecated
     public static ItemStack getCustomChunkLoaderItem() {
-        if (customChunkLoader != null) {
-            return customChunkLoader;
-        }
-
-        customChunkLoader = new ItemStack(Material.FURNACE);
-        ItemMeta meta = customChunkLoader.getItemMeta();
-        List<String> lore = Arrays.asList(ChatColor.BLUE + "" + ChatColor.ITALIC + hideString("Pipes", "Pipes"),
-                PipesConfig.getText("info.chunkLoaderLore"));
-        meta.setLore(lore);
-        meta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
-        meta.addEnchant(Enchantment.ARROW_DAMAGE, 1, true);
-        meta.setDisplayName(ChatColor.RESET + "" + ChatColor.WHITE + PipesUtil.hideString("Pipes", "Chunk Loader"));
-        customChunkLoader.setItemMeta(meta);
-        return customChunkLoader;
+        return PipesItem.CHUNK_LOADER.toItemStack();
     }
+
 }

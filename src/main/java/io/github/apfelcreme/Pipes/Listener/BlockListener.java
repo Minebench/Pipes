@@ -5,17 +5,17 @@ import io.github.apfelcreme.Pipes.Manager.PipeManager;
 import io.github.apfelcreme.Pipes.Pipe.Pipe;
 import io.github.apfelcreme.Pipes.Pipes;
 import io.github.apfelcreme.Pipes.PipesConfig;
+import io.github.apfelcreme.Pipes.PipesItem;
 import io.github.apfelcreme.Pipes.PipesUtil;
-import org.bukkit.ChatColor;
 import org.bukkit.Material;
-import org.bukkit.block.Dispenser;
-import org.bukkit.block.Dropper;
-import org.bukkit.block.Furnace;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.inventory.CraftItemEvent;
+import org.bukkit.event.inventory.PrepareAnvilEvent;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
 
 /**
  * Copyright (C) 2016 Lord36 aka Apfelcreme
@@ -39,53 +39,33 @@ public class BlockListener implements Listener {
 
     @EventHandler
     private void onBlockBreak(BlockBreakEvent event) {
-        if ((event.getBlock().getType() == Material.DISPENSER)
-                && PipeManager.isPipeInput((Dispenser) event.getBlock().getState())) {
-            // a pipe input was destroyed
+        PipesItem pipesItem = PipesUtil.getPipesItem(event.getBlock());
+        if (pipesItem != null) {
             event.setCancelled(true);
             event.getBlock().setType(Material.AIR);
-            event.getBlock().getWorld().dropItemNaturally(event.getBlock().getLocation(), PipesUtil.getCustomDispenserItem());
-        } else if ((event.getBlock().getType() == Material.DROPPER)
-                && PipeManager.isPipeOutput((Dropper) event.getBlock().getState())) {
-            // a pipe input was destroyed
-            event.setCancelled(true);
-            event.getBlock().setType(Material.AIR);
-            event.getBlock().getWorld().dropItemNaturally(event.getBlock().getLocation(), PipesUtil.getCustomDropperItem());
-        } else if ((event.getBlock().getType() == Material.FURNACE)
-                && PipeManager.isChunkLoader((Furnace) event.getBlock().getState())) {
-            // a pipe input was destroyed
-            event.setCancelled(true);
-            event.getBlock().setType(Material.AIR);
-            event.getBlock().getWorld().dropItemNaturally(event.getBlock().getLocation(), PipesUtil.getCustomChunkLoaderItem());
+            event.getBlock().getWorld().dropItemNaturally(event.getBlock().getLocation(), pipesItem.toItemStack());
         }
     }
 
     @EventHandler
     private void onBlockPlace(BlockPlaceEvent event) {
-        if (event.getItemInHand().getType() == Material.DISPENSER
-                || event.getItemInHand().getType() == Material.DROPPER
-                || event.getItemInHand().getType() == Material.FURNACE) {
-            if (event.getItemInHand() != null
-                    && event.getItemInHand().getItemMeta() != null
-                    && event.getItemInHand().getItemMeta().getLore() != null
-                    && event.getItemInHand().getItemMeta().getLore().contains(
-                    ChatColor.BLUE + "" + ChatColor.ITALIC + PipesUtil.hideString("Pipes", "Pipes"))) {
-                if ((event.getItemInHand().getType() == Material.FURNACE)
-                        && !event.getPlayer().hasPermission("Pipes.placeChunkLoader")) {
-                    Pipes.sendMessage(event.getPlayer(), PipesConfig.getText("error.noPermission"));
-                    event.setCancelled(true);
-                    return;
+        if (PipesUtil.getPipesItem(event.getBlock()) != null) {
+            if (event.getBlock().getType() == PipesItem.CHUNK_LOADER.getMaterial()
+                    && !event.getPlayer().hasPermission("Pipes.placeChunkLoader")) {
+                Pipes.sendMessage(event.getPlayer(), PipesConfig.getText("error.noPermission"));
+                event.setCancelled(true);
+                return;
+            }
+
+            try {
+                Pipe pipe = PipeManager.isPipe(event.getBlock());
+                if (pipe != null) {
+                    Pipes.sendMessage(event.getPlayer(), PipesConfig.getText("info.pipe.pipeBuilt")
+                            .replace("{0}", pipe.getString()));
+                    pipe.highlight();
                 }
-                try {
-                    Pipe pipe = PipeManager.isPipe(event.getBlock());
-                    if (pipe != null) {
-                        Pipes.sendMessage(event.getPlayer(), PipesConfig.getText("info.pipe.pipeBuilt")
-                                .replace("{0}", pipe.getString()));
-                        pipe.highlight();
-                    }
-                } catch (ChunkNotLoadedException e) {
-                    Pipes.sendMessage(event.getPlayer(), PipesConfig.getText("error.chunkNotLoaded"));
-                }
+            } catch (ChunkNotLoadedException e) {
+                Pipes.sendMessage(event.getPlayer(), PipesConfig.getText("error.chunkNotLoaded"));
             }
         }
     }
@@ -98,5 +78,32 @@ public class BlockListener implements Listener {
                 Pipes.sendMessage(event.getWhoClicked(), PipesConfig.getText("error.noPermission"));
             }
         }
+    }
+
+    @EventHandler
+    public void onItemRename(PrepareAnvilEvent event) {
+        if (!event.getResult().hasItemMeta() || !event.getResult().getItemMeta().hasDisplayName()) {
+            return;
+        }
+
+        if (event.getInventory().getContents().length > 0) {
+            ItemStack item = event.getInventory().getContents()[0];
+            if (item.hasItemMeta() && item.getItemMeta().hasDisplayName()
+                    && item.getItemMeta().getDisplayName().equals(event.getResult().getItemMeta().getDisplayName())) {
+                return;
+            }
+        }
+
+        PipesItem pipesItem = PipesUtil.getPipesItem(event.getResult());
+        if (pipesItem == null) {
+            return;
+        }
+
+        ItemMeta resultMeta = event.getResult().getItemMeta();
+        if (PipesUtil.getHiddenString(resultMeta.getDisplayName()) != null) {
+            return;
+        }
+        resultMeta.setDisplayName(PipesUtil.hideString(pipesItem.toString(), resultMeta.getDisplayName()));
+        event.getResult().setItemMeta(resultMeta);
     }
 }

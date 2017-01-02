@@ -3,7 +3,11 @@ package io.github.apfelcreme.Pipes.Manager;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import io.github.apfelcreme.Pipes.Exception.ChunkNotLoadedException;
-import io.github.apfelcreme.Pipes.Pipe.*;
+import io.github.apfelcreme.Pipes.Pipe.ChunkLoader;
+import io.github.apfelcreme.Pipes.Pipe.Pipe;
+import io.github.apfelcreme.Pipes.Pipe.PipeInput;
+import io.github.apfelcreme.Pipes.Pipe.PipeOutput;
+import io.github.apfelcreme.Pipes.Pipe.SimpleLocation;
 import io.github.apfelcreme.Pipes.PipesConfig;
 import io.github.apfelcreme.Pipes.PipesUtil;
 import org.bukkit.Material;
@@ -11,7 +15,10 @@ import org.bukkit.World;
 import org.bukkit.block.*;
 import org.bukkit.inventory.InventoryHolder;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Queue;
 import java.util.concurrent.TimeUnit;
 
 /**

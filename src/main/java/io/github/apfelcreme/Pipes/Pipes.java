@@ -10,9 +10,7 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ShapelessRecipe;
 import org.bukkit.plugin.java.JavaPlugin;
-import org.bukkit.scheduler.BukkitTask;
 
-import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
@@ -58,19 +56,19 @@ public class Pipes extends JavaPlugin {
         getServer().getPluginCommand("pipe").setExecutor(new PipeCommand());
 
         //create the custom recipes
-        ShapelessRecipe dispenserRecipe = new ShapelessRecipe(PipesUtil.getCustomDispenserItem());
+        ShapelessRecipe dispenserRecipe = new ShapelessRecipe(PipesItem.PIPE_INPUT.toItemStack());
         for (Map.Entry<Material, Integer> material : PipesConfig.getRecipeMaterials("dispenserRecipe").entrySet()) {
             dispenserRecipe.addIngredient(material.getValue(), material.getKey());
         }
         getServer().addRecipe(dispenserRecipe);
 
-        ShapelessRecipe dropperRecipe = new ShapelessRecipe(PipesUtil.getCustomDropperItem());
+        ShapelessRecipe dropperRecipe = new ShapelessRecipe(PipesItem.PIPE_OUTPUT.toItemStack());
         for (Map.Entry<Material, Integer> material : PipesConfig.getRecipeMaterials("dropperRecipe").entrySet()) {
             dropperRecipe.addIngredient(material.getValue(), material.getKey());
         }
         getServer().addRecipe(dropperRecipe);
 
-        ShapelessRecipe chunkLoaderRecipe = new ShapelessRecipe(PipesUtil.getCustomChunkLoaderItem());
+        ShapelessRecipe chunkLoaderRecipe = new ShapelessRecipe(PipesItem.CHUNK_LOADER.toItemStack());
         for (Map.Entry<Material, Integer> material : PipesConfig.getRecipeMaterials("chunkLoaderRecipe").entrySet()) {
             chunkLoaderRecipe.addIngredient(material.getValue(), material.getKey());
         }

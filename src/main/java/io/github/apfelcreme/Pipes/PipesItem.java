@@ -1,0 +1,82 @@
+package io.github.apfelcreme.Pipes;
+
+/**
+ * Copyright (C) 2016 Max lLe aka Phoenix616
+ * <p>
+ * This program is free software;
+ * you can redistribute it and/or modify it under the terms of the GNU General
+ * Public License as published by the Free Software Foundation; either version 3
+ * of the License, or (at your option) any later version.
+ * <p>
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
+ * details.
+ * <p>
+ * You should have received a copy of the GNU General Public License along with
+ * this program; if not, see <http://www.gnu.org/licenses/>.
+ *
+ * @author Max lee aka Phoenix616
+ */
+
+import org.bukkit.ChatColor;
+import org.bukkit.Material;
+import org.bukkit.enchantments.Enchantment;
+import org.bukkit.inventory.ItemFlag;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
+
+import java.util.Arrays;
+import java.util.List;
+
+public enum PipesItem {
+    PIPE_INPUT("Pipe Input", Material.DISPENSER, "dispenserLore"),
+    PIPE_OUTPUT("Pipe Output", Material.DROPPER, "dropperLore"),
+    CHUNK_LOADER("Chunk Loader", Material.FURNACE, "chunkLoaderLore");
+
+    private static final String IDENTIFIER = "Pipes";
+
+    private final String name;
+    private final Material material;
+    private final String loreKey;
+    private ItemStack item;
+
+    PipesItem(String name, Material material, String loreKey) {
+        this.name = name;
+        this.material = material;
+        this.loreKey = loreKey;
+    }
+
+    public static String getIdentifier() {
+        return IDENTIFIER;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public Material getMaterial() {
+        return material;
+    }
+
+    public String getLoreKey() {
+        return loreKey;
+    }
+
+    public ItemStack toItemStack() {
+        if (item != null) {
+            return item;
+        }
+        ItemStack item = new ItemStack(this.material);
+        ItemMeta meta = item.getItemMeta();
+        List<String> lore = Arrays.asList(PipesConfig.getText("info." + this.loreKey),
+                ChatColor.BLUE + "" + ChatColor.ITALIC + PipesUtil.hideString(this.toString(), IDENTIFIER));
+        meta.setLore(lore);
+        meta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
+        meta.addEnchant(Enchantment.ARROW_DAMAGE, 1, true);
+        meta.setDisplayName(ChatColor.RESET + "" + ChatColor.WHITE + PipesUtil.hideString(this.toString(), this.name));
+        item.setItemMeta(meta);
+        this.item = item;
+        return item;
+    }
+}

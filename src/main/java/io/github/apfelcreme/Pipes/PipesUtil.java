@@ -10,6 +10,7 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.material.DirectionalContainer;
 
 import java.util.Arrays;
 import java.util.List;
@@ -50,25 +51,16 @@ public class PipesUtil {
     }
 
     /**
-     * returns the direction a dropper is facing, as there is no way to get that information from the current API
+     * returns the direction a dropper is facing
      *
      * @param dropper the dropper block
      * @return the BlockFace the dropper is facing to
+     * @deprecated Use {@link DirectionalContainer#getFacing()}
      */
+    @Deprecated
     public static BlockFace getDropperFace(Dropper dropper) {
-        byte data = dropper.getData().getData();
-        if (data == 0) {
-            return BlockFace.DOWN;
-        } else if (data == 1) {
-            return BlockFace.UP;
-        } else if (data == 2) {
-            return BlockFace.NORTH;
-        } else if (data == 3) {
-            return BlockFace.SOUTH;
-        } else if (data == 4) {
-            return BlockFace.WEST;
-        } else if (data == 5) {
-            return BlockFace.EAST;
+        if (dropper.getData() instanceof DirectionalContainer) {
+            return ((DirectionalContainer) dropper.getData()).getFacing();
         }
         return null;
     }
@@ -78,21 +70,12 @@ public class PipesUtil {
      *
      * @param dispenser the dispenser block
      * @return the BlockFace the dispenser is facing to
+     * @deprecated Use {@link DirectionalContainer#getFacing()}
      */
+    @Deprecated
     public static BlockFace getDispenserFace(Dispenser dispenser) {
-        byte data = dispenser.getData().getData();
-        if (data == 0) {
-            return BlockFace.DOWN;
-        } else if (data == 1) {
-            return BlockFace.UP;
-        } else if (data == 2) {
-            return BlockFace.NORTH;
-        } else if (data == 3) {
-            return BlockFace.SOUTH;
-        } else if (data == 4) {
-            return BlockFace.WEST;
-        } else if (data == 5) {
-            return BlockFace.EAST;
+        if (dispenser.getData() instanceof DirectionalContainer) {
+            return ((DirectionalContainer) dispenser.getData()).getFacing();
         }
         return null;
     }

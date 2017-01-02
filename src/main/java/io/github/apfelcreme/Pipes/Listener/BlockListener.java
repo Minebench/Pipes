@@ -8,11 +8,14 @@ import io.github.apfelcreme.Pipes.PipesConfig;
 import io.github.apfelcreme.Pipes.PipesItem;
 import io.github.apfelcreme.Pipes.PipesUtil;
 import org.bukkit.Material;
+import org.bukkit.event.Event;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.inventory.CraftItemEvent;
+import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.event.inventory.PrepareAnvilEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -81,29 +84,33 @@ public class BlockListener implements Listener {
     }
 
     @EventHandler
-    public void onItemRename(PrepareAnvilEvent event) {
-        if (!event.getResult().hasItemMeta() || !event.getResult().getItemMeta().hasDisplayName()) {
+    public void onInventoryClick(InventoryClickEvent event) {
+        if (event.getInventory().getType() != InventoryType.ANVIL
+                || event.getResult() == Event.Result.DENY
+                || event.getSlotType() != InventoryType.SlotType.RESULT
+                || !event.getCurrentItem().hasItemMeta()
+                || !event.getCurrentItem().getItemMeta().hasDisplayName()) {
             return;
         }
 
         if (event.getInventory().getContents().length > 0) {
             ItemStack item = event.getInventory().getContents()[0];
-            if (item.hasItemMeta() && item.getItemMeta().hasDisplayName()
-                    && item.getItemMeta().getDisplayName().equals(event.getResult().getItemMeta().getDisplayName())) {
+            if (item != null && item.hasItemMeta() && item.getItemMeta().hasDisplayName()
+                    && item.getItemMeta().getDisplayName().equals(event.getCurrentItem().getItemMeta().getDisplayName())) {
                 return;
             }
         }
 
-        PipesItem pipesItem = PipesUtil.getPipesItem(event.getResult());
+        PipesItem pipesItem = PipesUtil.getPipesItem(event.getCurrentItem());
         if (pipesItem == null) {
             return;
         }
 
-        ItemMeta resultMeta = event.getResult().getItemMeta();
+        ItemMeta resultMeta = event.getCurrentItem().getItemMeta();
         if (PipesUtil.getHiddenString(resultMeta.getDisplayName()) != null) {
             return;
         }
         resultMeta.setDisplayName(PipesUtil.hideString(pipesItem.toString(), resultMeta.getDisplayName()));
-        event.getResult().setItemMeta(resultMeta);
+        event.getCurrentItem().setItemMeta(resultMeta);
     }
 }

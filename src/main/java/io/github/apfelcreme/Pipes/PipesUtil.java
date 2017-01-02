@@ -35,6 +35,10 @@ import java.util.regex.Pattern;
  */
 public class PipesUtil {
 
+    private static ItemStack customDispenser;
+    private static ItemStack customDropper;
+    private static ItemStack customChunkLoader;
+
     /**
      * returns whether a string only contains numbers
      *
@@ -180,7 +184,11 @@ public class PipesUtil {
      * @return an ItemStack of the custom dispenser item
      */
     public static ItemStack getCustomDispenserItem() {
-        ItemStack customDispenser = new ItemStack(Material.DISPENSER);
+        if (customDispenser != null) {
+            return customDispenser;
+        }
+
+        customDispenser = new ItemStack(Material.DISPENSER);
         ItemMeta meta = customDispenser.getItemMeta();
         List<String> lore = Arrays.asList(ChatColor.BLUE + "" + ChatColor.ITALIC + hideString("Pipes", "Pipes"),
                 PipesConfig.getText("info.dispenserLore"));
@@ -198,7 +206,11 @@ public class PipesUtil {
      * @return an ItemStack of the custom dropper item
      */
     public static ItemStack getCustomDropperItem() {
-        ItemStack customDropper = new ItemStack(Material.DROPPER);
+        if (customDropper != null) {
+            return customDropper;
+        }
+
+        customDropper = new ItemStack(Material.DROPPER);
         ItemMeta meta = customDropper.getItemMeta();
         List<String> lore = Arrays.asList(ChatColor.BLUE + "" + ChatColor.ITALIC + hideString("Pipes", "Pipes"),
                 PipesConfig.getText("info.dropperLore"));
@@ -216,7 +228,11 @@ public class PipesUtil {
      * @return an ItemStack of the custom chunkLoader item
      */
     public static ItemStack getCustomChunkLoaderItem() {
-        ItemStack customChunkLoader = new ItemStack(Material.FURNACE);
+        if (customChunkLoader != null) {
+            return customChunkLoader;
+        }
+
+        customChunkLoader = new ItemStack(Material.FURNACE);
         ItemMeta meta = customChunkLoader.getItemMeta();
         List<String> lore = Arrays.asList(ChatColor.BLUE + "" + ChatColor.ITALIC + hideString("Pipes", "Pipes"),
                 PipesConfig.getText("info.chunkLoaderLore"));

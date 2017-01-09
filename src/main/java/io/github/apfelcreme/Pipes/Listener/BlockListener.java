@@ -1,5 +1,6 @@
 package io.github.apfelcreme.Pipes.Listener;
 
+import io.github.apfelcreme.Pipes.Event.PipeBlockBreakEvent;
 import io.github.apfelcreme.Pipes.Exception.ChunkNotLoadedException;
 import io.github.apfelcreme.Pipes.Manager.PipeManager;
 import io.github.apfelcreme.Pipes.Pipe.Pipe;
@@ -42,11 +43,19 @@ public class BlockListener implements Listener {
 
     @EventHandler
     private void onBlockBreak(BlockBreakEvent event) {
+        if (event instanceof PipeBlockBreakEvent) {
+            return;
+        }
+
         PipesItem pipesItem = PipesUtil.getPipesItem(event.getBlock());
         if (pipesItem != null) {
             event.setCancelled(true);
-            event.getBlock().setType(Material.AIR);
-            event.getBlock().getWorld().dropItemNaturally(event.getBlock().getLocation(), pipesItem.toItemStack());
+            BlockBreakEvent blockBreakEvent = new PipeBlockBreakEvent(event.getBlock(), event.getPlayer(), pipesItem);
+            Pipes.getInstance().getServer().getPluginManager().callEvent(blockBreakEvent);
+            if (!blockBreakEvent.isCancelled()) {
+                event.getBlock().setType(Material.AIR);
+                event.getBlock().getWorld().dropItemNaturally(event.getBlock().getLocation(), pipesItem.toItemStack());
+            }
         }
     }
 

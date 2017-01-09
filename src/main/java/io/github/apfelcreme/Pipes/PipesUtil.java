@@ -104,14 +104,14 @@ public class PipesUtil {
         char[] chars = string.toCharArray();
         for (int i = 0; i < chars.length; i++) {
             char c = chars[i];
-            if (c == org.bukkit.ChatColor.COLOR_CHAR)
+            if (c == ChatColor.COLOR_CHAR)
                 continue;
             if (i + 1 < chars.length) {
-                if (chars[i + 1] == org.bukkit.ChatColor.COLOR_CHAR && i > 1 && chars[i - 1] == org.bukkit.ChatColor.COLOR_CHAR)
+                if (chars[i + 1] == ChatColor.COLOR_CHAR && i > 1 && chars[i - 1] == ChatColor.COLOR_CHAR)
                     builder.append(c);
                 else if (builder.length() > 0)
                     builder = new StringBuilder();
-            } else if (i > 0 && chars[i - 1] == org.bukkit.ChatColor.COLOR_CHAR)
+            } else if (i > 0 && chars[i - 1] == ChatColor.COLOR_CHAR)
                 builder.append(c);
         }
         if (builder.length() == 0)

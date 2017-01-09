@@ -154,7 +154,7 @@ public class PipeManager {
                         switch (pipesItem) {
                             case PIPE_INPUT:
                                 Block relativeToInput = block.getRelative(((Directional) block.getState().getData()).getFacing());
-                                if (relativeToInput.getState() instanceof InventoryHolder) {
+                                if (relativeToInput.getType() == Material.STAINED_GLASS) {
                                     inputs.add(new PipeInput(location));
                                     found.add(block);
                                     queue.add(new SimpleLocation(relativeToInput.getLocation()));

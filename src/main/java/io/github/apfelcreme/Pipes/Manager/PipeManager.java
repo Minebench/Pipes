@@ -11,10 +11,16 @@ import io.github.apfelcreme.Pipes.Pipe.SimpleLocation;
 import io.github.apfelcreme.Pipes.PipesConfig;
 import io.github.apfelcreme.Pipes.PipesItem;
 import io.github.apfelcreme.Pipes.PipesUtil;
+import org.bukkit.DyeColor;
 import org.bukkit.Material;
 import org.bukkit.World;
-import org.bukkit.block.*;
+import org.bukkit.block.Block;
+import org.bukkit.block.BlockFace;
+import org.bukkit.block.Dispenser;
+import org.bukkit.block.Dropper;
+import org.bukkit.block.Furnace;
 import org.bukkit.inventory.InventoryHolder;
+import org.bukkit.material.Colorable;
 import org.bukkit.material.Directional;
 
 import java.util.ArrayList;
@@ -118,7 +124,7 @@ public class PipeManager {
         List<ChunkLoader> chunkLoaders = new ArrayList<>();
         List<SimpleLocation> pipeBlocks = new ArrayList<>();
 
-        Byte color = null;
+        DyeColor color = null;
 
         World world = startingPoint.getWorld();
 
@@ -137,17 +143,20 @@ public class PipeManager {
             Block block = world.getBlockAt(location.getX(), location.getY(), location.getZ());
             if (!found.contains(block)) {
                 if (block.getType() == Material.STAINED_GLASS) {
+                    DyeColor blockColor = ((Colorable) block.getState().getData()).getColor();
                     if (color == null) {
-                        color = block.getData();
+                        color = blockColor;
                     }
-                    pipeBlocks.add(location);
-                    found.add(block);
-                    queue.add(location.getRelative(BlockFace.NORTH));
-                    queue.add(location.getRelative(BlockFace.EAST));
-                    queue.add(location.getRelative(BlockFace.SOUTH));
-                    queue.add(location.getRelative(BlockFace.WEST));
-                    queue.add(location.getRelative(BlockFace.UP));
-                    queue.add(location.getRelative(BlockFace.DOWN));
+                    if (color == blockColor) {
+                        pipeBlocks.add(location);
+                        found.add(block);
+                        queue.add(location.getRelative(BlockFace.NORTH));
+                        queue.add(location.getRelative(BlockFace.EAST));
+                        queue.add(location.getRelative(BlockFace.SOUTH));
+                        queue.add(location.getRelative(BlockFace.WEST));
+                        queue.add(location.getRelative(BlockFace.UP));
+                        queue.add(location.getRelative(BlockFace.DOWN));
+                    }
                 } else {
                     PipesItem pipesItem = PipesUtil.getPipesItem(block);
                     if (pipesItem != null) {
@@ -178,7 +187,7 @@ public class PipeManager {
             }
         }
         if ((outputs.size() > 0) && (inputs.size() > 0) && pipeBlocks.size() > 0) {
-            return new Pipe(inputs, outputs, chunkLoaders, pipeBlocks);
+            return new Pipe(inputs, outputs, chunkLoaders, pipeBlocks, color);
         }
         return null;
     }

@@ -1,6 +1,7 @@
 package io.github.apfelcreme.Pipes.Pipe;
 
 import io.github.apfelcreme.Pipes.PipesConfig;
+import org.bukkit.DyeColor;
 import org.bukkit.Effect;
 import org.bukkit.Location;
 import org.bukkit.block.Block;
@@ -34,13 +35,15 @@ public class Pipe {
     private final List<PipeOutput> outputs;
     private final List<ChunkLoader> chunkLoaders;
     private final List<SimpleLocation> pipeBlocks;
+    private final DyeColor color;
 
     public Pipe(List<PipeInput> inputs, List<PipeOutput> outputs,
-                List<ChunkLoader> chunkLoaders, List<SimpleLocation> pipeBlocks) {
+                List<ChunkLoader> chunkLoaders, List<SimpleLocation> pipeBlocks, DyeColor color) {
         this.inputs = inputs;
         this.outputs = outputs;
         this.chunkLoaders = chunkLoaders;
         this.pipeBlocks = pipeBlocks;
+        this.color = color;
     }
 
     /**
@@ -117,6 +120,15 @@ public class Pipe {
     }
 
     /**
+     * Get the color of this pipe
+     *
+     * @return The color of the stained glass blocks this pipe consists of
+     */
+    public DyeColor getColor() {
+        return color;
+    }
+
+    /**
      * displays particles around a pipe
      */
     public void highlight() {
@@ -175,6 +187,7 @@ public class Pipe {
         result = 31 * result + outputs.hashCode();
         result = 31 * result + chunkLoaders.hashCode();
         result = 31 * result + pipeBlocks.hashCode();
+        result = 31 * result + color.hashCode();
         return result;
     }
 }

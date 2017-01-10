@@ -143,7 +143,7 @@ public class PipeManager {
             Block block = world.getBlockAt(location.getX(), location.getY(), location.getZ());
             if (!found.contains(block)) {
                 if (block.getType() == Material.STAINED_GLASS) {
-                    DyeColor blockColor = ((Colorable) block.getState().getData()).getColor();
+                    DyeColor blockColor = DyeColor.getByWoolData(block.getState().getRawData());
                     if (color == null) {
                         color = blockColor;
                     }

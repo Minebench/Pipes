@@ -102,12 +102,9 @@ public class ScheduledItemTransfer {
                                             fuel.getAmount() + itemStack.getAmount(), itemStack.getDurability()));
                                     success = true;
                                 } else {
-                                    // the combined amount is greater than 64, so calculate the leftover stack and
-                                    // place it in the dispenser
-                                    int taken = 64 - fuel.getAmount();
-                                    PipesUtil.removeItems(input.getHolder().getInventory(), itemStack.getType(), taken, true);
-                                    furnace.getInventory().setFuel(new ItemStack(itemStack.getType(), 64, itemStack.getDurability()));
-                                    success = true;
+                                    // the furnace is full, so find continue with the list of outputs
+                                    // and try to fill one that isnt full
+                                    continue;
                                 }
                             } else if (fuel == null) {
                                 // there is no fuel currently in the fuel slot, so simply put it in
@@ -128,12 +125,9 @@ public class ScheduledItemTransfer {
                                             smelting.getAmount() + itemStack.getAmount(), itemStack.getDurability()));
                                     success = true;
                                 } else {
-                                    // the combined amount is greater than 64, so calculate the leftover stack and
-                                    // place it in the dispenser
-                                    int taken = 64 - smelting.getAmount();
-                                    PipesUtil.removeItems(input.getHolder().getInventory(), itemStack.getType(), taken, true);
-                                    furnace.getInventory().setSmelting(new ItemStack(itemStack.getType(), 64, itemStack.getDurability()));
-                                    success = true;
+                                    // the furnace is full, so find continue with the list of outputs
+                                    // and try to fill one that isnt full
+                                    continue;
                                 }
                             } else if (smelting == null) {
                                 input.getHolder().getInventory().remove(itemStack);

@@ -96,22 +96,22 @@ public class ScheduledItemTransfer {
                                 // has the same type as the fuel that is already in the furnace
                                 if ((itemStack.getAmount() + fuel.getAmount()) <= 64) {
                                     // the combined amount of both stacks is <= 64, so simply merge them
+                                    input.getHolder().getInventory().remove(itemStack);
                                     furnace.getInventory().setFuel(new ItemStack(itemStack.getType(),
                                             fuel.getAmount() + itemStack.getAmount(), itemStack.getDurability()));
-                                    input.getHolder().getInventory().remove(itemStack);
                                     success = true;
                                 } else {
                                     // the combined amount is greater than 64, so calculate the leftover stack and
                                     // place it in the dispenser
                                     int taken = 64 - fuel.getAmount();
-                                    furnace.getInventory().setFuel(new ItemStack(itemStack.getType(), 64, itemStack.getDurability()));
                                     PipesUtil.removeItems(input.getHolder().getInventory(), itemStack.getType(), taken, true);
+                                    furnace.getInventory().setFuel(new ItemStack(itemStack.getType(), 64, itemStack.getDurability()));
                                     success = true;
                                 }
                             } else if (fuel == null) {
                                 // there is no fuel currently in the fuel slot, so simply put it in
-                                furnace.getInventory().setFuel(itemStack);
                                 input.getHolder().getInventory().remove(itemStack);
+                                furnace.getInventory().setFuel(itemStack);
                                 success = true;
                             }
                         } else {
@@ -122,21 +122,21 @@ public class ScheduledItemTransfer {
                                 // has the same type as the fuel that is already in the furnace
                                 if ((itemStack.getAmount() + smelting.getAmount()) <= 64) {
                                     // the combined amount of both stacks is <= 64, so simply merge them
+                                    input.getHolder().getInventory().remove(itemStack);
                                     furnace.getInventory().setSmelting(new ItemStack(itemStack.getType(),
                                             smelting.getAmount() + itemStack.getAmount(), itemStack.getDurability()));
-                                    input.getHolder().getInventory().remove(itemStack);
                                     success = true;
                                 } else {
                                     // the combined amount is greater than 64, so calculate the leftover stack and
                                     // place it in the dispenser
                                     int taken = 64 - smelting.getAmount();
-                                    furnace.getInventory().setSmelting(new ItemStack(itemStack.getType(), 64, itemStack.getDurability()));
                                     PipesUtil.removeItems(input.getHolder().getInventory(), itemStack.getType(), taken, true);
+                                    furnace.getInventory().setSmelting(new ItemStack(itemStack.getType(), 64, itemStack.getDurability()));
                                     success = true;
                                 }
                             } else if (smelting == null) {
-                                furnace.getInventory().setSmelting(itemStack);
                                 input.getHolder().getInventory().remove(itemStack);
+                                furnace.getInventory().setSmelting(itemStack);
                                 success = true;
                             }
                         }
@@ -150,8 +150,8 @@ public class ScheduledItemTransfer {
                      */
                         // for chests, ender-chests, dropper etc...
                         if (output.getTargetHolder().getInventory().firstEmpty() != -1) {
-                            output.getTargetHolder().getInventory().addItem(itemStack);
                             input.getHolder().getInventory().remove(itemStack);
+                            output.getTargetHolder().getInventory().addItem(itemStack);
                             success = true;
                         }
                         break;

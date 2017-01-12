@@ -53,9 +53,10 @@ public class PipeCommand implements CommandExecutor {
             }
             if (subCommand != null) {
                 subCommand.execute(commandSender, strings);
+                return true;
             }
         }
-        return true;
+        return false;
     }
 
     /**

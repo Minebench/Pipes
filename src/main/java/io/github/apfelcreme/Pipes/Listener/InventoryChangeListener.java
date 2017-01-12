@@ -1,5 +1,6 @@
 package io.github.apfelcreme.Pipes.Listener;
 
+import io.github.apfelcreme.Pipes.Event.PipeMoveItemEvent;
 import io.github.apfelcreme.Pipes.Exception.ChunkNotLoadedException;
 import io.github.apfelcreme.Pipes.Manager.PipeManager;
 import io.github.apfelcreme.Pipes.Pipe.Pipe;
@@ -20,8 +21,6 @@ import org.bukkit.event.inventory.InventoryMoveItemEvent;
 import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.scheduler.BukkitRunnable;
-
-import java.util.*;
 
 /**
  * Copyright (C) 2016 Lord36 aka Apfelcreme
@@ -45,7 +44,7 @@ public class InventoryChangeListener implements Listener {
 
     @EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = true)
     private void onInventoryItemMove(final InventoryMoveItemEvent event) {
-        if (!handleInventoryAction(event.getDestination(), true)) {
+        if (!(event instanceof PipeMoveItemEvent) && !handleInventoryAction(event.getDestination(), true)) {
             event.setCancelled(true);
         }
     }

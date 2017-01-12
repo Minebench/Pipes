@@ -1,5 +1,6 @@
 package io.github.apfelcreme.Pipes.Pipe;
 
+import io.github.apfelcreme.Pipes.Event.PipeMoveItemEvent;
 import io.github.apfelcreme.Pipes.LoopDetection.Detection;
 import io.github.apfelcreme.Pipes.Manager.DetectionManager;
 import io.github.apfelcreme.Pipes.Pipes;
@@ -160,7 +161,7 @@ public class ScheduledItemTransfer {
                      */
                 }
                 if (success) {
-                    InventoryMoveItemEvent event = new InventoryMoveItemEvent(input.getHolder()
+                    PipeMoveItemEvent event = new PipeMoveItemEvent(pipe, input.getHolder()
                             .getInventory(), itemStack, output.getTargetHolder().getInventory(), true);
                     Pipes.getInstance().getServer().getPluginManager().callEvent(event);
                     return true;

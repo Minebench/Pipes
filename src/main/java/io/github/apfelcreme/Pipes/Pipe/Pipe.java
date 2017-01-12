@@ -104,14 +104,14 @@ public class Pipe {
     }
 
     /**
-     * returns the pipe input object if there is one at the given blocks location
+     * returns the pipe input object if there is one at the given location
      *
-     * @param block a block
+     * @param location a SimpleLocation
      * @return a pipeinput
      */
-    public PipeInput getInput(Block block) {
+    public PipeInput getInput(SimpleLocation location) {
         for (PipeInput pipeInput : inputs) {
-            if (pipeInput.getLocation().equals(new SimpleLocation(block.getLocation()))) {
+            if (pipeInput.getLocation().equals(location)) {
                 return pipeInput;
             }
         }

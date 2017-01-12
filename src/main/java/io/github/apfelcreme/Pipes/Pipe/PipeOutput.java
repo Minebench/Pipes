@@ -43,7 +43,7 @@ public class PipeOutput {
      */
     public InventoryHolder getOutputHolder() {
         Block block = location.getBlock();
-        if (PipesItem.PIPE_INPUT.check(block)) {
+        if (PipesItem.PIPE_OUTPUT.check(block)) {
             return (InventoryHolder) block.getState();
         }
         return null;

@@ -74,7 +74,7 @@ public class Pipe {
     public List<PipeOutput> getOutputs(InventoryType inventoryType, boolean filtering) {
         List<PipeOutput> sorterOutputs = new ArrayList<>();
         for (PipeOutput output : outputs) {
-            if (output.getTargetHolder().getInventory().getType() == inventoryType || inventoryType == null) {
+            if (inventoryType == null || output.getTargetHolder().getInventory().getType() == inventoryType) {
                 if ((filtering && !output.getFilterItems().isEmpty()) // there are items as filters + user wants sorters
                         || (!filtering && output.getFilterItems().isEmpty())) { // there are no items + user doesn't want sorters
                     sorterOutputs.add(output);

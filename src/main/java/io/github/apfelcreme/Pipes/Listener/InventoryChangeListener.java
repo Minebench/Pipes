@@ -47,10 +47,10 @@ public class InventoryChangeListener implements Listener {
 
     @EventHandler(priority = EventPriority.LOWEST)
     private void onInventoryItemMove(final InventoryMoveItemEvent event) {
-        if (event.isCancelled() || !(event.getDestination() instanceof BlockState)) {
+        if (event.isCancelled() || !(event.getDestination().getHolder() instanceof BlockState)) {
             return;
         }
-        final Block dispenserBlock = ((BlockState) event.getDestination()).getBlock();
+        final Block dispenserBlock = ((BlockState) event.getDestination().getHolder()).getBlock();
         if (!PipesItem.PIPE_INPUT.check(dispenserBlock)) {
             return;
         }

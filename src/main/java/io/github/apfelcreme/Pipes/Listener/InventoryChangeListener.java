@@ -47,47 +47,38 @@ public class InventoryChangeListener implements Listener {
 
     @EventHandler(priority = EventPriority.LOWEST)
     private void onInventoryItemMove(final InventoryMoveItemEvent event) {
-        if (event.isCancelled()) {
+        if (event.isCancelled() || !(event.getDestination() instanceof BlockState)) {
             return;
         }
-        if (event.getDestination().getType() == InventoryType.DISPENSER) {
-            final Block dispenserBlock = event.getDestination().getLocation().getWorld().getBlockAt(
-                    event.getDestination().getLocation().getBlockX(),
-                    event.getDestination().getLocation().getBlockY(),
-                    event.getDestination().getLocation().getBlockZ());
-            if (!PipesItem.PIPE_INPUT.check(dispenserBlock)) {
-                return;
-            }
-            final SimpleLocation dispenserLocation = new SimpleLocation(
-                    dispenserBlock.getWorld().getName(),
-                    dispenserBlock.getX(),
-                    dispenserBlock.getY(),
-                    dispenserBlock.getZ());
+        final Block dispenserBlock = ((BlockState) event.getDestination()).getBlock();
+        if (!PipesItem.PIPE_INPUT.check(dispenserBlock)) {
+            return;
+        }
+        final SimpleLocation dispenserLocation = new SimpleLocation(dispenserBlock.getLocation());
 
-            // cache the pipe
-            Pipe pipe = PipeManager.getInstance().getPipeCache().getIfPresent(dispenserLocation);
-            if (pipe == null) {
-                try {
-                    pipe = PipeManager.isPipe(dispenserBlock);
-                    PipeManager.getInstance().addPipeToCache(dispenserLocation, pipe);
-                } catch (ChunkNotLoadedException e) {
-                    pipe = null;
-                    event.setCancelled(true);
-                }
+        // cache the pipe
+        Pipe pipe = PipeManager.getInstance().getPipeCache().getIfPresent(dispenserLocation);
+        if (pipe == null) {
+            try {
+                pipe = PipeManager.isPipe(dispenserBlock);
+                PipeManager.getInstance().addPipeToCache(dispenserLocation, pipe);
+            } catch (ChunkNotLoadedException e) {
+                pipe = null;
+                event.setCancelled(true);
             }
-            if (pipe != null && !event.isCancelled()) {
-                final Pipe finalPipe = pipe;
-                Pipes.getInstance().getServer().getScheduler().scheduleSyncDelayedTask(Pipes.getInstance(), new Runnable() {
-                    @Override
-                    public void run() {
-                        PipeInput pipeInput = finalPipe.getInput(dispenserBlock);
-                        if (pipeInput != null) {
-                            ItemMoveScheduler.getInstance().add(new ScheduledItemTransfer(finalPipe, pipeInput));
-                        }
+        }
+        if (pipe != null && !event.isCancelled()) {
+            final Pipe finalPipe = pipe;
+            Pipes.getInstance().getServer().getScheduler().scheduleSyncDelayedTask(Pipes.getInstance(), new Runnable() {
+                @Override
+                public void run() {
+                    PipeInput pipeInput = finalPipe.getInput(dispenserBlock);
+                    if (pipeInput != null) {
+                        ItemMoveScheduler.getInstance().add(new ScheduledItemTransfer(finalPipe, pipeInput));
                     }
+                }
 //
-                }, 2L);
-            }
+            }, 2L);
         }
     }
 

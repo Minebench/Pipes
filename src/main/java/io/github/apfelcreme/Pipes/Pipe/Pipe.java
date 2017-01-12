@@ -75,8 +75,8 @@ public class Pipe {
         List<PipeOutput> sorterOutputs = new ArrayList<>();
         for (PipeOutput output : outputs) {
             if (output.getTargetHolder().getInventory().getType() == inventoryType || inventoryType == null) {
-                if ((!output.getFilterItems().isEmpty() && filtering) // there are items as fiters + user wants sorters
-                        || (output.getFilterItems().isEmpty() && !filtering)) { // there are no items + user doesnt want sorters
+                if ((filtering && !output.getFilterItems().isEmpty()) // there are items as filters + user wants sorters
+                        || (!filtering && output.getFilterItems().isEmpty())) { // there are no items + user doesn't want sorters
                     sorterOutputs.add(output);
                 }
             }
@@ -111,7 +111,7 @@ public class Pipe {
      */
     public PipeInput getInput(Block block) {
         for (PipeInput pipeInput : inputs) {
-            if (pipeInput.getHolder().equals(block.getState())) {
+            if (pipeInput.getLocation().equals(new SimpleLocation(block.getLocation()))) {
                 return pipeInput;
             }
         }

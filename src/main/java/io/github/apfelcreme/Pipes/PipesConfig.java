@@ -63,7 +63,7 @@ public class PipesConfig {
      * @return the delay between item transfers
      */
     public static long getTransferCooldown() {
-        return plugin.getConfig().getLong("transferCooldown", 1000L);
+        return plugin.getConfig().getLong("transferCooldown", 20L);
     }
 
 

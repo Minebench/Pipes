@@ -6,22 +6,20 @@ import io.github.apfelcreme.Pipes.Pipe.Pipe;
 import io.github.apfelcreme.Pipes.Pipe.PipeInput;
 import io.github.apfelcreme.Pipes.Pipe.SimpleLocation;
 import io.github.apfelcreme.Pipes.Pipes;
-import io.github.apfelcreme.Pipes.PipesConfig;
 import io.github.apfelcreme.Pipes.Manager.ItemMoveScheduler;
 import io.github.apfelcreme.Pipes.Pipe.ScheduledItemTransfer;
 import io.github.apfelcreme.Pipes.PipesItem;
 import io.github.apfelcreme.Pipes.PipesUtil;
-import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockState;
-import org.bukkit.block.Dispenser;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.inventory.InventoryMoveItemEvent;
 import org.bukkit.event.inventory.InventoryType;
-import org.bukkit.inventory.meta.BlockStateMeta;
+import org.bukkit.inventory.Inventory;
+import org.bukkit.scheduler.BukkitRunnable;
 
 import java.util.*;
 
@@ -45,40 +43,10 @@ import java.util.*;
  */
 public class InventoryChangeListener implements Listener {
 
-    @EventHandler(priority = EventPriority.LOWEST)
+    @EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = true)
     private void onInventoryItemMove(final InventoryMoveItemEvent event) {
-        if (event.isCancelled() || !(event.getDestination().getHolder() instanceof BlockState)) {
-            return;
-        }
-        final Block dispenserBlock = ((BlockState) event.getDestination().getHolder()).getBlock();
-        if (!PipesItem.PIPE_INPUT.check(dispenserBlock)) {
-            return;
-        }
-        final SimpleLocation dispenserLocation = new SimpleLocation(dispenserBlock.getLocation());
-
-        // cache the pipe
-        Pipe pipe = PipeManager.getInstance().getPipeCache().getIfPresent(dispenserLocation);
-        if (pipe == null) {
-            try {
-                pipe = PipeManager.isPipe(dispenserBlock);
-                PipeManager.getInstance().addPipeToCache(dispenserLocation, pipe);
-            } catch (ChunkNotLoadedException e) {
-                pipe = null;
-                event.setCancelled(true);
-            }
-        }
-        if (pipe != null && !event.isCancelled()) {
-            final Pipe finalPipe = pipe;
-            Pipes.getInstance().getServer().getScheduler().scheduleSyncDelayedTask(Pipes.getInstance(), new Runnable() {
-                @Override
-                public void run() {
-                    PipeInput pipeInput = finalPipe.getInput(dispenserBlock);
-                    if (pipeInput != null) {
-                        ItemMoveScheduler.getInstance().add(new ScheduledItemTransfer(finalPipe, pipeInput));
-                    }
-                }
-//
-            }, 2L);
+        if (!handleInventoryAction(event.getDestination(), true)) {
+            event.setCancelled(true);
         }
     }
 
@@ -89,20 +57,24 @@ public class InventoryChangeListener implements Listener {
      */
     @EventHandler(priority = EventPriority.LOWEST)
     private void onInventoryClose(InventoryCloseEvent event) {
-        if (!(event.getInventory().getHolder() instanceof BlockState)) {
-            return;
+        handleInventoryAction(event.getInventory(), false);
+    }
+
+    /**
+     * Handle an inventory action
+     * @param inventory The inventory
+     * @param scheduled Whether or not to add the scheduled task delayed by 2 ticks
+     * @return <tt>Wether or not something went wrong</tt>
+     */
+    private boolean handleInventoryAction(Inventory inventory, boolean scheduled) {
+        if (!(inventory.getHolder() instanceof BlockState)) {
+            return true;
         }
-        final Block dispenserBlock = ((BlockState) event.getInventory().getHolder()).getBlock();
+        Block dispenserBlock = ((BlockState) inventory.getHolder()).getBlock();
         if (!PipesItem.PIPE_INPUT.check(dispenserBlock)) {
-            return;
+            return true;
         }
-
-        SimpleLocation dispenserLocation = new SimpleLocation(
-                dispenserBlock.getWorld().getName(),
-                dispenserBlock.getX(),
-                dispenserBlock.getY(),
-                dispenserBlock.getZ());
-
+        SimpleLocation dispenserLocation = new SimpleLocation(dispenserBlock.getLocation());
 
         // cache the pipe
         Pipe pipe = PipeManager.getInstance().getPipeCache().getIfPresent(dispenserLocation);
@@ -111,15 +83,26 @@ public class InventoryChangeListener implements Listener {
                 pipe = PipeManager.isPipe(dispenserBlock);
                 PipeManager.getInstance().addPipeToCache(dispenserLocation, pipe);
             } catch (ChunkNotLoadedException e) {
-                pipe = null;
+                return false;
             }
         }
         if (pipe != null) {
-            PipeInput pipeInput = pipe.getInput(dispenserBlock);
+            PipeInput pipeInput = pipe.getInput(dispenserLocation);
             if (pipeInput != null) {
-                ItemMoveScheduler.getInstance().add(new ScheduledItemTransfer(pipe, pipeInput));
+                final ScheduledItemTransfer transfer = new ScheduledItemTransfer(pipe, pipeInput);
+                if (scheduled) {
+                    new BukkitRunnable() {
+                        @Override
+                        public void run() {
+                            ItemMoveScheduler.getInstance().add(transfer);
+                        }
+                    }.runTaskLater(Pipes.getInstance(), 2);
+                } else {
+                    ItemMoveScheduler.getInstance().add(transfer);
+                }
             }
         }
+        return true;
     }
 
     /**

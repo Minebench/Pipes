@@ -45,6 +45,13 @@ public class SimpleLocation {
         this.z = location.getBlockZ();
     }
 
+    public SimpleLocation(SimpleLocation location) {
+        this.worldName = location.getWorldName();
+        this.x = location.getX();
+        this.y = location.getY();
+        this.z = location.getZ();
+    }
+
     /**
      * returns the world name
      *

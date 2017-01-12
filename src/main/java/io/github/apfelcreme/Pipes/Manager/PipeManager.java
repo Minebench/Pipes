@@ -16,11 +16,8 @@ import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
-import org.bukkit.block.Dispenser;
-import org.bukkit.block.Dropper;
-import org.bukkit.block.Furnace;
+import org.bukkit.block.BlockState;
 import org.bukkit.inventory.InventoryHolder;
-import org.bukkit.material.Colorable;
 import org.bukkit.material.Directional;
 
 import java.util.ArrayList;
@@ -193,39 +190,39 @@ public class PipeManager {
     }
 
     /**
-     * checks whether the given dispenser block is a pipe input
+     * checks whether the given block state is a pipe input
      *
-     * @param dispenser a dispenser block
+     * @param state a block state
      * @return true or false
      * @deprecated Use {@link PipesItem#check(Block)}
      */
     @Deprecated
-    public static boolean isPipeInput(Dispenser dispenser) {
-        return dispenser.getInventory().getName().equals(PipesUtil.getCustomDispenserItem().getItemMeta().getDisplayName());
+    public static boolean isPipeInput(BlockState state) {
+        return PipesItem.PIPE_INPUT.check(state.getBlock());
     }
 
     /**
-     * checks whether the given dropper block is a pipe output
+     * checks whether the given block state is a pipe output
      *
-     * @param dropper a dropper block
+     * @param holder a block state
      * @return true or false
      * @deprecated Use {@link PipesItem#check(Block)}
      */
     @Deprecated
-    public static boolean isPipeOutput(Dropper dropper) {
-        return dropper.getInventory().getName().equals(PipesUtil.getCustomDropperItem().getItemMeta().getDisplayName());
+    public static boolean isPipeOutput(BlockState holder) {
+        return PipesItem.PIPE_OUTPUT.check(holder.getBlock());
     }
 
     /**
-     * checks whether the given furnace block is a chunk loader
+     * checks whether the given block state is a chunk loader
      *
-     * @param furnace a furnace block
+     * @param holder a block state
      * @return true or false
      * @deprecated Use {@link PipesItem#check(Block)}
      */
     @Deprecated
-    public static boolean isChunkLoader(Furnace furnace) {
-        return furnace.getInventory().getName().equals(PipesUtil.getCustomChunkLoaderItem().getItemMeta().getDisplayName());
+    public static boolean isChunkLoader(BlockState holder) {
+        return PipesItem.CHUNK_LOADER.check(holder.getBlock());
     }
 
     /**
@@ -237,11 +234,7 @@ public class PipeManager {
      */
     @Deprecated
     public static boolean isPipeInput(SimpleLocation location) {
-//        System.out.println(location.getBlock().getState() instanceof Dispenser);
-//        if (location.getBlock().getState() instanceof Dispenser)
-//            System.out.println(isPipeOutput((Dropper) location.getBlock().getState()));
-        return location.getBlock().getState() instanceof Dispenser
-                && isPipeInput((Dispenser) location.getBlock().getState());
+        return PipesItem.PIPE_INPUT.check(location.getBlock());
     }
 
     /**
@@ -253,11 +246,7 @@ public class PipeManager {
      */
     @Deprecated
     public static boolean isPipeOutput(SimpleLocation location) {
-//        System.out.println(location.getBlock().getState() instanceof Dropper);
-//        if (location.getBlock().getState() instanceof Dropper)
-//          System.out.println(isPipeOutput((Dropper) location.getBlock().getState()));
-        return location.getBlock().getState() instanceof Dropper
-                && isPipeOutput((Dropper) location.getBlock().getState());
+        return PipesItem.PIPE_OUTPUT.check(location.getBlock());
     }
 
     /**
@@ -269,7 +258,6 @@ public class PipeManager {
      */
     @Deprecated
     public static boolean isChunkLoader(SimpleLocation location) {
-        return location.getBlock().getState() instanceof Furnace
-                && isChunkLoader((Furnace) location.getBlock().getState());
+        return PipesItem.CHUNK_LOADER.check(location.getBlock());
     }
 }

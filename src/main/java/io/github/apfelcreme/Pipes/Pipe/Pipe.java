@@ -8,7 +8,6 @@ import org.bukkit.block.Block;
 import org.bukkit.event.inventory.InventoryType;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 /**
@@ -75,7 +74,7 @@ public class Pipe {
     public List<PipeOutput> getOutputs(InventoryType inventoryType, boolean filtering) {
         List<PipeOutput> sorterOutputs = new ArrayList<>();
         for (PipeOutput output : outputs) {
-            if (output.getInventoryHolder().getInventory().getType() == inventoryType || inventoryType == null) {
+            if (output.getTargetHolder().getInventory().getType() == inventoryType || inventoryType == null) {
                 if ((!output.getFilterItems().isEmpty() && filtering) // there are items as fiters + user wants sorters
                         || (output.getFilterItems().isEmpty() && !filtering)) { // there are no items + user doesnt want sorters
                     sorterOutputs.add(output);
@@ -112,7 +111,7 @@ public class Pipe {
      */
     public PipeInput getInput(Block block) {
         for (PipeInput pipeInput : inputs) {
-            if (pipeInput.getDispenser().equals(block.getState())) {
+            if (pipeInput.getHolder().equals(block.getState())) {
                 return pipeInput;
             }
         }
@@ -137,11 +136,11 @@ public class Pipe {
             locations.add(simpleLocation);
         }
         for (PipeInput input : inputs) {
-            locations.add(input.getDispenserLocation());
+            locations.add(input.getLocation());
         }
         for (PipeOutput output : outputs) {
-            locations.add(output.getDropperLocation());
-            locations.add(output.getInventoryHolderLocation());
+            locations.add(output.getLocation());
+            locations.add(output.getTargetLocation());
         }
         for (SimpleLocation simpleLocation : locations) {
             Location location = simpleLocation.getLocation();

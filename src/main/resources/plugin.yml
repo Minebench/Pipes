@@ -41,4 +41,4 @@ permissions:
   Pipes.reload:
     description: reload the configs
   Pipes.tp:
-    description: teleport to the dispenserLocation of a detection result
+    description: teleport to the location of the input of a pipe from a detection result

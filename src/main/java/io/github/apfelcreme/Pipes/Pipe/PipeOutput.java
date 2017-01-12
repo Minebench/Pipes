@@ -1,6 +1,7 @@
 package io.github.apfelcreme.Pipes.Pipe;
 
-import org.bukkit.block.Dropper;
+import io.github.apfelcreme.Pipes.PipesItem;
+import org.bukkit.block.Block;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
 
@@ -27,22 +28,23 @@ import java.util.List;
  */
 public class PipeOutput {
 
-    private final SimpleLocation dropperLocation;
-    private final SimpleLocation inventoryHolderLocation;
+    private final SimpleLocation location;
+    private final SimpleLocation targetLocation;
 
     public PipeOutput(SimpleLocation dropperLocation, SimpleLocation inventoryHolderLocation) {
-        this.dropperLocation = dropperLocation;
-        this.inventoryHolderLocation = inventoryHolderLocation;
+        this.location = dropperLocation;
+        this.targetLocation = inventoryHolderLocation;
     }
 
     /**
-     * returns the Dropper
+     * returns the inventory holder blockstate of the block
      *
-     * @return the Dropper
+     * @return the InventoryHolder
      */
-    public Dropper getDropper() {
-        if ((dropperLocation.getBlock() != null) && (dropperLocation.getBlock().getState() instanceof Dropper)) {
-            return (Dropper) dropperLocation.getBlock().getState();
+    public InventoryHolder getOutputHolder() {
+        Block block = location.getBlock();
+        if (PipesItem.PIPE_INPUT.check(block)) {
+            return (InventoryHolder) block.getState();
         }
         return null;
     }
@@ -52,20 +54,21 @@ public class PipeOutput {
      *
      * @return the InventoryHolder
      */
-    public InventoryHolder getInventoryHolder() {
-        if (inventoryHolderLocation.getBlock() != null) {
-            return (InventoryHolder) inventoryHolderLocation.getBlock().getState();
+    public InventoryHolder getTargetHolder() {
+        Block block = targetLocation.getBlock();
+        if (block != null && block.getState() instanceof InventoryHolder) {
+            return (InventoryHolder) block.getState();
         }
         return null;
     }
 
     /**
-     * returns the dropper location
+     * returns the location of this output block
      *
-     * @return the dropper location
+     * @return the location of the output block
      */
-    public SimpleLocation getDropperLocation() {
-        return dropperLocation;
+    public SimpleLocation getLocation() {
+        return location;
     }
 
     /**
@@ -73,8 +76,8 @@ public class PipeOutput {
      *
      * @return the inventoryholder location
      */
-    public SimpleLocation getInventoryHolderLocation() {
-        return inventoryHolderLocation;
+    public SimpleLocation getTargetLocation() {
+        return targetLocation;
     }
 
     /**
@@ -84,7 +87,7 @@ public class PipeOutput {
      */
     public List<ItemStack> getFilterItems() {
         List<ItemStack> sorterItems = new ArrayList<>();
-        for (ItemStack itemStack : getDropper().getInventory()) {
+        for (ItemStack itemStack : getOutputHolder().getInventory()) {
             if (itemStack != null) {
                 sorterItems.add(itemStack);
             }
@@ -99,9 +102,9 @@ public class PipeOutput {
 
         PipeOutput that = (PipeOutput) o;
 
-        if (dropperLocation != null ? !dropperLocation.equals(that.dropperLocation) : that.dropperLocation != null)
+        if (location != null ? !location.equals(that.location) : that.location != null)
             return false;
-        return !(inventoryHolderLocation != null ? !inventoryHolderLocation.equals(that.inventoryHolderLocation) : that.inventoryHolderLocation != null);
+        return !(targetLocation != null ? !targetLocation.equals(that.targetLocation) : that.targetLocation != null);
 
     }
 }

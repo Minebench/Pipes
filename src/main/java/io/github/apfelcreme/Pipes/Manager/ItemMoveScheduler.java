@@ -114,9 +114,9 @@ public class ItemMoveScheduler {
         emptyRuns = 0;
         if (!scheduledItemTransfers.contains(scheduledItemTransfer)) {
             scheduledItemTransfers.add(scheduledItemTransfer);
-            if (!isActive()) {
-                create();
-            }
+        }
+        if (!isActive() && !scheduledItemTransfers.isEmpty()) {
+            create();
         }
     }
 

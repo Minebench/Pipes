@@ -89,7 +89,7 @@ public enum PipesItem {
 
         String hidden = PipesUtil.getHiddenString(((InventoryHolder) block.getState()).getInventory().getTitle());
 
-        return hidden != null && this.name.equals(hidden) || IDENTIFIER.equals(hidden);
+        return hidden != null && this.toString().equals(hidden) || IDENTIFIER.equals(hidden);
     }
 
     public boolean check(ItemStack item) {

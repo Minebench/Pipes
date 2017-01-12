@@ -72,10 +72,11 @@ public class ItemMoveScheduler {
             @Override
             public void run() {
                 if (!scheduledItemTransfers.isEmpty()) {
-                    for (ScheduledItemTransfer scheduledItemTransfer : scheduledItemTransfers) {
-                        scheduledItemTransfer.execute();
+                    Iterator<ScheduledItemTransfer> transfers = scheduledItemTransfers.iterator();
+                    while (transfers.hasNext()) {
+                        transfers.next().execute();
+                        transfers.remove();
                     }
-                    scheduledItemTransfers.clear();
                 } else {
                     emptyRuns++;
                     if (emptyRuns >= 3) {

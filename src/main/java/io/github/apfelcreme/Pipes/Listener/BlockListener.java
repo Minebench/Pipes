@@ -43,10 +43,11 @@ import org.bukkit.inventory.meta.ItemMeta;
  */
 public class BlockListener implements Listener {
 
-
+    private final Pipes plugin;
     private BlockBreakLogging blockBreakLogging;
 
     public BlockListener(Pipes plugin) {
+        this.plugin = plugin;
         if(plugin.getServer().getPluginManager().isPluginEnabled("LogBlock")) {
             blockBreakLogging = new BlockBreakLogging(LogBlock.getInstance());
         }
@@ -58,7 +59,7 @@ public class BlockListener implements Listener {
         if (pipesItem != null) {
             event.setCancelled(true);
             PipeBlockBreakEvent blockBreakEvent = new PipeBlockBreakEvent(event.getBlock(), event.getPlayer(), pipesItem);
-            Pipes.getInstance().getServer().getPluginManager().callEvent(blockBreakEvent);
+            plugin.getServer().getPluginManager().callEvent(blockBreakEvent);
             if (!blockBreakEvent.isCancelled()) {
                 if(blockBreakLogging != null) {
                     blockBreakLogging.onBlockBreak(new BlockBreakEvent(blockBreakEvent.getBlock(), event.getPlayer()));

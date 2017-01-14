@@ -31,14 +31,20 @@ import org.bukkit.scheduler.BukkitTask;
  */
 public class PlayerRightclickListener implements Listener {
 
+    private final Pipes plugin;
+
+    public PlayerRightclickListener(Pipes plugin) {
+        this.plugin = plugin;
+    }
+
     @EventHandler
     public void onPlayerRightclick(PlayerInteractEvent event) {
         if (event.getAction() == Action.RIGHT_CLICK_BLOCK) {
-            String action = Pipes.getInstance().getRegisterRightClick(event.getPlayer());
+            String action = plugin.getRegisterRightClick(event.getPlayer());
             if ("info".equals(action)) {
                 event.setCancelled(true);
                 try {
-                    Pipes.getInstance().unregisterRightClick(event.getPlayer());
+                    plugin.unregisterRightClick(event.getPlayer());
                     Pipe pipe = PipeManager.isPipe(event.getClickedBlock());
                     if (pipe != null) {
                         Pipes.sendMessage(event.getPlayer(), pipe.getString());

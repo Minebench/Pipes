@@ -42,6 +42,12 @@ import org.bukkit.scheduler.BukkitRunnable;
  */
 public class InventoryChangeListener implements Listener {
 
+    private final Pipes plugin;
+
+    public InventoryChangeListener(Pipes plugin) {
+        this.plugin = plugin;
+    }
+
     @EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = true)
     private void onInventoryItemMove(final InventoryMoveItemEvent event) {
         if (!(event instanceof PipeMoveItemEvent) && !handleInventoryAction(event.getDestination(), true)) {
@@ -95,7 +101,7 @@ public class InventoryChangeListener implements Listener {
                         public void run() {
                             ItemMoveScheduler.getInstance().add(transfer);
                         }
-                    }.runTaskLater(Pipes.getInstance(), 2);
+                    }.runTaskLater(plugin, 2);
                 } else {
                     ItemMoveScheduler.getInstance().add(transfer);
                 }

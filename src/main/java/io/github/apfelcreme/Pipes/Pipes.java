@@ -50,9 +50,9 @@ public class Pipes extends JavaPlugin {
         instance = this;
         registeredRightClicks = CacheBuilder.newBuilder().expireAfterWrite(10, TimeUnit.SECONDS).build();
         PipesConfig.load();
-        getServer().getPluginManager().registerEvents(new InventoryChangeListener(), this);
-        getServer().getPluginManager().registerEvents(new PlayerRightclickListener(), this);
-        getServer().getPluginManager().registerEvents(new BlockListener(), this);
+        getServer().getPluginManager().registerEvents(new InventoryChangeListener(this), this);
+        getServer().getPluginManager().registerEvents(new PlayerRightclickListener(this), this);
+        getServer().getPluginManager().registerEvents(new BlockListener(this), this);
         getServer().getPluginCommand("pipe").setExecutor(new PipeCommand());
 
         //create the custom recipes

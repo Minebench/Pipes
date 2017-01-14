@@ -4,7 +4,7 @@ import io.github.apfelcreme.Pipes.PipesConfig;
 import org.bukkit.DyeColor;
 import org.bukkit.Effect;
 import org.bukkit.Location;
-import org.bukkit.block.Block;
+import org.bukkit.block.BlockState;
 import org.bukkit.event.inventory.InventoryType;
 
 import java.util.ArrayList;
@@ -77,7 +77,9 @@ public class Pipe {
             if (inventoryType == null || output.getTargetHolder().getInventory().getType() == inventoryType) {
                 if ((filtering && !output.getFilterItems().isEmpty()) // there are items as filters + user wants sorters
                         || (!filtering && output.getFilterItems().isEmpty())) { // there are no items + user doesn't want sorters
-                    sorterOutputs.add(output);
+                    if (!((BlockState) output.getOutputHolder()).getBlock().isBlockPowered()) {
+                        sorterOutputs.add(output);
+                    }
                 }
             }
         }

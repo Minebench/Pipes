@@ -74,8 +74,9 @@ public class ItemMoveScheduler {
                 if (!scheduledItemTransfers.isEmpty()) {
                     Iterator<ScheduledItemTransfer> transfers = scheduledItemTransfers.iterator();
                     while (transfers.hasNext()) {
-                        transfers.next().execute();
-                        transfers.remove();
+                        if (transfers.next().execute()) {
+                            transfers.remove();
+                        }
                     }
                 } else {
                     emptyRuns++;

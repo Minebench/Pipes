@@ -45,7 +45,7 @@ public class ScheduledItemTransfer {
     /**
      * executes the item transfer
      */
-    public void execute() {
+    public boolean execute() {
 
         Queue<ItemStack> itemQueue = new LinkedList<>();
         for (ItemStack itemStack : input.getHolder().getInventory()) {
@@ -59,6 +59,7 @@ public class ScheduledItemTransfer {
             detection.addLocation(new SimpleLocation(input.getLocation()));
         }
 
+        boolean transferredAll = true;
         for (ItemStack item : itemQueue) {
             // first: try to place the item in a chest that uses filters. try furnaces first
             boolean success;
@@ -67,8 +68,10 @@ public class ScheduledItemTransfer {
 
             // item could not be placed in an item filtering chest
             if (!success) success = processItemTransfer(item, pipe.getOutputs(InventoryType.FURNACE, false));
-            if (!success) processItemTransfer(item, pipe.getOutputs(null, false));
+            if (!success) success = processItemTransfer(item, pipe.getOutputs(null, false));
+            if (!success && transferredAll) transferredAll = false;
         }
+        return transferredAll;
     }
 
     /**

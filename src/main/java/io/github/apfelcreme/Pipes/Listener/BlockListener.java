@@ -15,6 +15,7 @@ import org.bukkit.event.Event;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
+import org.bukkit.event.block.BlockDispenseEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.inventory.CraftItemEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
@@ -50,6 +51,13 @@ public class BlockListener implements Listener {
         this.plugin = plugin;
         if(plugin.getServer().getPluginManager().isPluginEnabled("LogBlock")) {
             blockBreakLogging = new BlockBreakLogging(LogBlock.getInstance());
+        }
+    }
+
+    @EventHandler
+    private void onItemDispense(BlockDispenseEvent event) {
+        if (PipesUtil.getPipesItem(event.getBlock()) != null) {
+            event.setCancelled(true);
         }
     }
 

@@ -1,5 +1,7 @@
 package io.github.apfelcreme.Pipes.Listener;
 
+import de.diddiz.LogBlock.LogBlock;
+import de.diddiz.LogBlock.listeners.BlockBreakLogging;
 import io.github.apfelcreme.Pipes.Event.PipeBlockBreakEvent;
 import io.github.apfelcreme.Pipes.Exception.ChunkNotLoadedException;
 import io.github.apfelcreme.Pipes.Manager.PipeManager;
@@ -41,18 +43,26 @@ import org.bukkit.inventory.meta.ItemMeta;
  */
 public class BlockListener implements Listener {
 
+
+    private BlockBreakLogging blockBreakLogging;
+
+    public BlockListener(Pipes plugin) {
+        if(plugin.getServer().getPluginManager().isPluginEnabled("LogBlock")) {
+            blockBreakLogging = new BlockBreakLogging(LogBlock.getInstance());
+        }
+    }
+
     @EventHandler
     private void onBlockBreak(BlockBreakEvent event) {
-        if (event instanceof PipeBlockBreakEvent) {
-            return;
-        }
-
         PipesItem pipesItem = PipesUtil.getPipesItem(event.getBlock());
         if (pipesItem != null) {
             event.setCancelled(true);
-            BlockBreakEvent blockBreakEvent = new PipeBlockBreakEvent(event.getBlock(), event.getPlayer(), pipesItem);
+            PipeBlockBreakEvent blockBreakEvent = new PipeBlockBreakEvent(event.getBlock(), event.getPlayer(), pipesItem);
             Pipes.getInstance().getServer().getPluginManager().callEvent(blockBreakEvent);
             if (!blockBreakEvent.isCancelled()) {
+                if(blockBreakLogging != null) {
+                    blockBreakLogging.onBlockBreak(new BlockBreakEvent(blockBreakEvent.getBlock(), event.getPlayer()));
+                }
                 event.getBlock().setType(Material.AIR);
                 event.getBlock().getWorld().dropItemNaturally(event.getBlock().getLocation(), pipesItem.toItemStack());
             }

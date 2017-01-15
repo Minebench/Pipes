@@ -117,15 +117,15 @@ public class ScheduledItemTransfer {
                                     int resultSize = itemStack.getAmount() - (fuel.getMaxStackSize() - fuel.getAmount());
                                     if (resultSize <= 0) {
                                         inputHolder.getInventory().remove(itemStack);
-                                        furnace.getInventory().setFuel(new ItemStack(itemStack.getType(),
-                                                fuel.getAmount() + itemStack.getAmount(), itemStack.getDurability()));
+                                        itemStack.setAmount(fuel.getAmount() + itemStack.getAmount());
+                                        furnace.getInventory().setFuel(itemStack);
                                         movedAll = true;
                                     } else {
                                         inputHolder.getInventory().remove(itemStack);
                                         itemStack.setAmount(resultSize);
                                         inputHolder.getInventory().addItem(itemStack);
-                                        furnace.getInventory().setFuel(new ItemStack(itemStack.getType(),
-                                                fuel.getMaxStackSize(), itemStack.getDurability()));
+                                        itemStack.setAmount(itemStack.getMaxStackSize());
+                                        furnace.getInventory().setFuel(itemStack);
                                     }
                                     movedSome = true;
                                 } else {
@@ -150,15 +150,15 @@ public class ScheduledItemTransfer {
                                     int resultSize = itemStack.getAmount() - (smelting.getMaxStackSize() - smelting.getAmount());
                                     if (resultSize <= 0) {
                                         inputHolder.getInventory().remove(itemStack);
-                                        furnace.getInventory().setSmelting(new ItemStack(itemStack.getType(),
-                                                smelting.getAmount() + itemStack.getAmount(), itemStack.getDurability()));
+                                        itemStack.setAmount(smelting.getAmount() + itemStack.getAmount());
+                                        furnace.getInventory().setSmelting(itemStack);
                                         movedAll = true;
                                     } else {
                                         inputHolder.getInventory().remove(itemStack);
                                         itemStack.setAmount(resultSize);
                                         inputHolder.getInventory().addItem(itemStack);
-                                        furnace.getInventory().setSmelting(new ItemStack(itemStack.getType(),
-                                                smelting.getMaxStackSize(), itemStack.getDurability()));
+                                        itemStack.setAmount(itemStack.getMaxStackSize());
+                                        furnace.getInventory().setSmelting(itemStack);
                                     }
                                     movedSome = true;
                                 }

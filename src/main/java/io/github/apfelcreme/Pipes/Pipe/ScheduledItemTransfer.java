@@ -12,6 +12,7 @@ import org.bukkit.inventory.ItemStack;
 
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Queue;
 
 /**
@@ -94,7 +95,6 @@ public class ScheduledItemTransfer {
             // Could not find the input block, to not recheck this transfer we return true
             return true;
         }
-        boolean movedAll = false;
         for (PipeOutput output : outputs) {
             InventoryHolder targetHolder = output.getTargetHolder();
             if (targetHolder != null && (output.getFilterItems().isEmpty() || PipesUtil.containsSimilar(output.getFilterItems(), itemStack))) {
@@ -115,17 +115,23 @@ public class ScheduledItemTransfer {
                                 if (fuel.getMaxStackSize() == -1 || fuel.getAmount() < fuel.getMaxStackSize()) {
                                     // there is still room in the furnace
                                     int resultSize = itemStack.getAmount() - (fuel.getMaxStackSize() - fuel.getAmount());
+                                    ItemStack result = itemStack.clone();
                                     if (resultSize <= 0) {
                                         inputHolder.getInventory().remove(itemStack);
-                                        itemStack.setAmount(fuel.getAmount() + itemStack.getAmount());
-                                        furnace.getInventory().setFuel(itemStack);
-                                        movedAll = true;
+
+                                        result.setAmount(fuel.getAmount() + itemStack.getAmount());
+                                        furnace.getInventory().setFuel(result);
+
+                                        itemStack.setAmount(0);
                                     } else {
                                         inputHolder.getInventory().remove(itemStack);
                                         itemStack.setAmount(resultSize);
                                         inputHolder.getInventory().addItem(itemStack);
-                                        itemStack.setAmount(itemStack.getMaxStackSize());
-                                        furnace.getInventory().setFuel(itemStack);
+
+                                        result.setAmount(itemStack.getMaxStackSize());
+                                        furnace.getInventory().setFuel(result);
+
+                                        itemStack.setAmount(itemStack.getMaxStackSize() - resultSize);
                                     }
                                     movedSome = true;
                                 } else {
@@ -148,17 +154,23 @@ public class ScheduledItemTransfer {
                                 if (smelting.getMaxStackSize() == -1 || smelting.getAmount() < smelting.getMaxStackSize()) {
                                     // there is still room in the furnace
                                     int resultSize = itemStack.getAmount() - (smelting.getMaxStackSize() - smelting.getAmount());
+                                    ItemStack result = itemStack.clone();
                                     if (resultSize <= 0) {
                                         inputHolder.getInventory().remove(itemStack);
-                                        itemStack.setAmount(smelting.getAmount() + itemStack.getAmount());
-                                        furnace.getInventory().setSmelting(itemStack);
-                                        movedAll = true;
+
+                                        result.setAmount(smelting.getAmount() + itemStack.getAmount());
+                                        furnace.getInventory().setSmelting(result);
+
+                                        itemStack.setAmount(0);
                                     } else {
                                         inputHolder.getInventory().remove(itemStack);
                                         itemStack.setAmount(resultSize);
                                         inputHolder.getInventory().addItem(itemStack);
-                                        itemStack.setAmount(itemStack.getMaxStackSize());
-                                        furnace.getInventory().setSmelting(itemStack);
+
+                                        result.setAmount(itemStack.getMaxStackSize());
+                                        furnace.getInventory().setSmelting(result);
+
+                                        itemStack.setAmount(itemStack.getMaxStackSize() - resultSize);
                                     }
                                     movedSome = true;
                                 }
@@ -179,7 +191,11 @@ public class ScheduledItemTransfer {
                         // for chests, dropper etc...
                         if (targetHolder.getInventory().firstEmpty() != -1) {
                             inputHolder.getInventory().remove(itemStack);
-                            movedAll = targetHolder.getInventory().addItem(itemStack).isEmpty();
+                            Map<Integer, ItemStack> rest = targetHolder.getInventory().addItem(itemStack);
+                            itemStack.setAmount(0);
+                            for (ItemStack item : rest.values()) {
+                                itemStack.setAmount(itemStack.getAmount() + item.getAmount());
+                            }
                             movedSome = true;
                         }
                         break;
@@ -191,7 +207,7 @@ public class ScheduledItemTransfer {
                     PipeMoveItemEvent event = new PipeMoveItemEvent(pipe, inputHolder.getInventory(),
                             itemStack, targetHolder.getInventory(), true);
                     Pipes.getInstance().getServer().getPluginManager().callEvent(event);
-                    if (movedAll) {
+                    if (itemStack.getAmount() <= 0) {
                         return true;
                     }
                 }

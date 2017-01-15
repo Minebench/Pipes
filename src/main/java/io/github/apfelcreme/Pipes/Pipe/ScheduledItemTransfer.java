@@ -98,7 +98,7 @@ public class ScheduledItemTransfer {
         for (PipeOutput output : outputs) {
             InventoryHolder targetHolder = output.getTargetHolder();
             if (targetHolder != null && (output.getFilterItems().isEmpty() || PipesUtil.containsSimilar(output.getFilterItems(), itemStack))) {
-                boolean movedSome = false;
+                int originalAmount = itemStack.getAmount();
                 switch (targetHolder.getInventory().getType()) {
                     case FURNACE:
                     /*
@@ -133,7 +133,6 @@ public class ScheduledItemTransfer {
 
                                         itemStack.setAmount(itemStack.getMaxStackSize() - resultSize);
                                     }
-                                    movedSome = true;
                                 } else {
                                     // the furnace is full, so find continue with the list of outputs
                                     // and try to fill one that isnt full
@@ -143,7 +142,6 @@ public class ScheduledItemTransfer {
                                 // there is no fuel currently in the fuel slot, so simply put it in
                                 inputHolder.getInventory().remove(itemStack);
                                 furnace.getInventory().setFuel(itemStack);
-                                movedSome = true;
                             }
                         } else {
                             // the item is anything but a fuel (at least what we regard a fuel)
@@ -172,12 +170,10 @@ public class ScheduledItemTransfer {
 
                                         itemStack.setAmount(itemStack.getMaxStackSize() - resultSize);
                                     }
-                                    movedSome = true;
                                 }
                             } else if (smelting == null) {
                                 inputHolder.getInventory().remove(itemStack);
                                 furnace.getInventory().setSmelting(itemStack);
-                                movedSome = true;
                             }
                         }
                         break;
@@ -196,14 +192,13 @@ public class ScheduledItemTransfer {
                             for (ItemStack item : rest.values()) {
                                 itemStack.setAmount(itemStack.getAmount() + item.getAmount());
                             }
-                            movedSome = true;
                         }
                         break;
                     /*
                     END DEFAULT
                      */
                 }
-                if (movedSome) {
+                if (itemStack.getAmount() != originalAmount) {
                     PipeMoveItemEvent event = new PipeMoveItemEvent(pipe, inputHolder.getInventory(),
                             itemStack, targetHolder.getInventory(), true);
                     Pipes.getInstance().getServer().getPluginManager().callEvent(event);

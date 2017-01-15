@@ -6,7 +6,6 @@ import io.github.apfelcreme.Pipes.Manager.DetectionManager;
 import io.github.apfelcreme.Pipes.Pipes;
 import io.github.apfelcreme.Pipes.PipesUtil;
 import org.bukkit.block.Furnace;
-import org.bukkit.event.inventory.InventoryMoveItemEvent;
 import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
@@ -95,10 +94,11 @@ public class ScheduledItemTransfer {
             // Could not find the input block, to not recheck this transfer we return true
             return true;
         }
+        boolean movedAll = false;
         for (PipeOutput output : outputs) {
             InventoryHolder targetHolder = output.getTargetHolder();
             if (targetHolder != null && (output.getFilterItems().isEmpty() || PipesUtil.containsSimilar(output.getFilterItems(), itemStack))) {
-                boolean success = false;
+                boolean movedSome = false;
                 switch (targetHolder.getInventory().getType()) {
                     case FURNACE:
                     /*
@@ -112,12 +112,22 @@ public class ScheduledItemTransfer {
                             if (fuel != null && fuel.isSimilar(itemStack)) {
                                 // as you cannot mix two itemstacks with each other, check if the material inserted
                                 // has the same type as the fuel that is already in the furnace
-                                if ((itemStack.getAmount() + fuel.getAmount()) <= 64) {
-                                    // the combined amount of both stacks is <= 64, so simply merge them
-                                    inputHolder.getInventory().remove(itemStack);
-                                    furnace.getInventory().setFuel(new ItemStack(itemStack.getType(),
-                                            fuel.getAmount() + itemStack.getAmount(), itemStack.getDurability()));
-                                    success = true;
+                                if (fuel.getMaxStackSize() == -1 || fuel.getAmount() < fuel.getMaxStackSize()) {
+                                    // there is still room in the furnace
+                                    int resultSize = itemStack.getAmount() - (fuel.getMaxStackSize() - fuel.getAmount());
+                                    if (resultSize <= 0) {
+                                        inputHolder.getInventory().remove(itemStack);
+                                        furnace.getInventory().setFuel(new ItemStack(itemStack.getType(),
+                                                fuel.getAmount() + itemStack.getAmount(), itemStack.getDurability()));
+                                        movedAll = true;
+                                    } else {
+                                        inputHolder.getInventory().remove(itemStack);
+                                        itemStack.setAmount(resultSize);
+                                        inputHolder.getInventory().addItem(itemStack);
+                                        furnace.getInventory().setFuel(new ItemStack(itemStack.getType(),
+                                                fuel.getMaxStackSize(), itemStack.getDurability()));
+                                    }
+                                    movedSome = true;
                                 } else {
                                     // the furnace is full, so find continue with the list of outputs
                                     // and try to fill one that isnt full
@@ -127,7 +137,7 @@ public class ScheduledItemTransfer {
                                 // there is no fuel currently in the fuel slot, so simply put it in
                                 inputHolder.getInventory().remove(itemStack);
                                 furnace.getInventory().setFuel(itemStack);
-                                success = true;
+                                movedSome = true;
                             }
                         } else {
                             // the item is anything but a fuel (at least what we regard a fuel)
@@ -135,21 +145,27 @@ public class ScheduledItemTransfer {
                             if (smelting != null && smelting.isSimilar(itemStack)) {
                                 // as you cannot mix two itemstacks with each other, check if the material inserted
                                 // has the same type as the fuel that is already in the furnace
-                                if ((itemStack.getAmount() + smelting.getAmount()) <= 64) {
-                                    // the combined amount of both stacks is <= 64, so simply merge them
-                                    inputHolder.getInventory().remove(itemStack);
-                                    furnace.getInventory().setSmelting(new ItemStack(itemStack.getType(),
-                                            smelting.getAmount() + itemStack.getAmount(), itemStack.getDurability()));
-                                    success = true;
-                                } else {
-                                    // the furnace is full, so find continue with the list of outputs
-                                    // and try to fill one that isnt full
-                                    continue;
+                                if (smelting.getMaxStackSize() == -1 || smelting.getAmount() < smelting.getMaxStackSize()) {
+                                    // there is still room in the furnace
+                                    int resultSize = itemStack.getAmount() - (smelting.getMaxStackSize() - smelting.getAmount());
+                                    if (resultSize <= 0) {
+                                        inputHolder.getInventory().remove(itemStack);
+                                        furnace.getInventory().setSmelting(new ItemStack(itemStack.getType(),
+                                                smelting.getAmount() + itemStack.getAmount(), itemStack.getDurability()));
+                                        movedAll = true;
+                                    } else {
+                                        inputHolder.getInventory().remove(itemStack);
+                                        itemStack.setAmount(resultSize);
+                                        inputHolder.getInventory().addItem(itemStack);
+                                        furnace.getInventory().setSmelting(new ItemStack(itemStack.getType(),
+                                                smelting.getMaxStackSize(), itemStack.getDurability()));
+                                    }
+                                    movedSome = true;
                                 }
                             } else if (smelting == null) {
                                 inputHolder.getInventory().remove(itemStack);
                                 furnace.getInventory().setSmelting(itemStack);
-                                success = true;
+                                movedSome = true;
                             }
                         }
                         break;
@@ -160,22 +176,24 @@ public class ScheduledItemTransfer {
                     /*
                     BEGIN DEFAULT
                      */
-                        // for chests, ender-chests, dropper etc...
+                        // for chests, dropper etc...
                         if (targetHolder.getInventory().firstEmpty() != -1) {
                             inputHolder.getInventory().remove(itemStack);
-                            targetHolder.getInventory().addItem(itemStack);
-                            success = true;
+                            movedAll = targetHolder.getInventory().addItem(itemStack).isEmpty();
+                            movedSome = true;
                         }
                         break;
                     /*
                     END DEFAULT
                      */
                 }
-                if (success) {
+                if (movedSome) {
                     PipeMoveItemEvent event = new PipeMoveItemEvent(pipe, inputHolder.getInventory(),
                             itemStack, targetHolder.getInventory(), true);
                     Pipes.getInstance().getServer().getPluginManager().callEvent(event);
-                    return true;
+                    if (movedAll) {
+                        return true;
+                    }
                 }
             }
 

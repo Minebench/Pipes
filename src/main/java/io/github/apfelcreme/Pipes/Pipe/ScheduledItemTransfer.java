@@ -14,6 +14,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Queue;
+import java.util.logging.Level;
 
 /**
  * Copyright (C) 2016 Lord36 aka Apfelcreme
@@ -70,12 +71,15 @@ public class ScheduledItemTransfer {
         boolean transferredAll = true;
         for (ItemStack item : itemQueue) {
             // first: try to place the item in a chest that uses filters. try furnaces first
-            boolean success;
             List<PipeOutput> outputs = pipe.getOutputs(item);
             if (!outputs.isEmpty()) {
-                success = processItemTransfer(item, outputs);
-                if (!success && item.getAmount() != 0) {
-                    transferredAll = false;
+                try {
+                    processItemTransfer(item, outputs);
+                    if (item.getAmount() != 0) {
+                        transferredAll = false;
+                    }
+                } catch (MissingInventoryHolderException e) {
+                    Pipes.getInstance().getLogger().log(Level.WARNING, e.getMessage());
                 }
             }
         }
@@ -87,13 +91,12 @@ public class ScheduledItemTransfer {
      *
      * @param itemStack the item that shall be transferred
      * @param outputs   the list of outputs that are checked
-     * @return <tt>true</tt> if this transfer should be considered as completed and removed from the queue
      */
-    private boolean processItemTransfer(ItemStack itemStack, List<PipeOutput> outputs) {
+    private void processItemTransfer(ItemStack itemStack, List<PipeOutput> outputs) throws MissingInventoryHolderException {
         InventoryHolder inputHolder = input.getHolder();
         if (inputHolder == null) {
             // Could not find the input block, to not recheck this transfer we return true
-            return true;
+            throw new MissingInventoryHolderException("No inventory holder found at " + input.getLocation() + " while trying to transfer " + itemStack + "?");
         }
         for (PipeOutput output : outputs) {
             InventoryHolder targetHolder = output.getTargetHolder();
@@ -203,15 +206,19 @@ public class ScheduledItemTransfer {
                             itemStack, targetHolder.getInventory(), true);
                     Pipes.getInstance().getServer().getPluginManager().callEvent(event);
                     if (itemStack.getAmount() <= 0) {
-                        return true;
+                        return;
                     }
                 }
             }
 
         }
-        return false;
     }
 
+    private class MissingInventoryHolderException extends Exception {
+        public MissingInventoryHolderException(String s) {
+            super(s);
+        }
+    }
 }
 
 

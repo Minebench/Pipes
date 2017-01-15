@@ -6,6 +6,7 @@ import org.bukkit.Effect;
 import org.bukkit.Location;
 import org.bukkit.block.BlockState;
 import org.bukkit.event.inventory.InventoryType;
+import org.bukkit.inventory.InventoryHolder;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -74,10 +75,12 @@ public class Pipe {
     public List<PipeOutput> getOutputs(InventoryType inventoryType, boolean filtering) {
         List<PipeOutput> sorterOutputs = new ArrayList<>();
         for (PipeOutput output : outputs) {
-            if (inventoryType == null || output.getTargetHolder().getInventory().getType() == inventoryType) {
+            InventoryHolder targetHolder = output.getTargetHolder();
+            if (inventoryType == null || targetHolder != null && targetHolder.getInventory().getType() == inventoryType) {
                 if ((filtering && !output.getFilterItems().isEmpty()) // there are items as filters + user wants sorters
                         || (!filtering && output.getFilterItems().isEmpty())) { // there are no items + user doesn't want sorters
-                    if (!((BlockState) output.getOutputHolder()).getBlock().isBlockPowered()) {
+                    InventoryHolder holder = output.getOutputHolder();
+                    if (holder != null && !((BlockState) holder).getBlock().isBlockPowered()) {
                         sorterOutputs.add(output);
                     }
                 }

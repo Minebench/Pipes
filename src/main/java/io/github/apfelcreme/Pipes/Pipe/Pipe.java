@@ -1,12 +1,14 @@
 package io.github.apfelcreme.Pipes.Pipe;
 
 import io.github.apfelcreme.Pipes.PipesConfig;
+import io.github.apfelcreme.Pipes.PipesUtil;
 import org.bukkit.DyeColor;
 import org.bukkit.Effect;
 import org.bukkit.Location;
 import org.bukkit.block.BlockState;
 import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.inventory.InventoryHolder;
+import org.bukkit.inventory.ItemStack;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -87,6 +89,28 @@ public class Pipe {
             }
         }
         return sorterOutputs;
+    }
+
+    /**
+     * Get the outputs that match this item
+     *
+     * @param item
+     * @return The filtered outputs that match this item or every unfiltered ones
+     */
+    public List<PipeOutput> getOutputs(ItemStack item) {
+        List<PipeOutput> filteredOutputs = new ArrayList<>();
+        List<PipeOutput> unfilteredOutputs = new ArrayList<>();
+        for (PipeOutput output : outputs) {
+            InventoryHolder holder = output.getOutputHolder();
+            if (holder != null && !((BlockState) holder).getBlock().isBlockPowered()) {
+                if (output.getFilterItems().isEmpty()) {
+                    unfilteredOutputs.add(output);
+                } else if (PipesUtil.containsSimilar(output.getFilterItems(), item)) {
+                    filteredOutputs.add(output);
+                }
+            }
+        }
+        return filteredOutputs.isEmpty() ? unfilteredOutputs : filteredOutputs;
     }
 
     /**

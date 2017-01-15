@@ -5,8 +5,8 @@ import io.github.apfelcreme.Pipes.LoopDetection.Detection;
 import io.github.apfelcreme.Pipes.Manager.DetectionManager;
 import io.github.apfelcreme.Pipes.Pipes;
 import io.github.apfelcreme.Pipes.PipesUtil;
+import org.bukkit.Material;
 import org.bukkit.block.Furnace;
-import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
 
@@ -71,13 +71,13 @@ public class ScheduledItemTransfer {
         for (ItemStack item : itemQueue) {
             // first: try to place the item in a chest that uses filters. try furnaces first
             boolean success;
-            success = processItemTransfer(item, pipe.getOutputs(InventoryType.FURNACE, true));
-            if (!success) success = processItemTransfer(item, pipe.getOutputs(null, true));
-
-            // item could not be placed in an item filtering chest
-            if (!success) success = processItemTransfer(item, pipe.getOutputs(InventoryType.FURNACE, false));
-            if (!success) success = processItemTransfer(item, pipe.getOutputs(null, false));
-            if (!success && transferredAll) transferredAll = false;
+            List<PipeOutput> outputs = pipe.getOutputs(item);
+            if (!outputs.isEmpty()) {
+                success = processItemTransfer(item, outputs);
+                if (!success && item.getAmount() != 0) {
+                    transferredAll = false;
+                }
+            }
         }
         return transferredAll;
     }
@@ -109,7 +109,7 @@ public class ScheduledItemTransfer {
                         if (PipesUtil.isFuel(itemStack.getType())) {
                             // the transported item is either coal, or a coal block or a lava bucket
                             ItemStack fuel = furnace.getInventory().getFuel();
-                            if (fuel != null && fuel.isSimilar(itemStack)) {
+                            if (fuel != null && fuel.getType() != Material.AIR && fuel.isSimilar(itemStack)) {
                                 // as you cannot mix two itemstacks with each other, check if the material inserted
                                 // has the same type as the fuel that is already in the furnace
                                 if (fuel.getMaxStackSize() == -1 || fuel.getAmount() < fuel.getMaxStackSize()) {
@@ -138,7 +138,7 @@ public class ScheduledItemTransfer {
                                     // and try to fill one that isnt full
                                     continue;
                                 }
-                            } else if (fuel == null) {
+                            } else if (fuel == null || fuel.getType() == Material.AIR) {
                                 // there is no fuel currently in the fuel slot, so simply put it in
                                 inputHolder.getInventory().remove(itemStack);
                                 furnace.getInventory().setFuel(itemStack);

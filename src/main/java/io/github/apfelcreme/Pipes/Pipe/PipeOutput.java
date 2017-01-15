@@ -87,9 +87,12 @@ public class PipeOutput {
      */
     public List<ItemStack> getFilterItems() {
         List<ItemStack> sorterItems = new ArrayList<>();
-        for (ItemStack itemStack : getOutputHolder().getInventory()) {
-            if (itemStack != null) {
-                sorterItems.add(itemStack);
+        InventoryHolder holder = getOutputHolder();
+        if (holder != null) {
+            for (ItemStack itemStack : holder.getInventory()) {
+                if (itemStack != null) {
+                    sorterItems.add(itemStack);
+                }
             }
         }
         return sorterItems;

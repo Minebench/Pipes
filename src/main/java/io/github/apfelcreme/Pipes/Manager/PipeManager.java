@@ -70,7 +70,7 @@ public class PipeManager {
             public Pipe load(SimpleLocation location) throws Exception {
                 Pipe pipe = isPipe(location.getBlock());
                 if (pipe == null) {
-                    throw new ExecutionException(new Exception("No pipe found!"));
+                    throw new Exception("No pipe found!");
                 }
                 return pipe;
             }
@@ -102,7 +102,6 @@ public class PipeManager {
         try {
             return pipeCache.get(location);
         } catch (ExecutionException e) {
-            Pipes.getInstance().getLogger().log(Level.WARNING, "Error while trying to get a pipe from the cache.", e);
             return null;
         }
     }

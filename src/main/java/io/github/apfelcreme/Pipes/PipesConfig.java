@@ -32,6 +32,7 @@ public class PipesConfig {
     private static YamlConfiguration languageConfig;
 
     private static Pipes plugin;
+    private static long transferCooldown;
 
     /**
      * loads the config
@@ -44,6 +45,7 @@ public class PipesConfig {
         plugin.saveDefaultConfig();
         plugin.saveResource("lang.de.yml", false);
         plugin.reloadConfig();
+        transferCooldown = plugin.getConfig().getLong("transferCooldown", 20L);
         languageConfig = YamlConfiguration.loadConfiguration(new File(plugin.getDataFolder() + "/lang.de.yml"));
     }
 
@@ -63,7 +65,7 @@ public class PipesConfig {
      * @return the delay between item transfers
      */
     public static long getTransferCooldown() {
-        return plugin.getConfig().getLong("transferCooldown", 20L);
+        return transferCooldown;
     }
 
 

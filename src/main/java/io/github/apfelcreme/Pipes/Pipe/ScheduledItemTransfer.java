@@ -13,10 +13,12 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
 
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Queue;
+import java.util.Set;
 
 /**
  * Copyright (C) 2016 Lord36 aka Apfelcreme
@@ -81,12 +83,29 @@ public class ScheduledItemTransfer {
             detection.addLocation(new SimpleLocation(input.getLocation()));
         }
 
+        Set<ItemStack> filteredItems = new HashSet<>();
+        for (PipeOutput output : pipe.getOutputs()) {
+            if (!output.isPowered()) { // powered outputs are not counted
+                List<ItemStack> filterItems = output.getFilterItems();
+                if (!filterItems.isEmpty()) {
+                    filteredItems.addAll(filterItems);
+                }
+            }
+        }
+
         // loop through all outputs as we don't want to desync the blockstates between each item
         for (PipeOutput output : pipe.getOutputs()) {
+            // check if the pipe output is powered, if so don't try to put items in it
+            if (output.isPowered()) {
+                continue;
+            }
+
             InventoryHolder targetHolder = output.getTargetHolder();
             if (targetHolder == null) {
                 continue;
             }
+
+            List<ItemStack> filterItems = output.getFilterItems();
 
             // loop through all items and check if they should be handled by this output
             for (ItemStack itemStack : itemQueue) {
@@ -95,8 +114,13 @@ public class ScheduledItemTransfer {
                     continue;
                 }
 
-                // check if output accepts item
-                if (!output.acceptsItem(itemStack)) {
+                if (filterItems.isEmpty()) {
+                    // if this output doesn't filter then check if another one wants this item
+                    if (!filteredItems.isEmpty() && PipesUtil.containsSimilar(filteredItems, itemStack)) {
+                        continue;
+                    }
+                } else if (!PipesUtil.containsSimilar(filterItems, itemStack)) {
+                    // check if output accepts this item
                     continue;
                 }
 

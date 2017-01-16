@@ -11,6 +11,7 @@ import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.material.DirectionalContainer;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.regex.Pattern;
 
@@ -208,8 +209,13 @@ public class PipesUtil {
      * @param itemStack an item stack
      * @return true if there is an item stack of the same type with the same data. Amount may vary
      */
-    public static boolean containsSimilar(List<ItemStack> items, ItemStack itemStack) {
-        return getFirstSimilar(items, itemStack) != null;
+    public static boolean containsSimilar(Collection<ItemStack> items, ItemStack itemStack) {
+        for (ItemStack item : items) {
+            if (isSimilarFuzzy(item, itemStack)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**
@@ -221,11 +227,25 @@ public class PipesUtil {
      */
     public static ItemStack getFirstSimilar(List<ItemStack> items, ItemStack itemStack) {
         for (ItemStack item : items) {
-            if (item.getType() == itemStack.getType() && item.getData().equals(itemStack.getData())) {
+            if (isSimilarFuzzy(item, itemStack)) {
                 return item;
             }
         }
         return null;
+    }
+
+    /**
+     * Check if two ItemStacks are similar ignoring amounts and meta
+     * @param a
+     * @param b
+     * @return
+     */
+    public static boolean isSimilarFuzzy(ItemStack a, ItemStack b) {
+        if (a == null || b == null)
+            return false;
+        if (a == b)
+            return true;
+        return a.getType() == b.getType() && a.getData().equals(b.getData());
     }
 
     /**

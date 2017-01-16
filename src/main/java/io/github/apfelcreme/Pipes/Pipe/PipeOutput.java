@@ -1,8 +1,8 @@
 package io.github.apfelcreme.Pipes.Pipe;
 
 import io.github.apfelcreme.Pipes.PipesItem;
-import io.github.apfelcreme.Pipes.PipesUtil;
 import org.bukkit.block.Block;
+import org.bukkit.block.BlockState;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
 
@@ -112,8 +112,8 @@ public class PipeOutput {
 
     }
 
-    public boolean acceptsItem(ItemStack itemStack) {
-        List<ItemStack> filterItems = getFilterItems();
-        return filterItems.isEmpty() || PipesUtil.containsSimilar(filterItems, itemStack);
+    public boolean isPowered() {
+        InventoryHolder holder = getOutputHolder();
+        return holder == null || ((BlockState) holder).getBlock().isBlockPowered();
     }
 }

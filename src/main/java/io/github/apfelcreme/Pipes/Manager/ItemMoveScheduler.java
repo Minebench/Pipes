@@ -1,10 +1,18 @@
 package io.github.apfelcreme.Pipes.Manager;
 
+import com.google.common.collect.Iterators;
+import io.github.apfelcreme.Pipes.Exception.ChunkNotLoadedException;
+import io.github.apfelcreme.Pipes.Pipe.Pipe;
+import io.github.apfelcreme.Pipes.Pipe.SimpleLocation;
 import io.github.apfelcreme.Pipes.Pipes;
 import io.github.apfelcreme.Pipes.PipesConfig;
 import io.github.apfelcreme.Pipes.Pipe.ScheduledItemTransfer;
+import org.bukkit.configuration.file.YamlConfiguration;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.*;
+import java.util.logging.Level;
 
 /**
  * Copyright (C) 2016 Lord36 aka Apfelcreme
@@ -118,6 +126,37 @@ public class ItemMoveScheduler {
         }
         if (!isActive() && !scheduledItemTransfers.isEmpty()) {
             create();
+        }
+    }
+
+    public List<ScheduledItemTransfer> getTransfers() {
+        return scheduledItemTransfers;
+    }
+
+    public static void load() {
+        YamlConfiguration oldTransfers = YamlConfiguration.loadConfiguration(new File(Pipes.getInstance().getDataFolder(), "transfers.yml"));
+        for (Map locMap : oldTransfers.getMapList("transfers")) {
+            try {
+                SimpleLocation location = SimpleLocation.deserialize(locMap);
+                getInstance().add(new ScheduledItemTransfer(location));
+            } catch (IllegalArgumentException e) {
+                Pipes.getInstance().getLogger().log(Level.SEVERE, "Could not load transfer from transfers.yml: " + e.getMessage());
+            }
+        }
+    }
+
+    public static void exit() {
+        getInstance().kill();
+        YamlConfiguration oldTransfers = new YamlConfiguration();
+        List<Map<String, Object>> transferList = new ArrayList<>();
+        for (ScheduledItemTransfer transfer : getInstance().getTransfers()) {
+            transferList.add(transfer.getInputLocation().serialize());
+        }
+        oldTransfers.set("transfers", transferList);
+        try {
+            oldTransfers.save(new File(Pipes.getInstance().getDataFolder(), "transfers.yml"));
+        } catch (IOException e) {
+            Pipes.getInstance().getLogger().log(Level.SEVERE, "Could not write transfers to transfers.yml", e);
         }
     }
 

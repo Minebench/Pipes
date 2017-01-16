@@ -3,6 +3,7 @@ package io.github.apfelcreme.Pipes.Pipe;
 import io.github.apfelcreme.Pipes.Event.PipeMoveItemEvent;
 import io.github.apfelcreme.Pipes.LoopDetection.Detection;
 import io.github.apfelcreme.Pipes.Manager.DetectionManager;
+import io.github.apfelcreme.Pipes.Manager.PipeManager;
 import io.github.apfelcreme.Pipes.Pipes;
 import io.github.apfelcreme.Pipes.PipesUtil;
 import org.bukkit.Location;
@@ -15,7 +16,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Queue;
-import java.util.logging.Level;
 
 /**
  * Copyright (C) 2016 Lord36 aka Apfelcreme
@@ -37,12 +37,10 @@ import java.util.logging.Level;
  */
 public class ScheduledItemTransfer {
 
-    private Pipe pipe;
-    private PipeInput input;
+    private SimpleLocation inputLocation;
 
-    public ScheduledItemTransfer(Pipe pipe, PipeInput input) {
-        this.pipe = pipe;
-        this.input = input;
+    public ScheduledItemTransfer(SimpleLocation inputLocation) {
+        this.inputLocation = inputLocation;
     }
 
     /**
@@ -51,11 +49,19 @@ public class ScheduledItemTransfer {
      * @return <tt>true</tt> if this transfer should be considered as completed and removed from the queue
      */
     public boolean execute() {
-        Location location = input.getLocation().getLocation();
+        Location location = inputLocation.getLocation();
         if (!location.getWorld().isChunkLoaded(location.getBlockX() >> 4, location.getBlockZ() >> 4)) {
+            // Chunk is not loaded, cannot transfer items
             return false;
         }
 
+        Pipe pipe = PipeManager.getInstance().getPipe(inputLocation);
+        if (pipe == null) {
+            // No pipe at location? Remove the transfer
+            return true;
+        }
+
+        PipeInput input = pipe.getInput(inputLocation);
         InventoryHolder inputHolder = input.getHolder();
         if (inputHolder == null) {
             // Could not find the input block, to not recheck this transfer we return true
@@ -78,13 +84,9 @@ public class ScheduledItemTransfer {
             // first: try to place the item in a chest that uses filters. try furnaces first
             List<PipeOutput> outputs = pipe.getOutputs(item);
             if (!outputs.isEmpty()) {
-                try {
-                    processItemTransfer(item, outputs);
-                    if (item.getAmount() != 0) {
-                        transferredAll = false;
-                    }
-                } catch (MissingInventoryHolderException e) {
-                    Pipes.getInstance().getLogger().log(Level.WARNING, e.getMessage());
+                processItemTransfer(pipe, inputHolder, item, outputs);
+                if (item.getAmount() != 0) {
+                    transferredAll = false;
                 }
             }
         }
@@ -97,12 +99,7 @@ public class ScheduledItemTransfer {
      * @param itemStack the item that shall be transferred
      * @param outputs   the list of outputs that are checked
      */
-    private void processItemTransfer(ItemStack itemStack, List<PipeOutput> outputs) throws MissingInventoryHolderException {
-        InventoryHolder inputHolder = input.getHolder();
-        if (inputHolder == null) {
-            // Could not find the input block, to not recheck this transfer we return true
-            throw new MissingInventoryHolderException("No inventory holder found at " + input.getLocation() + " while trying to transfer " + itemStack + "?");
-        }
+    private void processItemTransfer(Pipe pipe, InventoryHolder inputHolder, ItemStack itemStack, List<PipeOutput> outputs) {
         for (PipeOutput output : outputs) {
             InventoryHolder targetHolder = output.getTargetHolder();
             if (targetHolder != null && (output.getFilterItems().isEmpty() || PipesUtil.containsSimilar(output.getFilterItems(), itemStack))) {
@@ -219,10 +216,8 @@ public class ScheduledItemTransfer {
         }
     }
 
-    private class MissingInventoryHolderException extends Exception {
-        public MissingInventoryHolderException(String s) {
-            super(s);
-        }
+    public SimpleLocation getInputLocation() {
+        return inputLocation;
     }
 }
 

@@ -2,12 +2,15 @@ package io.github.apfelcreme.Pipes.Manager;
 
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.CacheLoader;
+import com.google.common.cache.LoadingCache;
 import io.github.apfelcreme.Pipes.Exception.ChunkNotLoadedException;
 import io.github.apfelcreme.Pipes.Pipe.ChunkLoader;
 import io.github.apfelcreme.Pipes.Pipe.Pipe;
 import io.github.apfelcreme.Pipes.Pipe.PipeInput;
 import io.github.apfelcreme.Pipes.Pipe.PipeOutput;
 import io.github.apfelcreme.Pipes.Pipe.SimpleLocation;
+import io.github.apfelcreme.Pipes.Pipes;
 import io.github.apfelcreme.Pipes.PipesConfig;
 import io.github.apfelcreme.Pipes.PipesItem;
 import io.github.apfelcreme.Pipes.PipesUtil;
@@ -24,7 +27,9 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
+import java.util.logging.Level;
 
 /**
  * Copyright (C) 2016 Lord36 aka Apfelcreme
@@ -54,13 +59,22 @@ public class PipeManager {
     /**
      * a cache to stop endless pipe checks
      */
-    private final Cache<SimpleLocation, Pipe> pipeCache;
+    private final LoadingCache<SimpleLocation, Pipe> pipeCache;
 
     /**
      * constructor
      */
     private PipeManager() {
-        pipeCache = CacheBuilder.newBuilder().expireAfterWrite(PipesConfig.getPipeCacheDuration(), TimeUnit.MILLISECONDS).build();
+        pipeCache = CacheBuilder.newBuilder().expireAfterWrite(PipesConfig.getPipeCacheDuration(), TimeUnit.MILLISECONDS).build(new CacheLoader<SimpleLocation, Pipe>() {
+            @Override
+            public Pipe load(SimpleLocation location) throws Exception {
+                Pipe pipe = isPipe(location.getBlock());
+                if (pipe == null) {
+                    throw new Exception("No pipe found!");
+                }
+                return pipe;
+            }
+        });
     }
 
     /**
@@ -73,27 +87,6 @@ public class PipeManager {
     }
 
     /**
-     * adds a pipe to the pipe cache
-     *
-     * @param dispenserLocation the location
-     * @param pipe              the pipe object
-     */
-    public void addPipeToCache(SimpleLocation dispenserLocation, Pipe pipe) {
-        if (pipe != null) {
-            pipeCache.put(dispenserLocation, pipe);
-        }
-    }
-
-    /**
-     * removes a pipe from the pipe cache
-     *
-     * @param dispenserLocation the location
-     */
-    public void removeFromPipeCache(SimpleLocation dispenserLocation) {
-        pipeCache.invalidate(dispenserLocation);
-    }
-
-    /**
      * returns the PipeManager instance
      *
      * @return the PipeManager instance
@@ -103,6 +96,15 @@ public class PipeManager {
             instance = new PipeManager();
         }
         return instance;
+    }
+
+    public Pipe getPipe(SimpleLocation location) {
+        try {
+            return pipeCache.get(location);
+        } catch (ExecutionException e) {
+            Pipes.getInstance().getLogger().log(Level.WARNING, "Error while trying to get a pipe from the cache.", e);
+            return null;
+        }
     }
 
     /**

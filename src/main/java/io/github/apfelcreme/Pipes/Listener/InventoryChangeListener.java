@@ -81,30 +81,22 @@ public class InventoryChangeListener implements Listener {
         }
         SimpleLocation dispenserLocation = new SimpleLocation(dispenserBlock.getLocation());
 
-        // cache the pipe
-        Pipe pipe = PipeManager.getInstance().getPipeCache().getIfPresent(dispenserLocation);
+        Pipe pipe = PipeManager.getInstance().getPipe(dispenserLocation);
         if (pipe == null) {
-            try {
-                pipe = PipeManager.isPipe(dispenserBlock);
-                PipeManager.getInstance().addPipeToCache(dispenserLocation, pipe);
-            } catch (ChunkNotLoadedException e) {
-                return false;
-            }
+            return false;
         }
-        if (pipe != null) {
-            PipeInput pipeInput = pipe.getInput(dispenserLocation);
-            if (pipeInput != null) {
-                final ScheduledItemTransfer transfer = new ScheduledItemTransfer(pipe, pipeInput);
-                if (scheduled) {
-                    new BukkitRunnable() {
-                        @Override
-                        public void run() {
-                            ItemMoveScheduler.getInstance().add(transfer);
-                        }
-                    }.runTaskLater(plugin, 2);
-                } else {
-                    ItemMoveScheduler.getInstance().add(transfer);
-                }
+        PipeInput pipeInput = pipe.getInput(dispenserLocation);
+        if (pipeInput != null) {
+            final ScheduledItemTransfer transfer = new ScheduledItemTransfer(dispenserLocation);
+            if (scheduled) {
+                new BukkitRunnable() {
+                    @Override
+                    public void run() {
+                        ItemMoveScheduler.getInstance().add(transfer);
+                    }
+                }.runTaskLater(plugin, 2);
+            } else {
+                ItemMoveScheduler.getInstance().add(transfer);
             }
         }
         return true;

@@ -38,7 +38,8 @@ public class MonitorCommand implements SubCommand {
             Pipes.sendMessage(commandSender, PipesConfig.getText("info.monitor.pipeCache")
                     .replace("{0}", String.valueOf(PipeManager.getInstance().getPipeCache().size())));
             if (ItemMoveScheduler.getInstance().isActive()) {
-                Pipes.sendMessage(commandSender, PipesConfig.getText("info.monitor.schedulerActive"));
+                Pipes.sendMessage(commandSender, PipesConfig.getText("info.monitor.schedulerActive")
+                        .replace("{0}", String.valueOf(ItemMoveScheduler.getInstance().getTransfers().size())));
             } else {
                 Pipes.sendMessage(commandSender, PipesConfig.getText("info.monitor.schedulerNotActive"));
             }

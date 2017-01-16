@@ -5,8 +5,11 @@ import com.google.common.cache.CacheBuilder;
 import io.github.apfelcreme.Pipes.Listener.BlockListener;
 import io.github.apfelcreme.Pipes.Listener.InventoryChangeListener;
 import io.github.apfelcreme.Pipes.Listener.PlayerRightclickListener;
+import io.github.apfelcreme.Pipes.Manager.ItemMoveScheduler;
+import io.github.apfelcreme.Pipes.Pipe.SimpleLocation;
 import org.bukkit.Material;
 import org.bukkit.command.CommandSender;
+import org.bukkit.configuration.serialization.ConfigurationSerialization;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ShapelessRecipe;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -50,6 +53,7 @@ public class Pipes extends JavaPlugin {
         instance = this;
         registeredRightClicks = CacheBuilder.newBuilder().expireAfterWrite(10, TimeUnit.SECONDS).build();
         PipesConfig.load();
+        ItemMoveScheduler.load();
         getServer().getPluginManager().registerEvents(new InventoryChangeListener(this), this);
         getServer().getPluginManager().registerEvents(new PlayerRightclickListener(this), this);
         getServer().getPluginManager().registerEvents(new BlockListener(this), this);
@@ -73,6 +77,11 @@ public class Pipes extends JavaPlugin {
             chunkLoaderRecipe.addIngredient(material.getValue(), material.getKey());
         }
         getServer().addRecipe(chunkLoaderRecipe);
+    }
+
+    @Override
+    public void onDisable() {
+        ItemMoveScheduler.exit();
     }
 
     /**

@@ -22,7 +22,7 @@ texts:
       cooldownStarted: '&a Rechtsklicke in 10 Sekunden eine Pipe'
     monitor:
       pipeCache: '&a Pipe-Cache: &f{0} &aItems'
-      schedulerActive: '&a Item-Move-Scheduler: &2aktiv'
+      schedulerActive: '&a Item-Move-Scheduler: &f{0} &2Transfers'
       schedulerNotActive: '&a Item-Move-Scheduler: &cnicht aktiv'
       version: '&a Version: &f{0}'
     pipe:

@@ -5,6 +5,7 @@ import io.github.apfelcreme.Pipes.LoopDetection.Detection;
 import io.github.apfelcreme.Pipes.Manager.DetectionManager;
 import io.github.apfelcreme.Pipes.Pipes;
 import io.github.apfelcreme.Pipes.PipesUtil;
+import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Furnace;
 import org.bukkit.inventory.InventoryHolder;
@@ -50,6 +51,10 @@ public class ScheduledItemTransfer {
      * @return <tt>true</tt> if this transfer should be considered as completed and removed from the queue
      */
     public boolean execute() {
+        Location location = input.getLocation().getLocation();
+        if (!location.getWorld().isChunkLoaded(location.getBlockX() >> 4, location.getBlockZ() >> 4)) {
+            return false;
+        }
 
         InventoryHolder inputHolder = input.getHolder();
         if (inputHolder == null) {

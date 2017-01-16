@@ -143,6 +143,7 @@ public class ItemMoveScheduler {
                 Pipes.getInstance().getLogger().log(Level.SEVERE, "Could not load transfer from transfers.yml: " + e.getMessage());
             }
         }
+        Pipes.getInstance().getLogger().log(Level.INFO, "Loaded " + getInstance().getTransfers().size() + " scheduled transfers.");
     }
 
     public static void exit() {
@@ -155,6 +156,7 @@ public class ItemMoveScheduler {
         oldTransfers.set("transfers", transferList);
         try {
             oldTransfers.save(new File(Pipes.getInstance().getDataFolder(), "transfers.yml"));
+            Pipes.getInstance().getLogger().log(Level.INFO, "Saved " + transferList.size() + " scheduled transfers.");
         } catch (IOException e) {
             Pipes.getInstance().getLogger().log(Level.SEVERE, "Could not write transfers to transfers.yml", e);
         }

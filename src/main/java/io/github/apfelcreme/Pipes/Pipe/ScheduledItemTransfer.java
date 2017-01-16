@@ -174,13 +174,15 @@ public class ScheduledItemTransfer {
                             case SPLASH_POTION:
                             case LINGERING_POTION:
                                 int firstEmpty = brewerInventory.firstEmpty();
-                                while (firstEmpty != -1 && firstEmpty < 3) {
+                                while (firstEmpty != -1 && firstEmpty < 3 && itemStack.getAmount() > 0) {
                                     inputHolder.getInventory().remove(itemStack);
                                     ItemStack result = new ItemStack(itemStack);
                                     if (itemStack.getAmount() > 1) {
-                                        itemStack.setAmount(itemStack.getAmount() - 1);
+                                        int newAmount = itemStack.getAmount() - 1;
+                                        itemStack.setAmount(newAmount);
                                         result.setAmount(1);
                                         inputHolder.getInventory().addItem(itemStack);
+                                        itemStack.setAmount(newAmount); // Inventory#addItem might change the amount...
                                     }
                                     brewerInventory.setItem(firstEmpty, result);
                                     firstEmpty = brewerInventory.firstEmpty();

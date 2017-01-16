@@ -46,7 +46,7 @@ public class PipesConfig {
         plugin.saveResource("lang.de.yml", false);
         plugin.reloadConfig();
         transferCooldown = plugin.getConfig().getLong("transferCooldown", 20L);
-        languageConfig = YamlConfiguration.loadConfiguration(new File(plugin.getDataFolder() + "/lang.de.yml"));
+        languageConfig = YamlConfiguration.loadConfiguration(new File(plugin.getDataFolder(), "/lang.de.yml"));
     }
 
     /**

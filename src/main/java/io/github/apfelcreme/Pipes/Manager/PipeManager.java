@@ -70,7 +70,7 @@ public class PipeManager {
             public Pipe load(SimpleLocation location) throws Exception {
                 Pipe pipe = isPipe(location.getBlock());
                 if (pipe == null) {
-                    throw new Exception("No pipe found!");
+                    throw new ExecutionException(new Exception("No pipe found!"));
                 }
                 return pipe;
             }

@@ -5,6 +5,8 @@ import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import io.github.apfelcreme.Pipes.Exception.ChunkNotLoadedException;
+import io.github.apfelcreme.Pipes.Exception.PipeTooLongException;
+import io.github.apfelcreme.Pipes.Exception.TooManyOutputsException;
 import io.github.apfelcreme.Pipes.Pipe.ChunkLoader;
 import io.github.apfelcreme.Pipes.Pipe.Pipe;
 import io.github.apfelcreme.Pipes.Pipe.PipeInput;
@@ -112,7 +114,7 @@ public class PipeManager {
      * @param startingPoint a block
      * @return a pipe, if there is one
      */
-    public static Pipe isPipe(Block startingPoint) throws ChunkNotLoadedException {
+    public static Pipe isPipe(Block startingPoint) throws ChunkNotLoadedException, TooManyOutputsException, PipeTooLongException {
 
         Queue<SimpleLocation> queue = new LinkedList<>();
         List<Block> found = new ArrayList<>();
@@ -146,6 +148,9 @@ public class PipeManager {
                         color = blockColor;
                     }
                     if (color == blockColor) {
+                        if (PipesConfig.getMaxPipeLength() > 0 && pipeBlocks.size() >= PipesConfig.getMaxPipeLength()) {
+                            throw new PipeTooLongException(location);
+                        }
                         pipeBlocks.add(location);
                         found.add(block);
                         queue.add(location.getRelative(BlockFace.NORTH));
@@ -170,6 +175,9 @@ public class PipeManager {
                             case PIPE_OUTPUT:
                                 Block relativeToOutput = block.getRelative(((Directional) block.getState().getData()).getFacing());
                                 if (relativeToOutput.getState() instanceof InventoryHolder) {
+                                    if (PipesConfig.getMaxPipeOutputs() > 0 && outputs.size() >= PipesConfig.getMaxPipeOutputs()) {
+                                        throw new TooManyOutputsException(location);
+                                    }
                                     outputs.add(new PipeOutput(location, new SimpleLocation(relativeToOutput.getLocation())));
                                     found.add(block);
                                     found.add(relativeToOutput);

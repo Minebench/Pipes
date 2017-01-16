@@ -4,6 +4,8 @@ import de.diddiz.LogBlock.LogBlock;
 import de.diddiz.LogBlock.listeners.BlockBreakLogging;
 import io.github.apfelcreme.Pipes.Event.PipeBlockBreakEvent;
 import io.github.apfelcreme.Pipes.Exception.ChunkNotLoadedException;
+import io.github.apfelcreme.Pipes.Exception.PipeTooLongException;
+import io.github.apfelcreme.Pipes.Exception.TooManyOutputsException;
 import io.github.apfelcreme.Pipes.Manager.PipeManager;
 import io.github.apfelcreme.Pipes.Pipe.Pipe;
 import io.github.apfelcreme.Pipes.Pipes;
@@ -107,6 +109,12 @@ public class BlockListener implements Listener {
                 }
             } catch (ChunkNotLoadedException e) {
                 Pipes.sendMessage(event.getPlayer(), PipesConfig.getText("error.chunkNotLoaded"));
+            } catch (TooManyOutputsException e) {
+                Pipes.sendMessage(event.getPlayer(), PipesConfig.getText("error.tooManyOutputs")
+                        .replace("{0}", String.valueOf(PipesConfig.getMaxPipeOutputs())));
+            } catch (PipeTooLongException e) {
+                Pipes.sendMessage(event.getPlayer(), PipesConfig.getText("error.pipeTooLong")
+                        .replace("{0}", String.valueOf(PipesConfig.getMaxPipeLength())));
             }
         }
     }

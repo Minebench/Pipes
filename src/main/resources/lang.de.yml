@@ -2,6 +2,8 @@ texts:
   prefix: '&f[&aP&f]'
   error:
     chunkNotLoaded: '&c Teile der Pipe befinden sich in nicht geladenen Chunks!'
+    tooManyOutputs: '&c Die Pipe hat mehr Outputs als die maximal erlaubte Anzahl von &f{0}&c!'
+    pipeTooLong: '&c Die Pipe ist länger als die maximal erlaubte Länge von &f{0}&c!'
     commandCanOnlyBeRunByAPlayer: '&c Command can only be run by a player!'
     noDetection: '&c Keine Detektion gefunden! Führe zunächst /pipe detect <Zeit> aus!'
     noPermission: '&c Du hast keine ausreichende Berechtigung'

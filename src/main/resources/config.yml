@@ -12,4 +12,6 @@ chunkLoaderRecipe:
   FURNACE: 1
   OBSIDIAN: 1
   GOLD_BLOCK: 1
+maxPipeLength: 128
+maxPipeOutputs: 64
 

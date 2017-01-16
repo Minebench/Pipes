@@ -1,9 +1,7 @@
 package io.github.apfelcreme.Pipes.Exception;
 
-import io.github.apfelcreme.Pipes.Pipe.SimpleLocation;
-
-/**
- * Copyright (C) 2016 Lord36 aka Apfelcreme
+/*
+ * Copyright 2017 Max Lee (https://github.com/Phoenix616/)
  * <p>
  * This program is free software;
  * you can redistribute it and/or modify it under the terms of the GNU General
@@ -17,13 +15,12 @@ import io.github.apfelcreme.Pipes.Pipe.SimpleLocation;
  * <p>
  * You should have received a copy of the GNU General Public License along with
  * this program; if not, see <http://www.gnu.org/licenses/>.
- *
- * @author Lord36 aka Apfelcreme
  */
-public class ChunkNotLoadedException extends LocationException {
 
-    public ChunkNotLoadedException(SimpleLocation location) {
+import io.github.apfelcreme.Pipes.Pipe.SimpleLocation;
+
+public class PipeTooLongException extends LocationException {
+    public PipeTooLongException(SimpleLocation location) {
         super(location);
     }
-
 }

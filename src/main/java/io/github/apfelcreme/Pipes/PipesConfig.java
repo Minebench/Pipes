@@ -33,6 +33,8 @@ public class PipesConfig {
 
     private static Pipes plugin;
     private static long transferCooldown;
+    private static int maxPipeOutputs;
+    private static int maxPipeLength;
 
     /**
      * loads the config
@@ -45,7 +47,9 @@ public class PipesConfig {
         plugin.saveDefaultConfig();
         plugin.saveResource("lang.de.yml", false);
         plugin.reloadConfig();
-        transferCooldown = plugin.getConfig().getLong("transferCooldown", 20L);
+        transferCooldown = plugin.getConfig().getLong("transferCooldown");
+        maxPipeOutputs = plugin.getConfig().getInt("maxPipeOutputs");
+        maxPipeLength = plugin.getConfig().getInt("maxPipeLength");
         languageConfig = YamlConfiguration.loadConfiguration(new File(plugin.getDataFolder(), "lang.de.yml"));
     }
 
@@ -66,6 +70,24 @@ public class PipesConfig {
      */
     public static long getTransferCooldown() {
         return transferCooldown;
+    }
+
+    /**
+     * returns the maximum number of outputs a pipe can have
+     *
+     * @return the maximum number of outputs a pipe can have
+     */
+    public static int getMaxPipeOutputs() {
+        return maxPipeOutputs;
+    }
+
+    /**
+     * returns the maximum length of a pipe
+     *
+     * @return the maximum length of a pipe
+     */
+    public static int getMaxPipeLength() {
+        return maxPipeLength;
     }
 
 

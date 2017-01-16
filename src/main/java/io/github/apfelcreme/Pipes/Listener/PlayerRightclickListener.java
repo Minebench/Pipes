@@ -1,6 +1,8 @@
 package io.github.apfelcreme.Pipes.Listener;
 
 import io.github.apfelcreme.Pipes.Exception.ChunkNotLoadedException;
+import io.github.apfelcreme.Pipes.Exception.PipeTooLongException;
+import io.github.apfelcreme.Pipes.Exception.TooManyOutputsException;
 import io.github.apfelcreme.Pipes.Manager.PipeManager;
 import io.github.apfelcreme.Pipes.Pipe.Pipe;
 import io.github.apfelcreme.Pipes.Pipes;
@@ -54,6 +56,12 @@ public class PlayerRightclickListener implements Listener {
                     }
                 } catch (ChunkNotLoadedException e) {
                     Pipes.sendMessage(event.getPlayer(), PipesConfig.getText("error.chunkNotLoaded"));
+                } catch (TooManyOutputsException e) {
+                    Pipes.sendMessage(event.getPlayer(), PipesConfig.getText("error.tooManyOutputs")
+                            .replace("{0}", String.valueOf(PipesConfig.getMaxPipeOutputs())));
+                } catch (PipeTooLongException e) {
+                    Pipes.sendMessage(event.getPlayer(), PipesConfig.getText("error.pipeTooLong")
+                            .replace("{0}", String.valueOf(PipesConfig.getMaxPipeLength())));
                 }
             }
 

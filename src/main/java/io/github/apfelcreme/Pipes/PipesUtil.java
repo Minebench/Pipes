@@ -218,23 +218,6 @@ public class PipesUtil {
     }
 
     /**
-     * checks if a type can be used for smelting in a furnace
-     *
-     * @param type a material type
-     * @return true or false
-     */
-    public static boolean isFuel(Material type) {
-        switch (type) {
-            case COAL:
-            case COAL_BLOCK:
-            case LAVA_BUCKET:
-                return true;
-            default:
-                return false;
-        }
-    }
-
-    /**
      * returns an ItemStack of the custom dispenser item
      *
      * @return an ItemStack of the custom dispenser item

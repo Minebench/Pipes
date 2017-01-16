@@ -7,8 +7,9 @@ import io.github.apfelcreme.Pipes.Manager.PipeManager;
 import io.github.apfelcreme.Pipes.Pipes;
 import io.github.apfelcreme.Pipes.PipesUtil;
 import org.bukkit.Location;
-import org.bukkit.Material;
-import org.bukkit.block.Furnace;
+import org.bukkit.inventory.BrewerInventory;
+import org.bukkit.inventory.FurnaceInventory;
+import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
 
@@ -16,7 +17,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Queue;
-import java.util.logging.Level;
 
 /**
  * Copyright (C) 2016 Lord36 aka Apfelcreme
@@ -111,111 +111,129 @@ public class ScheduledItemTransfer {
                     BEGIN FURNACE
                      */
                         // try to put coal etc in the correct place
-                        Furnace furnace = (Furnace) targetHolder;
-                        if (PipesUtil.isFuel(itemStack.getType())) {
-                            // the transported item is either coal, or a coal block or a lava bucket
-                            ItemStack fuel = furnace.getInventory().getFuel();
-                            if (fuel != null && fuel.getType() != Material.AIR && fuel.isSimilar(itemStack)) {
-                                // as you cannot mix two itemstacks with each other, check if the material inserted
-                                // has the same type as the fuel that is already in the furnace
-                                if (fuel.getMaxStackSize() == -1 || fuel.getAmount() < fuel.getMaxStackSize()) {
-                                    // there is still room in the furnace
-                                    int resultSize = itemStack.getAmount() - (fuel.getMaxStackSize() - fuel.getAmount());
-                                    ItemStack result = itemStack.clone();
-                                    if (resultSize <= 0) {
-                                        inputHolder.getInventory().remove(itemStack);
 
-                                        result.setAmount(fuel.getAmount() + itemStack.getAmount());
-                                        furnace.getInventory().setFuel(result);
+                        switch (itemStack.getType()) {
+                            case COAL:
+                            case COAL_BLOCK:
+                            case LAVA_BUCKET:
+                                // the transported item is either coal, or a coal block or a lava bucket
+                                addFuel(inputHolder, targetHolder.getInventory(), itemStack);
+                                break;
+                            default:
+                                // the item is anything but a fuel (at least what we regard a fuel)
+                                FurnaceInventory furnaceInventory = (FurnaceInventory) targetHolder.getInventory();
+                                ItemStack smelting = furnaceInventory.getSmelting();
+                                if (smelting == null) {
+                                    inputHolder.getInventory().remove(itemStack);
+                                    furnaceInventory.setSmelting(itemStack);
+                                } else if (smelting.isSimilar(itemStack)) {
+                                    // as you cannot mix two itemstacks with each other, check if the material inserted
+                                    // has the same type as the fuel that is already in the furnace
+                                    if (smelting.getMaxStackSize() == -1 || smelting.getAmount() < smelting.getMaxStackSize()) {
+                                        // there is still room in the furnace
+                                        int resultSize = itemStack.getAmount() - (smelting.getMaxStackSize() - smelting.getAmount());
+                                        ItemStack result = itemStack.clone();
+                                        if (resultSize <= 0) {
+                                            inputHolder.getInventory().remove(itemStack);
 
-                                        itemStack.setAmount(0);
-                                    } else {
-                                        inputHolder.getInventory().remove(itemStack);
-                                        itemStack.setAmount(resultSize);
-                                        inputHolder.getInventory().addItem(itemStack);
+                                            result.setAmount(smelting.getAmount() + itemStack.getAmount());
+                                            furnaceInventory.setSmelting(result);
 
-                                        result.setAmount(itemStack.getMaxStackSize());
-                                        furnace.getInventory().setFuel(result);
+                                            itemStack.setAmount(0);
+                                        } else {
+                                            inputHolder.getInventory().remove(itemStack);
+                                            itemStack.setAmount(resultSize);
+                                            inputHolder.getInventory().addItem(itemStack);
 
-                                        itemStack.setAmount(itemStack.getMaxStackSize() - resultSize);
-                                    }
-                                } else {
-                                    // the furnace is full, so find continue with the list of outputs
-                                    // and try to fill one that isnt full
-                                    continue;
-                                }
-                            } else if (fuel == null || fuel.getType() == Material.AIR) {
-                                // there is no fuel currently in the fuel slot, so simply put it in
-                                inputHolder.getInventory().remove(itemStack);
-                                furnace.getInventory().setFuel(itemStack);
-                            }
-                        } else {
-                            // the item is anything but a fuel (at least what we regard a fuel)
-                            ItemStack smelting = furnace.getInventory().getSmelting();
-                            if (smelting != null && smelting.isSimilar(itemStack)) {
-                                // as you cannot mix two itemstacks with each other, check if the material inserted
-                                // has the same type as the fuel that is already in the furnace
-                                if (smelting.getMaxStackSize() == -1 || smelting.getAmount() < smelting.getMaxStackSize()) {
-                                    // there is still room in the furnace
-                                    int resultSize = itemStack.getAmount() - (smelting.getMaxStackSize() - smelting.getAmount());
-                                    ItemStack result = itemStack.clone();
-                                    if (resultSize <= 0) {
-                                        inputHolder.getInventory().remove(itemStack);
+                                            result.setAmount(itemStack.getMaxStackSize());
+                                            furnaceInventory.setSmelting(result);
 
-                                        result.setAmount(smelting.getAmount() + itemStack.getAmount());
-                                        furnace.getInventory().setSmelting(result);
-
-                                        itemStack.setAmount(0);
-                                    } else {
-                                        inputHolder.getInventory().remove(itemStack);
-                                        itemStack.setAmount(resultSize);
-                                        inputHolder.getInventory().addItem(itemStack);
-
-                                        result.setAmount(itemStack.getMaxStackSize());
-                                        furnace.getInventory().setSmelting(result);
-
-                                        itemStack.setAmount(itemStack.getMaxStackSize() - resultSize);
+                                            itemStack.setAmount(itemStack.getMaxStackSize() - resultSize);
+                                        }
                                     }
                                 }
-                            } else if (smelting == null) {
-                                inputHolder.getInventory().remove(itemStack);
-                                furnace.getInventory().setSmelting(itemStack);
-                            }
+                                break;
                         }
                         break;
                     /*
                     END FURNACE
                      */
-                    default:
+                    /*
+                    BEGIN BREWING STAND
+                     */
+                    case BREWING:
+                        BrewerInventory brewerInventory = (BrewerInventory) targetHolder.getInventory();
+                        switch (itemStack.getType()) {
+                            case BLAZE_POWDER:
+                                // the transported item is fuel
+                                if (!addFuel(inputHolder, brewerInventory, itemStack)) {
+                                    continue;
+                                }
+                                break;
+                            case POTION:
+                            case SPLASH_POTION:
+                            case LINGERING_POTION:
+                                int firstEmpty = brewerInventory.firstEmpty();
+                                while (firstEmpty != -1 && firstEmpty < 3) {
+                                    inputHolder.getInventory().remove(itemStack);
+                                    ItemStack result = new ItemStack(itemStack);
+                                    if (itemStack.getAmount() > 1) {
+                                        itemStack.setAmount(itemStack.getAmount() - 1);
+                                        result.setAmount(1);
+                                        inputHolder.getInventory().addItem(itemStack);
+                                    }
+                                    brewerInventory.setItem(firstEmpty, result);
+                                    firstEmpty = brewerInventory.firstEmpty();
+                                }
+                                break;
+                            default:
+                                ItemStack ingredient = brewerInventory.getIngredient();
+                                if (ingredient == null) {
+                                    inputHolder.getInventory().remove(itemStack);
+                                    brewerInventory.setIngredient(itemStack);
+                                    itemStack.setAmount(0);
+                                } else if (ingredient.isSimilar(itemStack)) {
+                                    // as you cannot mix two itemstacks with each other, check if the material inserted
+                                    // has the same type as the ingredient that is already in the brewingstand
+                                    if (ingredient.getMaxStackSize() == -1 || ingredient.getAmount() < ingredient.getMaxStackSize()) {
+                                        int rest = itemStack.getMaxStackSize() - ingredient.getAmount();
+                                        inputHolder.getInventory().remove(itemStack);
+
+                                        ingredient.setAmount(ingredient.getMaxStackSize());
+                                        brewerInventory.setIngredient(ingredient);
+
+                                        itemStack.setAmount(rest);
+                                        inputHolder.getInventory().addItem(itemStack);
+                                    }
+                                }
+                                break;
+                        }
+                        break;
+                    /*
+                    END BREWING STAND
+                     */
+                    /*
+                    BEGIN BEACON
+                     */
+                    case BEACON:
+                        switch (itemStack.getType()) {
+                            case DIAMOND:
+                            case EMERALD:
+                            case GOLD_INGOT:
+                            case IRON_INGOT:
+                                addItem(inputHolder.getInventory(), targetHolder.getInventory(), itemStack);
+                                break;
+                        }
+                        break;
+                    /*
+                    END BEACON
+                     */
                     /*
                     BEGIN DEFAULT
                      */
+                    default:
                         // for chests, dropper etc...
-                        inputHolder.getInventory().remove(itemStack);
-                        if (targetHolder.getInventory().firstEmpty() != -1) {
-                            targetHolder.getInventory().addItem(itemStack);
-                            itemStack.setAmount(0);
-                        } else {
-                            // CraftBukkit doesn't return leftovers when adding to partial stacks
-                            // To work around this we add the items via an array with one item in
-                            // each position so that we will get a leftover map in every case
-                            ItemStack[] stacks = new ItemStack[itemStack.getAmount()];
-                            for (int i = 0; i < itemStack.getAmount(); i++) {
-                                ItemStack clone = new ItemStack(itemStack);
-                                clone.setAmount(1);
-                                stacks[i] = clone;
-                            }
-                            Map<Integer, ItemStack> rest = targetHolder.getInventory().addItem(stacks);
-                            int newAmount = 0;
-                            for (ItemStack item : rest.values()) {
-                                newAmount += item.getAmount();
-                            }
-                            itemStack.setAmount(newAmount);
-                            if (itemStack.getAmount() > 0) {
-                                inputHolder.getInventory().addItem(itemStack);
-                                itemStack.setAmount(newAmount); // Need to reset the amount as addItem might change the size
-                            }
-                        }
+                        addItem(inputHolder.getInventory(), targetHolder.getInventory(), itemStack);
                         break;
                     /*
                     END DEFAULT
@@ -231,6 +249,110 @@ public class ScheduledItemTransfer {
                 }
             }
 
+        }
+    }
+
+    /**
+     * Add an item to an inventory. This more complex method is necessary as CraftBukkit doesn't properly
+     * return leftovers with partial item stacks
+     * @param source The inventory that we move it from
+     * @param target Where to move the item to
+     * @param itemStack The item stack
+     */
+    private void addItem(Inventory source, Inventory target, ItemStack itemStack) {
+        source.remove(itemStack);
+        if (target.firstEmpty() != -1) {
+            target.addItem(itemStack);
+            itemStack.setAmount(0);
+        } else {
+            // CraftBukkit doesn't return leftovers when adding to partial stacks
+            // To work around this we add the items via an array with one item in
+            // each position so that we will get a leftover map in every case
+            ItemStack[] stacks = new ItemStack[itemStack.getAmount()];
+            for (int i = 0; i < itemStack.getAmount(); i++) {
+                ItemStack clone = new ItemStack(itemStack);
+                clone.setAmount(1);
+                stacks[i] = clone;
+            }
+            Map<Integer, ItemStack> rest = target.addItem(stacks);
+            int newAmount = 0;
+            for (ItemStack item : rest.values()) {
+                newAmount += item.getAmount();
+            }
+            itemStack.setAmount(newAmount);
+            if (itemStack.getAmount() > 0) {
+                source.addItem(itemStack);
+                itemStack.setAmount(newAmount); // Need to reset the amount as addItem might change the size
+            }
+        }
+    }
+
+    /**
+     * Add fuel to an inventory that supports fuel
+     * @param inventory
+     * @param itemStack
+     * @return Whether or not the fuel was successfully set
+     */
+    private boolean addFuel(InventoryHolder inputHolder, Inventory inventory, ItemStack itemStack) {
+        ItemStack fuel = getFuel(inventory);
+        if (fuel != null && fuel.isSimilar(itemStack)) {
+            // as you cannot mix two itemstacks with each other, check if the material inserted
+            // has the same type as the fuel that is already in the furnace
+            if (fuel.getMaxStackSize() == -1 || fuel.getAmount() < fuel.getMaxStackSize()) {
+                // there is still room in the furnace
+                int resultSize = itemStack.getAmount() - (fuel.getMaxStackSize() - fuel.getAmount());
+                ItemStack result = itemStack.clone();
+                if (resultSize <= 0) {
+                    inputHolder.getInventory().remove(itemStack);
+
+                    result.setAmount(fuel.getAmount() + itemStack.getAmount());
+                    setFuel(inventory, result);
+
+                    itemStack.setAmount(0);
+                } else {
+                    inputHolder.getInventory().remove(itemStack);
+                    itemStack.setAmount(resultSize);
+                    inputHolder.getInventory().addItem(itemStack);
+
+                    result.setAmount(itemStack.getMaxStackSize());
+                    setFuel(inventory, result);
+
+                    itemStack.setAmount(itemStack.getMaxStackSize() - resultSize);
+                }
+            } else {
+                // the furnace is full, so find continue with the list of outputs
+                // and try to fill one that isnt full
+                return false;
+            }
+        } else if (fuel == null) {
+            // there is no fuel currently in the fuel slot, so simply put it in
+            inputHolder.getInventory().remove(itemStack);
+            setFuel(inventory, itemStack);
+        }
+        return true;
+    }
+
+    private ItemStack getFuel(Inventory inventory) {
+        switch (inventory.getType()) {
+            case BREWING:
+                return ((BrewerInventory) inventory).getFuel();
+            case FURNACE:
+                return ((FurnaceInventory) inventory).getFuel();
+            default:
+                throw new IllegalArgumentException("Inventories of the type " + inventory.getType() + " do not have fuel!");
+        }
+    }
+
+    private void setFuel(Inventory inventory, ItemStack itemStack) {
+        switch (inventory.getType()) {
+            case BREWING:
+                ((BrewerInventory) inventory).setFuel(itemStack);
+                break;
+            case FURNACE:
+                ((FurnaceInventory) inventory).setFuel(itemStack);
+                break;
+            default:
+                throw new IllegalArgumentException("Inventories of the type " + inventory.getType() + " do not have fuel!");
         }
     }
 

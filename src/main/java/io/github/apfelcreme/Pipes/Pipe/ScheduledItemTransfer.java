@@ -84,11 +84,9 @@ public class ScheduledItemTransfer {
         for (ItemStack item : itemQueue) {
             // first: try to place the item in a chest that uses filters. try furnaces first
             List<PipeOutput> outputs = pipe.getOutputs(item);
-            if (!outputs.isEmpty()) {
-                processItemTransfer(pipe, inputHolder, item, outputs);
-                if (item.getAmount() != 0) {
-                    transferredAll = false;
-                }
+            processItemTransfer(pipe, inputHolder, item, outputs);
+            if (item.getAmount() != 0) {
+                transferredAll = false;
             }
         }
         return transferredAll;

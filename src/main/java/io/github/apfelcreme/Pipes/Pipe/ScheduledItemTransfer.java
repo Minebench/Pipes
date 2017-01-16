@@ -192,19 +192,20 @@ public class ScheduledItemTransfer {
                      */
                         // for chests, dropper etc...
                         inputHolder.getInventory().remove(itemStack);
-                        targetHolder.getInventory().addItem(itemStack);
-                        if (itemStack.getAmount() > 0) { // There is a rest
-                            // addItem will change the size of the itemstack when adding it
-                            // back to the inventory -> save it here and reset it later
-                            int restAmount = itemStack.getAmount();
-                            inputHolder.getInventory().addItem(itemStack);
-                            if (itemStack.getAmount() > 0) {
+                        Map<Integer, ItemStack> rest = targetHolder.getInventory().addItem(itemStack);
+                        itemStack.setAmount(0);
+                        for (ItemStack item : rest.values()) {
+                            itemStack.setAmount(itemStack.getAmount() + item.getAmount());
+                        }
+                        if (itemStack.getAmount() > 0) {
+                            Map<Integer, ItemStack> wtfRest = inputHolder.getInventory().addItem(itemStack);
+                            if (!wtfRest.isEmpty()) {
                                 Pipes.getInstance().getLogger().log(Level.WARNING, "Could not add rest items back to input at " + inputLocation + "? Oo Dropping them...");
                                 Location loc = inputLocation.getLocation();
-                                loc.getWorld().dropItemNaturally(loc, itemStack);
-                                return;
+                                for (ItemStack item : wtfRest.values()) {
+                                    loc.getWorld().dropItemNaturally(loc, item);
+                                }
                             }
-                            itemStack.setAmount(restAmount);
                         }
                         break;
                     /*

@@ -25,8 +25,8 @@ import org.bukkit.inventory.ItemStack;
 public class PipeMoveItemEvent extends InventoryMoveItemEvent {
     private final Pipe pipe;
 
-    public PipeMoveItemEvent(Pipe pipe, Inventory sourceInventory, ItemStack itemStack, Inventory destinationInventory, boolean didSourceInitiate) {
-        super(sourceInventory, itemStack, destinationInventory, didSourceInitiate);
+    public PipeMoveItemEvent(Pipe pipe, Inventory sourceInventory, ItemStack itemStack, Inventory destinationInventory) {
+        super(sourceInventory, itemStack, destinationInventory, true);
         this.pipe = pipe;
     }
 

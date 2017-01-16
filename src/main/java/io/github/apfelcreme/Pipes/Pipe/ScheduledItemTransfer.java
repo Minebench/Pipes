@@ -68,6 +68,7 @@ public class ScheduledItemTransfer {
             // Could not find the input block, to not recheck this transfer we return true
             return true;
         }
+
         Queue<ItemStack> itemQueue = new LinkedList<>();
         for (ItemStack itemStack : inputHolder.getInventory()) {
             if (itemStack != null) {
@@ -80,36 +81,39 @@ public class ScheduledItemTransfer {
             detection.addLocation(new SimpleLocation(input.getLocation()));
         }
 
-        boolean transferredAll = true;
-        for (ItemStack item : itemQueue) {
-            // first: try to place the item in a chest that uses filters. try furnaces first
-            List<PipeOutput> outputs = pipe.getOutputs(item);
-            processItemTransfer(pipe, inputHolder, item, outputs);
-            if (item.getAmount() != 0) {
-                transferredAll = false;
-            }
-        }
-        return transferredAll;
-    }
-
-    /**
-     * handles the actual item transfer by trying to place them in one of the given outputs
-     *
-     * @param itemStack the item that shall be transferred
-     * @param outputs   the list of outputs that are checked
-     */
-    private void processItemTransfer(Pipe pipe, InventoryHolder inputHolder, ItemStack itemStack, List<PipeOutput> outputs) {
-        for (PipeOutput output : outputs) {
+        // loop through all outputs as we don't want to desync the blockstates between each item
+        for (PipeOutput output : pipe.getOutputs()) {
             InventoryHolder targetHolder = output.getTargetHolder();
-            if (targetHolder != null && (output.getFilterItems().isEmpty() || PipesUtil.containsSimilar(output.getFilterItems(), itemStack))) {
-                int originalAmount = itemStack.getAmount();
+            if (targetHolder == null) {
+                continue;
+            }
+
+            // loop through all items and check if they should be handled by this output
+            for (ItemStack itemStack : itemQueue) {
+                // we don't need to move empty/already moved itemstacks
+                if (itemStack.getAmount() <= 0) {
+                    continue;
+                }
+
+                // check if output accepts item
+                if (!output.acceptsItem(itemStack)) {
+                    continue;
+                }
+
+                // call move event before doing any moving to check if it was cancelled
+                PipeMoveItemEvent pipeMoveEvent = new PipeMoveItemEvent(pipe, inputHolder.getInventory(),
+                        itemStack, targetHolder.getInventory());
+                Pipes.getInstance().getServer().getPluginManager().callEvent(pipeMoveEvent);
+                if (pipeMoveEvent.isCancelled()) {
+                    continue;
+                }
+
                 switch (targetHolder.getInventory().getType()) {
-                    case FURNACE:
                     /*
                     BEGIN FURNACE
                      */
+                    case FURNACE:
                         // try to put coal etc in the correct place
-
                         switch (itemStack.getType()) {
                             case COAL:
                             case COAL_BLOCK:
@@ -239,17 +243,15 @@ public class ScheduledItemTransfer {
                     END DEFAULT
                      */
                 }
-                if (itemStack.getAmount() != originalAmount) {
-                    PipeMoveItemEvent event = new PipeMoveItemEvent(pipe, inputHolder.getInventory(),
-                            itemStack, targetHolder.getInventory(), true);
-                    Pipes.getInstance().getServer().getPluginManager().callEvent(event);
-                    if (itemStack.getAmount() <= 0) {
-                        return;
-                    }
-                }
             }
-
         }
+
+        for (ItemStack item : itemQueue) {
+            if (item.getAmount() > 0) {
+                return false;
+            }
+        }
+        return true;
     }
 
     /**

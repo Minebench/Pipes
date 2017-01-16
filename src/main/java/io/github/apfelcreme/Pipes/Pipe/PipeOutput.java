@@ -1,6 +1,7 @@
 package io.github.apfelcreme.Pipes.Pipe;
 
 import io.github.apfelcreme.Pipes.PipesItem;
+import io.github.apfelcreme.Pipes.PipesUtil;
 import org.bukkit.block.Block;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
@@ -109,5 +110,10 @@ public class PipeOutput {
             return false;
         return !(targetLocation != null ? !targetLocation.equals(that.targetLocation) : that.targetLocation != null);
 
+    }
+
+    public boolean acceptsItem(ItemStack itemStack) {
+        List<ItemStack> filterItems = getFilterItems();
+        return filterItems.isEmpty() || PipesUtil.containsSimilar(filterItems, itemStack);
     }
 }

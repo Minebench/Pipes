@@ -209,12 +209,23 @@ public class PipesUtil {
      * @return true if there is an item stack of the same type with the same data. Amount may vary
      */
     public static boolean containsSimilar(List<ItemStack> items, ItemStack itemStack) {
+        return getFirstSimilar(items, itemStack) != null;
+    }
+
+    /**
+     * checks if the given list of items contains an item stack similar to the given item stack and returns the first one
+     *
+     * @param items     a list of item stacks
+     * @param itemStack an item stack
+     * @return The first itemstack matching this one or null if none was found
+     */
+    public static ItemStack getFirstSimilar(List<ItemStack> items, ItemStack itemStack) {
         for (ItemStack item : items) {
             if (item.getType() == itemStack.getType() && item.getData().equals(itemStack.getData())) {
-                return true;
+                return item;
             }
         }
-        return false;
+        return null;
     }
 
     /**

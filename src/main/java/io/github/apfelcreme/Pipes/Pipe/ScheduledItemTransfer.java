@@ -192,19 +192,28 @@ public class ScheduledItemTransfer {
                      */
                         // for chests, dropper etc...
                         inputHolder.getInventory().remove(itemStack);
-                        Map<Integer, ItemStack> rest = targetHolder.getInventory().addItem(itemStack);
-                        itemStack.setAmount(0);
-                        for (ItemStack item : rest.values()) {
-                            itemStack.setAmount(itemStack.getAmount() + item.getAmount());
-                        }
-                        if (itemStack.getAmount() > 0) {
-                            Map<Integer, ItemStack> wtfRest = inputHolder.getInventory().addItem(itemStack);
-                            if (!wtfRest.isEmpty()) {
-                                Pipes.getInstance().getLogger().log(Level.WARNING, "Could not add rest items back to input at " + inputLocation + "? Oo Dropping them...");
-                                Location loc = inputLocation.getLocation();
-                                for (ItemStack item : wtfRest.values()) {
-                                    loc.getWorld().dropItemNaturally(loc, item);
-                                }
+                        if (inputHolder.getInventory().firstEmpty() != -1) {
+                            inputHolder.getInventory().addItem(itemStack);
+                            itemStack.setAmount(0);
+                        } else {
+                            // CraftBukkit doesn't return leftovers when adding to partial stacks
+                            // To work around this we add the items via an array with one item in
+                            // each position so that we will get a leftover map in every case
+                            ItemStack[] stacks = new ItemStack[itemStack.getAmount()];
+                            for (int i = 0; i < itemStack.getAmount(); i++) {
+                                ItemStack clone = new ItemStack(itemStack);
+                                clone.setAmount(1);
+                                stacks[i] = clone;
+                            }
+                            Map<Integer, ItemStack> rest = targetHolder.getInventory().addItem(stacks);
+                            int newAmount = 0;
+                            for (ItemStack item : rest.values()) {
+                                newAmount += item.getAmount();
+                            }
+                            itemStack.setAmount(newAmount);
+                            if (itemStack.getAmount() > 0) {
+                                inputHolder.getInventory().addItem(itemStack);
+                                itemStack.setAmount(newAmount); // Need to reset the amount as addItem might change the size
                             }
                         }
                         break;

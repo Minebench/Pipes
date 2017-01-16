@@ -16,6 +16,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Queue;
+import java.util.logging.Level;
 
 /**
  * Copyright (C) 2016 Lord36 aka Apfelcreme
@@ -190,12 +191,20 @@ public class ScheduledItemTransfer {
                     BEGIN DEFAULT
                      */
                         // for chests, dropper etc...
-                        if (targetHolder.getInventory().firstEmpty() != -1) {
-                            inputHolder.getInventory().remove(itemStack);
-                            Map<Integer, ItemStack> rest = targetHolder.getInventory().addItem(itemStack);
-                            itemStack.setAmount(0);
-                            for (ItemStack item : rest.values()) {
-                                itemStack.setAmount(itemStack.getAmount() + item.getAmount());
+                        inputHolder.getInventory().remove(itemStack);
+                        Map<Integer, ItemStack> rest = targetHolder.getInventory().addItem(itemStack);
+                        itemStack.setAmount(0);
+                        for (ItemStack item : rest.values()) {
+                            itemStack.setAmount(itemStack.getAmount() + item.getAmount());
+                        }
+                        if (itemStack.getAmount() > 0) {
+                            Map<Integer, ItemStack> wtfRest = inputHolder.getInventory().addItem(itemStack);
+                            if (!wtfRest.isEmpty()) {
+                                Pipes.getInstance().getLogger().log(Level.WARNING, "Could not add rest items back to input at " + inputLocation + "? Oo Dropping them...");
+                                Location loc = inputLocation.getLocation();
+                                for (ItemStack item : wtfRest.values()) {
+                                    loc.getWorld().dropItemNaturally(loc, item);
+                                }
                             }
                         }
                         break;

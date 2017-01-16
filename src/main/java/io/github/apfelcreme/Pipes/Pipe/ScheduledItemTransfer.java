@@ -203,15 +203,15 @@ public class ScheduledItemTransfer {
                                 while (firstEmpty != -1 && firstEmpty < 3 && itemStack.getAmount() > 0) {
                                     inputHolder.getInventory().remove(itemStack);
                                     ItemStack result = new ItemStack(itemStack);
-                                    if (itemStack.getAmount() > 1) {
-                                        int newAmount = itemStack.getAmount() - 1;
-                                        itemStack.setAmount(newAmount);
-                                        result.setAmount(1);
+                                    int newAmount = itemStack.getAmount() - 1;
+                                    itemStack.setAmount(newAmount);
+                                    result.setAmount(1);
+                                    brewerInventory.setItem(firstEmpty, result);
+                                    if (newAmount > 0) {
                                         inputHolder.getInventory().addItem(itemStack);
                                         itemStack.setAmount(newAmount); // Inventory#addItem might change the amount...
+                                        firstEmpty = brewerInventory.firstEmpty();
                                     }
-                                    brewerInventory.setItem(firstEmpty, result);
-                                    firstEmpty = brewerInventory.firstEmpty();
                                 }
                                 break;
                             default:

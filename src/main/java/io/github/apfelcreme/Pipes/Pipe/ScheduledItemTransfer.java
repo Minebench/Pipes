@@ -105,6 +105,8 @@ public class ScheduledItemTransfer {
                 continue;
             }
 
+            Inventory targetInventory = targetHolder.getInventory();
+
             List<ItemStack> filterItems = output.getFilterItems();
 
             // loop through all items and check if they should be handled by this output
@@ -126,13 +128,13 @@ public class ScheduledItemTransfer {
 
                 // call move event before doing any moving to check if it was cancelled
                 PipeMoveItemEvent pipeMoveEvent = new PipeMoveItemEvent(pipe, inputHolder.getInventory(),
-                        itemStack, targetHolder.getInventory());
+                        itemStack, targetInventory);
                 Pipes.getInstance().getServer().getPluginManager().callEvent(pipeMoveEvent);
                 if (pipeMoveEvent.isCancelled()) {
                     continue;
                 }
 
-                switch (targetHolder.getInventory().getType()) {
+                switch (targetInventory.getType()) {
                     /*
                     BEGIN FURNACE
                      */
@@ -143,11 +145,11 @@ public class ScheduledItemTransfer {
                             case COAL_BLOCK:
                             case LAVA_BUCKET:
                                 // the transported item is either coal, or a coal block or a lava bucket
-                                addFuel(inputHolder, targetHolder.getInventory(), itemStack);
+                                addFuel(inputHolder, targetInventory, itemStack);
                                 break;
                             default:
                                 // the item is anything but a fuel (at least what we regard a fuel)
-                                FurnaceInventory furnaceInventory = (FurnaceInventory) targetHolder.getInventory();
+                                FurnaceInventory furnaceInventory = (FurnaceInventory) targetInventory;
                                 ItemStack smelting = furnaceInventory.getSmelting();
                                 if (smelting == null) {
                                     inputHolder.getInventory().remove(itemStack);
@@ -188,7 +190,7 @@ public class ScheduledItemTransfer {
                     BEGIN BREWING STAND
                      */
                     case BREWING:
-                        BrewerInventory brewerInventory = (BrewerInventory) targetHolder.getInventory();
+                        BrewerInventory brewerInventory = (BrewerInventory) targetInventory;
                         switch (itemStack.getType()) {
                             case BLAZE_POWDER:
                                 // the transported item is fuel
@@ -249,7 +251,7 @@ public class ScheduledItemTransfer {
                             case EMERALD:
                             case GOLD_INGOT:
                             case IRON_INGOT:
-                                addItem(inputHolder.getInventory(), targetHolder.getInventory(), itemStack);
+                                addItem(inputHolder.getInventory(), targetInventory, itemStack);
                                 break;
                         }
                         break;
@@ -261,7 +263,7 @@ public class ScheduledItemTransfer {
                      */
                     default:
                         // for chests, dropper etc...
-                        addItem(inputHolder.getInventory(), targetHolder.getInventory(), itemStack);
+                        addItem(inputHolder.getInventory(), targetInventory, itemStack);
                         break;
                     /*
                     END DEFAULT

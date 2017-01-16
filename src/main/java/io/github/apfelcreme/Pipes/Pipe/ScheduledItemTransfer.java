@@ -192,8 +192,8 @@ public class ScheduledItemTransfer {
                      */
                         // for chests, dropper etc...
                         inputHolder.getInventory().remove(itemStack);
-                        if (inputHolder.getInventory().firstEmpty() != -1) {
-                            inputHolder.getInventory().addItem(itemStack);
+                        if (targetHolder.getInventory().firstEmpty() != -1) {
+                            targetHolder.getInventory().addItem(itemStack);
                             itemStack.setAmount(0);
                         } else {
                             // CraftBukkit doesn't return leftovers when adding to partial stacks

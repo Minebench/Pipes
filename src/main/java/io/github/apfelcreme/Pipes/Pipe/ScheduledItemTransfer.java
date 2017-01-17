@@ -226,7 +226,7 @@ public class ScheduledItemTransfer {
                 }
             }
 
-            if (itemStack.getAmount() > 0) {
+            if (transferredAll && itemStack.getAmount() > 0) {
                 transferredAll = false;
             }
         }

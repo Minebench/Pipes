@@ -71,6 +71,8 @@ public class ScheduledItemTransfer {
             return true;
         }
 
+        Inventory inputInventory = inputHolder.getInventory();
+
         Queue<ItemStack> itemQueue = new LinkedList<>();
         for (ItemStack itemStack : inputHolder.getInventory()) {
             if (itemStack != null) {
@@ -145,39 +147,20 @@ public class ScheduledItemTransfer {
                             case COAL_BLOCK:
                             case LAVA_BUCKET:
                                 // the transported item is either coal, or a coal block or a lava bucket
-                                addFuel(inputHolder, targetInventory, itemStack);
+                                addFuel(inputInventory, targetInventory, itemStack);
                                 break;
                             default:
                                 // the item is anything but a fuel (at least what we regard a fuel)
                                 FurnaceInventory furnaceInventory = (FurnaceInventory) targetInventory;
                                 ItemStack smelting = furnaceInventory.getSmelting();
                                 if (smelting == null) {
-                                    inputHolder.getInventory().remove(itemStack);
+                                    inputInventory.removeItem(new ItemStack(itemStack));
                                     furnaceInventory.setSmelting(itemStack);
+                                    itemStack.setAmount(0);
                                 } else if (smelting.isSimilar(itemStack)) {
-                                    // as you cannot mix two itemstacks with each other, check if the material inserted
-                                    // has the same type as the fuel that is already in the furnace
-                                    if (smelting.getMaxStackSize() == -1 || smelting.getAmount() < smelting.getMaxStackSize()) {
-                                        // there is still room in the furnace
-                                        int resultSize = itemStack.getAmount() - (smelting.getMaxStackSize() - smelting.getAmount());
-                                        ItemStack result = itemStack.clone();
-                                        if (resultSize <= 0) {
-                                            inputHolder.getInventory().remove(itemStack);
-
-                                            result.setAmount(smelting.getAmount() + itemStack.getAmount());
-                                            furnaceInventory.setSmelting(result);
-
-                                            itemStack.setAmount(0);
-                                        } else {
-                                            inputHolder.getInventory().remove(itemStack);
-                                            itemStack.setAmount(resultSize);
-                                            inputHolder.getInventory().addItem(itemStack);
-
-                                            result.setAmount(itemStack.getMaxStackSize());
-                                            furnaceInventory.setSmelting(result);
-
-                                            itemStack.setAmount(itemStack.getMaxStackSize() - resultSize);
-                                        }
+                                    ItemStack itemToSet = moveToSingleSlot(inputInventory, smelting, itemStack);
+                                    if (itemToSet != null) {
+                                        furnaceInventory.setSmelting(itemToSet);
                                     }
                                 }
                                 break;
@@ -194,7 +177,7 @@ public class ScheduledItemTransfer {
                         switch (itemStack.getType()) {
                             case BLAZE_POWDER:
                                 // the transported item is fuel
-                                if (!addFuel(inputHolder, brewerInventory, itemStack)) {
+                                if (!addFuel(inputInventory, brewerInventory, itemStack)) {
                                     continue;
                                 }
                                 break;
@@ -203,15 +186,16 @@ public class ScheduledItemTransfer {
                             case LINGERING_POTION:
                                 int firstEmpty = brewerInventory.firstEmpty();
                                 while (firstEmpty != -1 && firstEmpty < 3 && itemStack.getAmount() > 0) {
-                                    inputHolder.getInventory().remove(itemStack);
-                                    ItemStack result = new ItemStack(itemStack);
                                     int newAmount = itemStack.getAmount() - 1;
+                                    ItemStack remove = new ItemStack(itemStack);
+                                    remove.setAmount(1);
+                                    inputInventory.removeItem(remove);
                                     itemStack.setAmount(newAmount);
+
+                                    ItemStack result = new ItemStack(itemStack);
                                     result.setAmount(1);
                                     brewerInventory.setItem(firstEmpty, result);
                                     if (newAmount > 0) {
-                                        inputHolder.getInventory().addItem(itemStack);
-                                        itemStack.setAmount(newAmount); // Inventory#addItem might change the amount...
                                         firstEmpty = brewerInventory.firstEmpty();
                                     }
                                 }
@@ -219,21 +203,13 @@ public class ScheduledItemTransfer {
                             default:
                                 ItemStack ingredient = brewerInventory.getIngredient();
                                 if (ingredient == null) {
-                                    inputHolder.getInventory().remove(itemStack);
+                                    inputInventory.removeItem(new ItemStack(itemStack));
                                     brewerInventory.setIngredient(itemStack);
                                     itemStack.setAmount(0);
                                 } else if (ingredient.isSimilar(itemStack)) {
-                                    // as you cannot mix two itemstacks with each other, check if the material inserted
-                                    // has the same type as the ingredient that is already in the brewingstand
-                                    if (ingredient.getMaxStackSize() == -1 || ingredient.getAmount() < ingredient.getMaxStackSize()) {
-                                        int rest = itemStack.getMaxStackSize() - ingredient.getAmount();
-                                        inputHolder.getInventory().remove(itemStack);
-
-                                        ingredient.setAmount(ingredient.getMaxStackSize());
-                                        brewerInventory.setIngredient(ingredient);
-
-                                        itemStack.setAmount(rest);
-                                        inputHolder.getInventory().addItem(itemStack);
+                                    ItemStack itemToSet = moveToSingleSlot(inputInventory, ingredient, itemStack);
+                                    if (itemToSet != null) {
+                                        brewerInventory.setIngredient(itemToSet);
                                     }
                                 }
                                 break;
@@ -321,43 +297,52 @@ public class ScheduledItemTransfer {
      * @param itemStack
      * @return Whether or not the fuel was successfully set
      */
-    private boolean addFuel(InventoryHolder inputHolder, Inventory inventory, ItemStack itemStack) {
+    private boolean addFuel(Inventory sourceInventory, Inventory inventory, ItemStack itemStack) {
         ItemStack fuel = getFuel(inventory);
         if (fuel != null && fuel.isSimilar(itemStack)) {
-            // as you cannot mix two itemstacks with each other, check if the material inserted
-            // has the same type as the fuel that is already in the furnace
-            if (fuel.getMaxStackSize() == -1 || fuel.getAmount() < fuel.getMaxStackSize()) {
-                // there is still room in the furnace
-                int resultSize = itemStack.getAmount() - (fuel.getMaxStackSize() - fuel.getAmount());
-                ItemStack result = itemStack.clone();
-                if (resultSize <= 0) {
-                    inputHolder.getInventory().remove(itemStack);
-
-                    result.setAmount(fuel.getAmount() + itemStack.getAmount());
-                    setFuel(inventory, result);
-
-                    itemStack.setAmount(0);
-                } else {
-                    inputHolder.getInventory().remove(itemStack);
-                    itemStack.setAmount(resultSize);
-                    inputHolder.getInventory().addItem(itemStack);
-
-                    result.setAmount(itemStack.getMaxStackSize());
-                    setFuel(inventory, result);
-
-                    itemStack.setAmount(itemStack.getMaxStackSize() - resultSize);
-                }
-            } else {
-                // the furnace is full, so find continue with the list of outputs
-                // and try to fill one that isnt full
+            ItemStack itemToSet = moveToSingleSlot(sourceInventory, fuel, itemStack);
+            if (itemToSet == null) {
                 return false;
             }
+
+            setFuel(inventory, itemStack);
         } else if (fuel == null) {
             // there is no fuel currently in the fuel slot, so simply put it in
-            inputHolder.getInventory().remove(itemStack);
+            sourceInventory.remove(itemStack);
             setFuel(inventory, itemStack);
         }
         return true;
+    }
+
+    private ItemStack moveToSingleSlot(Inventory sourceInventory, ItemStack current, ItemStack added) {
+        // as you cannot mix two itemstacks with each other, check if the material inserted
+        // has the same type as the fuel that is already in current slot
+        if (current.getMaxStackSize() == -1 || current.getAmount() < current.getMaxStackSize()) {
+            // there is still room in the slot
+            int remaining = current.getMaxStackSize() - current.getAmount();
+            int restSize = added.getAmount() - remaining;
+
+            if (restSize > 0) {
+                ItemStack remove = new ItemStack(added);
+                remove.setAmount(remaining);
+                sourceInventory.removeItem(remove);
+                added.setAmount(restSize);
+
+                current.setAmount(current.getMaxStackSize());
+            } else {
+                sourceInventory.removeItem(new ItemStack(added));
+
+                current.setAmount(current.getAmount() + added.getAmount());
+
+                added.setAmount(0);
+            }
+
+            return current;
+        }
+
+        // the inventory is full, so find continue with the list of outputs
+        // and try to fill one that isnt full
+        return null;
     }
 
     private ItemStack getFuel(Inventory inventory) {

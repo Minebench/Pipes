@@ -283,10 +283,10 @@ public class ScheduledItemTransfer {
                 return false;
             }
 
-            setFuel(target, itemStack);
+            setFuel(target, itemToSet);
         } else if (fuel == null) {
             // there is no fuel currently in the fuel slot, so simply put it in
-            source.remove(itemStack);
+            source.removeItem(itemStack);
             setFuel(target, itemStack);
         }
         return true;
@@ -295,10 +295,10 @@ public class ScheduledItemTransfer {
     private ItemStack moveToSingleSlot(Inventory source, ItemStack current, ItemStack added) {
         // as you cannot mix two itemstacks with each other, check if the material inserted
         // has the same type as the fuel that is already in current slot
-        if (current.getMaxStackSize() == -1 || current.getAmount() < current.getMaxStackSize()) {
+        if (current.getAmount() < current.getMaxStackSize()) {
             // there is still room in the slot
-            int remaining = current.getMaxStackSize() - current.getAmount();
-            int restSize = added.getAmount() - remaining;
+            int remaining = current.getMaxStackSize() - current.getAmount(); // amount of room in the slot
+            int restSize = added.getAmount() - remaining; // amount of overflowing items
 
             if (restSize > 0) {
                 ItemStack remove = new ItemStack(added);

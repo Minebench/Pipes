@@ -85,6 +85,8 @@ public class ScheduledItemTransfer {
             detection.addLocation(new SimpleLocation(input.getLocation()));
         }
 
+        boolean transferredAll = true;
+
         // loop through all items and check if they should be handled by this output
         for (ItemStack itemStack : itemQueue) {
 
@@ -223,14 +225,13 @@ public class ScheduledItemTransfer {
                      */
                 }
             }
-        }
 
-        for (ItemStack item : itemQueue) {
-            if (item.getAmount() > 0) {
-                return false;
+            if (itemStack.getAmount() > 0) {
+                transferredAll = false;
             }
         }
-        return true;
+
+        return transferredAll;
     }
 
     /**

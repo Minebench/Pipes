@@ -169,10 +169,12 @@ public class ScheduledItemTransfer {
                                     ItemStack remove = new ItemStack(itemStack);
                                     remove.setAmount(1);
                                     inputInventory.removeItem(remove);
-                                    itemStack.setAmount(itemStack.getAmount() - 1);
 
                                     ItemStack result = new ItemStack(itemStack);
                                     result.setAmount(1);
+
+                                    itemStack.setAmount(itemStack.getAmount() - 1);
+
                                     brewerInventory.setItem(firstEmpty, result);
                                     if (itemStack.getAmount() > 0) {
                                         firstEmpty = brewerInventory.firstEmpty();

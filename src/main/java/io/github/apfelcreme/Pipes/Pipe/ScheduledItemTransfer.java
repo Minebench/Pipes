@@ -85,49 +85,27 @@ public class ScheduledItemTransfer {
             detection.addLocation(new SimpleLocation(input.getLocation()));
         }
 
-        Set<ItemStack> filteredItems = new HashSet<>();
-        for (PipeOutput output : pipe.getOutputs()) {
-            if (!output.isPowered()) { // powered outputs are not counted
-                List<ItemStack> filterItems = output.getFilterItems();
-                if (!filterItems.isEmpty()) {
-                    filteredItems.addAll(filterItems);
-                }
-            }
-        }
+        // loop through all items and check if they should be handled by this output
+        for (ItemStack itemStack : itemQueue) {
 
-        // loop through all outputs as we don't want to desync the blockstates between each item
-        for (PipeOutput output : pipe.getOutputs()) {
-            // check if the pipe output is powered, if so don't try to put items in it
-            if (output.isPowered()) {
-                continue;
-            }
-
-            InventoryHolder targetHolder = output.getTargetHolder();
-            if (targetHolder == null) {
-                continue;
-            }
-
-            Inventory targetInventory = targetHolder.getInventory();
-
-            List<ItemStack> filterItems = output.getFilterItems();
-
-            // loop through all items and check if they should be handled by this output
-            for (ItemStack itemStack : itemQueue) {
+            // loop through all outputs
+            for (PipeOutput output : pipe.getOutputs(itemStack)) {
                 // we don't need to move empty/already moved itemstacks
                 if (itemStack.getAmount() <= 0) {
                     continue;
                 }
 
-                if (filterItems.isEmpty()) {
-                    // if this output doesn't filter then check if another one wants this item
-                    if (!filteredItems.isEmpty() && PipesUtil.containsSimilar(filteredItems, itemStack)) {
-                        continue;
-                    }
-                } else if (!PipesUtil.containsSimilar(filterItems, itemStack)) {
-                    // check if output accepts this item
+                // check if the pipe output is powered, if so don't try to put items in it
+                if (output.isPowered()) {
                     continue;
                 }
 
+                InventoryHolder targetHolder = output.getTargetHolder();
+                if (targetHolder == null) {
+                    continue;
+                }
+
+                Inventory targetInventory = targetHolder.getInventory();
                 // call move event before doing any moving to check if it was cancelled
                 PipeMoveItemEvent pipeMoveEvent = new PipeMoveItemEvent(pipe, inputHolder.getInventory(),
                         itemStack, targetInventory);
@@ -186,16 +164,15 @@ public class ScheduledItemTransfer {
                             case LINGERING_POTION:
                                 int firstEmpty = brewerInventory.firstEmpty();
                                 while (firstEmpty != -1 && firstEmpty < 3 && itemStack.getAmount() > 0) {
-                                    int newAmount = itemStack.getAmount() - 1;
                                     ItemStack remove = new ItemStack(itemStack);
                                     remove.setAmount(1);
                                     inputInventory.removeItem(remove);
-                                    itemStack.setAmount(newAmount);
+                                    itemStack.setAmount(itemStack.getAmount() - 1);
 
                                     ItemStack result = new ItemStack(itemStack);
                                     result.setAmount(1);
                                     brewerInventory.setItem(firstEmpty, result);
-                                    if (newAmount > 0) {
+                                    if (itemStack.getAmount() > 0) {
                                         firstEmpty = brewerInventory.firstEmpty();
                                     }
                                 }
@@ -264,7 +241,7 @@ public class ScheduledItemTransfer {
      * @param itemStack The item stack
      */
     private void addItem(Inventory source, Inventory target, ItemStack itemStack) {
-        source.remove(itemStack);
+        source.removeItem(itemStack);
         if (target.firstEmpty() != -1) {
             target.addItem(itemStack);
             itemStack.setAmount(0);
@@ -293,28 +270,29 @@ public class ScheduledItemTransfer {
 
     /**
      * Add fuel to an inventory that supports fuel
-     * @param inventory
-     * @param itemStack
+     * @param source The inventory that we move it from
+     * @param target Where to move the item to
+     * @param itemStack The item stack
      * @return Whether or not the fuel was successfully set
      */
-    private boolean addFuel(Inventory sourceInventory, Inventory inventory, ItemStack itemStack) {
-        ItemStack fuel = getFuel(inventory);
+    private boolean addFuel(Inventory source, Inventory target, ItemStack itemStack) {
+        ItemStack fuel = getFuel(target);
         if (fuel != null && fuel.isSimilar(itemStack)) {
-            ItemStack itemToSet = moveToSingleSlot(sourceInventory, fuel, itemStack);
+            ItemStack itemToSet = moveToSingleSlot(source, fuel, itemStack);
             if (itemToSet == null) {
                 return false;
             }
 
-            setFuel(inventory, itemStack);
+            setFuel(target, itemStack);
         } else if (fuel == null) {
             // there is no fuel currently in the fuel slot, so simply put it in
-            sourceInventory.remove(itemStack);
-            setFuel(inventory, itemStack);
+            source.remove(itemStack);
+            setFuel(target, itemStack);
         }
         return true;
     }
 
-    private ItemStack moveToSingleSlot(Inventory sourceInventory, ItemStack current, ItemStack added) {
+    private ItemStack moveToSingleSlot(Inventory source, ItemStack current, ItemStack added) {
         // as you cannot mix two itemstacks with each other, check if the material inserted
         // has the same type as the fuel that is already in current slot
         if (current.getMaxStackSize() == -1 || current.getAmount() < current.getMaxStackSize()) {
@@ -325,12 +303,12 @@ public class ScheduledItemTransfer {
             if (restSize > 0) {
                 ItemStack remove = new ItemStack(added);
                 remove.setAmount(remaining);
-                sourceInventory.removeItem(remove);
+                source.removeItem(remove);
                 added.setAmount(restSize);
 
                 current.setAmount(current.getMaxStackSize());
             } else {
-                sourceInventory.removeItem(new ItemStack(added));
+                source.removeItem(new ItemStack(added));
 
                 current.setAmount(current.getAmount() + added.getAmount());
 

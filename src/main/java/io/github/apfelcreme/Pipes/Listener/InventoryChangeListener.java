@@ -48,7 +48,7 @@ public class InventoryChangeListener implements Listener {
 
     @EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = true)
     private void onInventoryItemMove(final InventoryMoveItemEvent event) {
-        if (!(event instanceof PipeMoveItemEvent) && !handleInventoryAction(event.getDestination(), true)) {
+        if (!handleInventoryAction(event.getDestination(), true)) {
             event.setCancelled(true);
         }
     }

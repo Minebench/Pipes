@@ -6,6 +6,8 @@ import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.block.Dispenser;
 import org.bukkit.block.Dropper;
+import org.bukkit.inventory.BrewerInventory;
+import org.bukkit.inventory.FurnaceInventory;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
@@ -13,6 +15,7 @@ import org.bukkit.material.DirectionalContainer;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.regex.Pattern;
 
 /**
@@ -281,4 +284,138 @@ public class PipesUtil {
         return PipesItem.CHUNK_LOADER.toItemStack();
     }
 
+    /**
+     * Set the fuel of an inventory (currently either of type BREWING or FURNACE)
+     * @param inventory The inventory that accepts fuel
+     * @param itemStack The item that should be placed as fuel
+     */
+    public static void setFuel(Inventory inventory, ItemStack itemStack) {
+        switch (inventory.getType()) {
+            case BREWING:
+                ((BrewerInventory) inventory).setFuel(itemStack);
+                break;
+            case FURNACE:
+                ((FurnaceInventory) inventory).setFuel(itemStack);
+                break;
+            default:
+                throw new IllegalArgumentException("Inventories of the type " + inventory.getType() + " do not have fuel!");
+        }
+    }
+
+    /**
+     * Get the fuel of an inventory (currently either of type BREWING or FURNACE)
+     * @param inventory The inventory that accepts fuel
+     */
+    public static ItemStack getFuel(Inventory inventory) {
+        switch (inventory.getType()) {
+            case BREWING:
+                return ((BrewerInventory) inventory).getFuel();
+            case FURNACE:
+                return ((FurnaceInventory) inventory).getFuel();
+            default:
+                throw new IllegalArgumentException("Inventories of the type " + inventory.getType() + " do not have fuel!");
+        }
+    }
+
+    /**
+     * Add an item to an inventory. This more complex method is necessary as CraftBukkit doesn't properly
+     * return leftovers with partial item stacks
+     * @param source The inventory that we move it from
+     * @param target Where to move the item to
+     * @param itemStack The item stack
+     */
+    public static void addItem(Inventory source, Inventory target, ItemStack itemStack) {
+        source.removeItem(itemStack);
+        if (target.firstEmpty() != -1) {
+            target.addItem(itemStack);
+            itemStack.setAmount(0);
+        } else {
+            // CraftBukkit doesn't return leftovers when adding to partial stacks
+            // To work around this we add the items via an array with one item in
+            // each position so that we will get a leftover map in every case
+            ItemStack[] stacks = new ItemStack[itemStack.getAmount()];
+            for (int i = 0; i < itemStack.getAmount(); i++) {
+                ItemStack clone = new ItemStack(itemStack);
+                clone.setAmount(1);
+                stacks[i] = clone;
+            }
+            Map<Integer, ItemStack> rest = target.addItem(stacks);
+            int newAmount = 0;
+            for (ItemStack item : rest.values()) {
+                newAmount += item.getAmount();
+            }
+            itemStack.setAmount(newAmount);
+            if (itemStack.getAmount() > 0) {
+                source.addItem(itemStack);
+                itemStack.setAmount(newAmount); // Need to reset the amount as addItem might change the size
+            }
+        }
+    }
+
+    /**
+     * Add fuel to an inventory that supports fuel
+     * @param source The inventory that we move it from
+     * @param target Where to move the item to
+     * @param itemStack The item stack
+     * @return Whether or not the fuel was successfully set
+     */
+    public static boolean addFuel(Inventory source, Inventory target, ItemStack itemStack) {
+        ItemStack fuel = getFuel(target);
+        if (fuel != null && fuel.isSimilar(itemStack)) {
+            ItemStack itemToSet = moveToSingleSlot(source, fuel, itemStack);
+            if (itemToSet == null) {
+                return false;
+            }
+
+            setFuel(target, itemToSet);
+        } else if (fuel == null) {
+            // there is no fuel currently in the fuel slot, so simply put it in
+            source.removeItem(itemStack);
+            setFuel(target, itemStack);
+        }
+        return true;
+    }
+
+    /**
+     * Calculate the result itemstack that should be moved to a single slot containing some item
+     * @param source The inventory the added item is coming from
+     * @param current The current item in the target inventory
+     * @param added The item to be added to the target
+     * @return The item stack that should be added to the target inventory
+     */
+    public static ItemStack moveToSingleSlot(Inventory source, ItemStack current, ItemStack added) {
+        if (current == null || current.getAmount() == 0) {
+            current = new ItemStack(added);
+            added.setAmount(0);
+            return current;
+        } else if (current.getAmount() < current.getMaxStackSize()) {
+            // as you cannot mix two itemstacks with each other, check if the material inserted
+            // has the same type as the fuel that is already in current slot
+
+            // there is still room in the slot
+            int remaining = current.getMaxStackSize() - current.getAmount(); // amount of room in the slot
+            int restSize = added.getAmount() - remaining; // amount of overflowing items
+
+            if (restSize > 0) {
+                ItemStack remove = new ItemStack(added);
+                remove.setAmount(remaining);
+                source.removeItem(remove);
+                added.setAmount(restSize);
+
+                current.setAmount(current.getMaxStackSize());
+            } else {
+                source.removeItem(new ItemStack(added));
+
+                current.setAmount(current.getAmount() + added.getAmount());
+
+                added.setAmount(0);
+            }
+
+            return current;
+        }
+
+        // the inventory is full, so find continue with the list of outputs
+        // and try to fill one that isnt full
+        return null;
+    }
 }

@@ -1,14 +1,12 @@
 package io.github.apfelcreme.Pipes.Listener;
 
 import io.github.apfelcreme.Pipes.Event.PipeMoveItemEvent;
-import io.github.apfelcreme.Pipes.Exception.ChunkNotLoadedException;
 import io.github.apfelcreme.Pipes.Manager.PipeManager;
 import io.github.apfelcreme.Pipes.Pipe.Pipe;
 import io.github.apfelcreme.Pipes.Pipe.PipeInput;
 import io.github.apfelcreme.Pipes.Pipe.SimpleLocation;
 import io.github.apfelcreme.Pipes.Pipes;
 import io.github.apfelcreme.Pipes.Manager.ItemMoveScheduler;
-import io.github.apfelcreme.Pipes.Pipe.ScheduledItemTransfer;
 import io.github.apfelcreme.Pipes.PipesItem;
 import io.github.apfelcreme.Pipes.PipesUtil;
 import org.bukkit.block.Block;
@@ -79,7 +77,7 @@ public class InventoryChangeListener implements Listener {
         if (!PipesItem.PIPE_INPUT.check(dispenserBlock)) {
             return true;
         }
-        SimpleLocation dispenserLocation = new SimpleLocation(dispenserBlock.getLocation());
+        final SimpleLocation dispenserLocation = new SimpleLocation(dispenserBlock.getLocation());
 
         Pipe pipe = PipeManager.getInstance().getPipe(dispenserLocation);
         if (pipe == null) {
@@ -87,16 +85,15 @@ public class InventoryChangeListener implements Listener {
         }
         PipeInput pipeInput = pipe.getInput(dispenserLocation);
         if (pipeInput != null) {
-            final ScheduledItemTransfer transfer = new ScheduledItemTransfer(dispenserLocation);
             if (scheduled) {
                 new BukkitRunnable() {
                     @Override
                     public void run() {
-                        ItemMoveScheduler.getInstance().add(transfer);
+                        ItemMoveScheduler.getInstance().add(dispenserLocation);
                     }
                 }.runTaskLater(plugin, 2);
             } else {
-                ItemMoveScheduler.getInstance().add(transfer);
+                ItemMoveScheduler.getInstance().add(dispenserLocation);
             }
         }
         return true;

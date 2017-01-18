@@ -159,7 +159,14 @@ public class SimpleLocation {
 
     @Override
     public int hashCode() {
-        return toString().hashCode();
+        int hash = 42;
+
+        hash = 31 * hash + worldName.hashCode();
+        hash = 23 * hash + x;
+        hash = 23 * hash + y;
+        hash = 23 * hash + z;
+        return hash;
+
     }
 
     @Override

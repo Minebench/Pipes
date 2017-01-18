@@ -42,7 +42,7 @@ public class ItemMoveScheduler {
     /**
      * the queue that holds the items that are waiting to be transferred
      */
-    private List<ScheduledItemTransfer> scheduledItemTransfers;
+    private Set<ScheduledItemTransfer> scheduledItemTransfers;
 
     /**
      * the number of consecutive runs without any transfers (cancels at 4)
@@ -56,7 +56,7 @@ public class ItemMoveScheduler {
 
     private ItemMoveScheduler() {
         taskId = -1;
-        scheduledItemTransfers = new ArrayList<>();
+        scheduledItemTransfers = new LinkedHashSet<>();
         emptyRuns = 0;
     }
 
@@ -129,7 +129,7 @@ public class ItemMoveScheduler {
         }
     }
 
-    public List<ScheduledItemTransfer> getTransfers() {
+    public Set<ScheduledItemTransfer> getTransfers() {
         return scheduledItemTransfers;
     }
 

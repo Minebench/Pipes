@@ -123,6 +123,11 @@ public class ItemMoveScheduler {
         }
 
         PipeInput input = pipe.getInput(simpleLocation);
+        if (input == null) {
+            // Could not find an input at that location, to not recheck this transfer we return true
+            return true;
+        }
+
         InventoryHolder inputHolder = input.getHolder();
         if (inputHolder == null) {
             // Could not find the input block, to not recheck this transfer we return true

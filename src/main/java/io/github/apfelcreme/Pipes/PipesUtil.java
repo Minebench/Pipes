@@ -372,6 +372,7 @@ public class PipesUtil {
             // there is no fuel currently in the fuel slot, so simply put it in
             source.removeItem(itemStack);
             setFuel(target, itemStack);
+            itemStack.setAmount(0);
         }
         return true;
     }

@@ -101,11 +101,14 @@ public class Pipe {
         List<PipeOutput> filteredOutputs = new ArrayList<>();
         List<PipeOutput> unfilteredOutputs = new ArrayList<>();
         for (PipeOutput output : outputs) {
-            List<ItemStack> filterItems = output.getFilterItems();
-            if (filterItems.isEmpty()) {
-                unfilteredOutputs.add(output);
-            } else if (PipesUtil.containsSimilar(filterItems, item)) {
-                filteredOutputs.add(output);
+            InventoryHolder holder = output.getOutputHolder();
+            if (holder != null && !((BlockState) holder).getBlock().isBlockPowered()) {
+                List<ItemStack> filterItems = output.getFilterItems();
+                if (filterItems.isEmpty()) {
+                    unfilteredOutputs.add(output);
+                } else if (PipesUtil.containsSimilar(filterItems, item)) {
+                    filteredOutputs.add(output);
+                }
             }
         }
         return filteredOutputs.isEmpty() ? unfilteredOutputs : filteredOutputs;

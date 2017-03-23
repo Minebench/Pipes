@@ -1,10 +1,13 @@
 package io.github.apfelcreme.Pipes.Pipe;
 
 import io.github.apfelcreme.Pipes.PipesItem;
+import io.github.apfelcreme.Pipes.PipesUtil;
 import org.bukkit.block.Block;
+import org.bukkit.block.BlockFace;
 import org.bukkit.block.BlockState;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.material.Directional;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -27,27 +30,17 @@ import java.util.List;
  *
  * @author Lord36 aka Apfelcreme
  */
-public class PipeOutput {
+public class PipeOutput extends AbstractPipePart {
 
-    private final SimpleLocation location;
-    private final SimpleLocation targetLocation;
+    private final BlockFace facing;
 
-    public PipeOutput(SimpleLocation dropperLocation, SimpleLocation inventoryHolderLocation) {
-        this.location = dropperLocation;
-        this.targetLocation = inventoryHolderLocation;
+    public PipeOutput(SimpleLocation location, BlockFace facing) {
+        super(PipesItem.PIPE_OUTPUT, location);
+        this.facing = facing;
     }
 
-    /**
-     * returns the inventory holder blockstate of the block
-     *
-     * @return the InventoryHolder
-     */
-    public InventoryHolder getOutputHolder() {
-        Block block = location.getBlock();
-        if (PipesItem.PIPE_OUTPUT.check(block)) {
-            return (InventoryHolder) block.getState();
-        }
-        return null;
+    public PipeOutput(Block block) {
+        this(new SimpleLocation(block.getLocation()), ((Directional) block.getState()).getFacing());
     }
 
     /**
@@ -56,29 +49,19 @@ public class PipeOutput {
      * @return the InventoryHolder
      */
     public InventoryHolder getTargetHolder() {
-        Block block = targetLocation.getBlock();
+        Block block = getTargetLocation().getBlock();
         if (block != null && block.getState() instanceof InventoryHolder) {
             return (InventoryHolder) block.getState();
         }
         return null;
     }
 
-    /**
-     * returns the location of this output block
-     *
-     * @return the location of the output block
-     */
-    public SimpleLocation getLocation() {
-        return location;
+    public SimpleLocation getTargetLocation() {
+        return getLocation().getRelative(getFacing());
     }
 
-    /**
-     * returns the inventoryholder location
-     *
-     * @return the inventoryholder location
-     */
-    public SimpleLocation getTargetLocation() {
-        return targetLocation;
+    public BlockFace getFacing() {
+        return facing;
     }
 
     /**
@@ -88,7 +71,7 @@ public class PipeOutput {
      */
     public List<ItemStack> getFilterItems() {
         List<ItemStack> sorterItems = new ArrayList<>();
-        InventoryHolder holder = getOutputHolder();
+        InventoryHolder holder = getHolder();
         if (holder != null) {
             for (ItemStack itemStack : holder.getInventory().getContents()) {
                 if (itemStack != null) {
@@ -101,19 +84,8 @@ public class PipeOutput {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-
-        PipeOutput that = (PipeOutput) o;
-
-        if (location != null ? !location.equals(that.location) : that.location != null)
-            return false;
-        return !(targetLocation != null ? !targetLocation.equals(that.targetLocation) : that.targetLocation != null);
-
-    }
-
-    public boolean isPowered() {
-        InventoryHolder holder = getOutputHolder();
-        return holder == null || ((BlockState) holder).getBlock().isBlockPowered();
+        return this == o
+                || super.equals(o)
+                && !(facing != null ? !facing.equals(((PipeOutput) o).facing) : ((PipeOutput) o).facing != null);
     }
 }

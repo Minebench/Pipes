@@ -7,12 +7,12 @@ import com.google.common.cache.LoadingCache;
 import io.github.apfelcreme.Pipes.Exception.ChunkNotLoadedException;
 import io.github.apfelcreme.Pipes.Exception.PipeTooLongException;
 import io.github.apfelcreme.Pipes.Exception.TooManyOutputsException;
+import io.github.apfelcreme.Pipes.Pipe.AbstractPipePart;
 import io.github.apfelcreme.Pipes.Pipe.ChunkLoader;
 import io.github.apfelcreme.Pipes.Pipe.Pipe;
 import io.github.apfelcreme.Pipes.Pipe.PipeInput;
 import io.github.apfelcreme.Pipes.Pipe.PipeOutput;
 import io.github.apfelcreme.Pipes.Pipe.SimpleLocation;
-import io.github.apfelcreme.Pipes.Pipes;
 import io.github.apfelcreme.Pipes.PipesConfig;
 import io.github.apfelcreme.Pipes.PipesItem;
 import io.github.apfelcreme.Pipes.PipesUtil;
@@ -31,7 +31,6 @@ import java.util.List;
 import java.util.Queue;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
-import java.util.logging.Level;
 
 /**
  * Copyright (C) 2016 Lord36 aka Apfelcreme
@@ -161,30 +160,31 @@ public class PipeManager {
                         queue.add(location.getRelative(BlockFace.DOWN));
                     }
                 } else {
-                    PipesItem pipesItem = PipesUtil.getPipesItem(block);
-                    if (pipesItem != null) {
-                        switch (pipesItem) {
+                    AbstractPipePart pipesPart = PipesUtil.getPipesPart(block);
+                    if (pipesPart != null) {
+                        switch (pipesPart.getType()) {
                             case PIPE_INPUT:
-                                Block relativeToInput = block.getRelative(((Directional) block.getState().getData()).getFacing());
-                                if (relativeToInput.getType() == Material.STAINED_GLASS) {
-                                    inputs.add(new PipeInput(location));
+                                PipeInput pipeInput = (PipeInput) pipesPart;
+                                if (block.getRelative(pipeInput.getFacing()).getType() == Material.STAINED_GLASS) {
+                                    inputs.add(pipeInput);
                                     found.add(block);
-                                    queue.add(new SimpleLocation(relativeToInput.getLocation()));
+                                    queue.add(pipeInput.getTargetLocation());
                                 }
                                 break;
                             case PIPE_OUTPUT:
-                                Block relativeToOutput = block.getRelative(((Directional) block.getState().getData()).getFacing());
-                                if (relativeToOutput.getState() instanceof InventoryHolder) {
+                                PipeOutput pipeOutput = (PipeOutput) pipesPart;
+                                Block relativeToOutput = pipeOutput.getTargetLocation().getBlock();
+                                if (relativeToOutput instanceof InventoryHolder) {
                                     if (PipesConfig.getMaxPipeOutputs() > 0 && outputs.size() >= PipesConfig.getMaxPipeOutputs()) {
                                         throw new TooManyOutputsException(location);
                                     }
-                                    outputs.add(new PipeOutput(location, new SimpleLocation(relativeToOutput.getLocation())));
+                                    outputs.add(pipeOutput);
                                     found.add(block);
                                     found.add(relativeToOutput);
                                 }
                                 break;
                             case CHUNK_LOADER:
-                                chunkLoaders.add(new ChunkLoader(location));
+                                chunkLoaders.add((ChunkLoader) pipesPart);
                                 found.add(block);
                                 break;
                         }

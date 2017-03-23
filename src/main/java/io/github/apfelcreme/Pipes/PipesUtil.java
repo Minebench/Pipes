@@ -1,5 +1,10 @@
 package io.github.apfelcreme.Pipes;
 
+import io.github.apfelcreme.Pipes.Pipe.AbstractPipePart;
+import io.github.apfelcreme.Pipes.Pipe.ChunkLoader;
+import io.github.apfelcreme.Pipes.Pipe.PipeInput;
+import io.github.apfelcreme.Pipes.Pipe.PipeOutput;
+import io.github.apfelcreme.Pipes.Pipe.SimpleLocation;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
@@ -11,6 +16,7 @@ import org.bukkit.inventory.FurnaceInventory;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.material.Directional;
 import org.bukkit.material.DirectionalContainer;
 
 import java.util.Collection;
@@ -157,13 +163,18 @@ public class PipesUtil {
         }
 
         String hidden = getHiddenString(((InventoryHolder) block.getState()).getInventory().getTitle());
-        if (hidden == null || hidden.isEmpty()) {
+        if (hidden == null) {
+            return null;
+        }
+        hidden = hidden.split(",")[0];
+        if (hidden.isEmpty()) {
             return null;
         }
 
         try {
             return PipesItem.valueOf(hidden);
         } catch (IllegalArgumentException e) {
+            // Legacy
             if (PipesItem.getIdentifier().equals(hidden)) {
                 switch (block.getType()) {
                     case DISPENSER:
@@ -176,6 +187,24 @@ public class PipesUtil {
             }
             return null;
         }
+    }
+
+    public static AbstractPipePart getPipesPart(Block block) {
+        PipesItem type = getPipesItem(block);
+        if (type == null) {
+            return null;
+        }
+
+        switch (type) {
+            case PIPE_INPUT:
+                return new PipeInput(block);
+            case PIPE_OUTPUT:
+                return new PipeOutput(block);
+            case CHUNK_LOADER:
+                return new ChunkLoader(block);
+        }
+
+        return null;
     }
 
 

@@ -67,31 +67,6 @@ public class Pipe {
     }
 
     /**
-     * returns a list of outputs with the given inventory types, with or
-     * without a sorting function
-     *
-     * @param inventoryType the type inventory holder you wish to get, null for all
-     * @param filtering     only get outputs with a filtering function
-     * @return a list of outputs matching the given parameters
-     */
-    public List<PipeOutput> getOutputs(InventoryType inventoryType, boolean filtering) {
-        List<PipeOutput> sorterOutputs = new ArrayList<>();
-        for (PipeOutput output : outputs) {
-            InventoryHolder targetHolder = output.getTargetHolder();
-            if (inventoryType == null || targetHolder != null && targetHolder.getInventory().getType() == inventoryType) {
-                if ((filtering && !output.getFilterItems().isEmpty()) // there are items as filters + user wants sorters
-                        || (!filtering && output.getFilterItems().isEmpty())) { // there are no items + user doesn't want sorters
-                    InventoryHolder holder = output.getOutputHolder();
-                    if (holder != null && !((BlockState) holder).getBlock().isBlockPowered()) {
-                        sorterOutputs.add(output);
-                    }
-                }
-            }
-        }
-        return sorterOutputs;
-    }
-
-    /**
      * Get the outputs that match this item
      *
      * @param item
@@ -101,8 +76,7 @@ public class Pipe {
         List<PipeOutput> filteredOutputs = new ArrayList<>();
         List<PipeOutput> unfilteredOutputs = new ArrayList<>();
         for (PipeOutput output : outputs) {
-            InventoryHolder holder = output.getOutputHolder();
-            if (holder != null && !((BlockState) holder).getBlock().isBlockPowered()) {
+            if (!output.isPowered()) {
                 List<ItemStack> filterItems = output.getFilterItems();
                 if (filterItems.isEmpty()) {
                     unfilteredOutputs.add(output);

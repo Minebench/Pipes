@@ -2,7 +2,8 @@ package io.github.apfelcreme.Pipes.Pipe;
 
 import io.github.apfelcreme.Pipes.PipesItem;
 import org.bukkit.block.Block;
-import org.bukkit.inventory.InventoryHolder;
+import org.bukkit.block.BlockFace;
+import org.bukkit.material.Directional;
 
 /**
  * Copyright (C) 2016 Lord36 aka Apfelcreme
@@ -22,45 +23,31 @@ import org.bukkit.inventory.InventoryHolder;
  *
  * @author Lord36 aka Apfelcreme
  */
-public class PipeInput {
+public class PipeInput extends AbstractPipePart {
 
-    private SimpleLocation location;
+    private final BlockFace facing;
 
-    public PipeInput(SimpleLocation location) {
-        this.location = location;
+    public PipeInput(SimpleLocation location, BlockFace facing) {
+        super(PipesItem.PIPE_INPUT, location);
+        this.facing = facing;
     }
 
-    /**
-     * returns the dispenser
-     *
-     * @return the dispenser
-     */
-    public InventoryHolder getHolder() {
-        Block block = location.getBlock();
-        if (PipesItem.PIPE_INPUT.check(block)) {
-            return (InventoryHolder) block.getState();
-        }
-        return null;
+    public PipeInput(Block block) {
+        this(new SimpleLocation(block.getLocation()), ((Directional) block.getState()).getFacing());
     }
 
-    /**
-     * returns the dispenser location
-     *
-     * @return the dispenser location
-     */
-    public SimpleLocation getLocation() {
-        return location;
+    public SimpleLocation getTargetLocation() {
+        return getLocation().getRelative(getFacing());
+    }
+
+    public BlockFace getFacing() {
+        return facing;
     }
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-
-        PipeInput pipeInput = (PipeInput) o;
-
-        return !(location != null ? !location.equals(pipeInput.location) : pipeInput.location != null);
-
+        return this == o
+                || super.equals(o)
+                && !(facing != null ? !facing.equals(((PipeInput) o).facing) : ((PipeInput) o).facing != null);
     }
-
 }

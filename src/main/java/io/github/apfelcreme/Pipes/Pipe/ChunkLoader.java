@@ -1,6 +1,7 @@
 package io.github.apfelcreme.Pipes.Pipe;
 
-import org.bukkit.block.Furnace;
+import io.github.apfelcreme.Pipes.PipesItem;
+import org.bukkit.block.Block;
 
 /**
  * Copyright (C) 2016 Lord36 aka Apfelcreme
@@ -20,45 +21,13 @@ import org.bukkit.block.Furnace;
  *
  * @author Lord36 aka Apfelcreme
  */
-public class ChunkLoader {
+public class ChunkLoader extends AbstractPipePart {
 
-    private SimpleLocation chunkLoaderLocation;
-
-    public ChunkLoader(SimpleLocation chunkLoaderLocation) {
-        this.chunkLoaderLocation = chunkLoaderLocation;
+    public ChunkLoader(SimpleLocation location) {
+        super(PipesItem.CHUNK_LOADER, location);
     }
 
-
-    /**
-     * returns the chunkLoader
-     *
-     * @return the chunkLoader
-     */
-    public Furnace getChunkLoader() {
-        if ((chunkLoaderLocation.getBlock() != null) && (chunkLoaderLocation.getBlock().getState() instanceof Furnace)) {
-            return (Furnace) chunkLoaderLocation.getBlock().getState();
-        }
-        return null;
+    public ChunkLoader(Block block) {
+        this(new SimpleLocation(block.getLocation()));
     }
-
-    /**
-     * returns the chunkLoader location
-     *
-     * @return the chunkLoader location
-     */
-    public SimpleLocation getChunkLoaderLocation() {
-        return chunkLoaderLocation;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-
-        ChunkLoader chunkLoader = (ChunkLoader) o;
-
-        return !(chunkLoaderLocation != null ? !chunkLoaderLocation.equals(chunkLoader.chunkLoaderLocation) : chunkLoader.chunkLoaderLocation != null);
-
-    }
-
 }

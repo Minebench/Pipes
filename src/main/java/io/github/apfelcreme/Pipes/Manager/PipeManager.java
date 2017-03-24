@@ -23,7 +23,6 @@ import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.block.BlockState;
 import org.bukkit.inventory.InventoryHolder;
-import org.bukkit.material.Directional;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
@@ -174,7 +173,7 @@ public class PipeManager {
                             case PIPE_OUTPUT:
                                 PipeOutput pipeOutput = (PipeOutput) pipesPart;
                                 Block relativeToOutput = pipeOutput.getTargetLocation().getBlock();
-                                if (relativeToOutput instanceof InventoryHolder) {
+                                if (relativeToOutput.getState() instanceof InventoryHolder) {
                                     if (PipesConfig.getMaxPipeOutputs() > 0 && outputs.size() >= PipesConfig.getMaxPipeOutputs()) {
                                         throw new TooManyOutputsException(location);
                                     }

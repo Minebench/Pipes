@@ -33,7 +33,7 @@ public class PipeInput extends AbstractPipePart {
     }
 
     public PipeInput(Block block) {
-        this(new SimpleLocation(block.getLocation()), ((Directional) block.getState()).getFacing());
+        this(new SimpleLocation(block.getLocation()), ((Directional) block.getState().getData()).getFacing());
     }
 
     public SimpleLocation getTargetLocation() {

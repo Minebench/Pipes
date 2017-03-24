@@ -44,7 +44,7 @@ public class PipeOutput extends AbstractPipePart {
     }
 
     public PipeOutput(Block block) {
-        this(new SimpleLocation(block.getLocation()), ((Directional) block.getState()).getFacing());
+        this(new SimpleLocation(block.getLocation()), ((Directional) block.getState().getData()).getFacing());
         if (block.getState() instanceof Nameable) {
             String hidden = PipesUtil.getHiddenString(((Nameable) block.getState()).getCustomName());
             if (hidden != null) {

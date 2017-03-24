@@ -4,9 +4,9 @@ import io.github.apfelcreme.Pipes.Pipe.AbstractPipePart;
 import io.github.apfelcreme.Pipes.Pipe.ChunkLoader;
 import io.github.apfelcreme.Pipes.Pipe.PipeInput;
 import io.github.apfelcreme.Pipes.Pipe.PipeOutput;
-import io.github.apfelcreme.Pipes.Pipe.SimpleLocation;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
+import org.bukkit.Nameable;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.block.Dispenser;
@@ -16,7 +16,6 @@ import org.bukkit.inventory.FurnaceInventory;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.material.Directional;
 import org.bukkit.material.DirectionalContainer;
 
 import java.util.Collection;
@@ -166,7 +165,7 @@ public class PipesUtil {
             return null;
         }
 
-        String hidden = getHiddenString(((InventoryHolder) block.getState()).getInventory().getTitle());
+        String hidden = getHiddenString(((Nameable) block.getState()).getCustomName());
         if (hidden == null) {
             return null;
         }

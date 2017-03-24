@@ -107,8 +107,12 @@ public class PipesUtil {
 
     /**
      * Returns a hidden string in the itemstack which is hidden using the last lore line
+     * @return The hidden string or <tt>null</tt> if there is none or the input is null
      */
     public static String getHiddenString(String string) {
+        if (string == null) {
+            return null;
+        }
         // Only the color chars at the end of the string is it
         StringBuilder builder = new StringBuilder();
         char[] chars = string.toCharArray();

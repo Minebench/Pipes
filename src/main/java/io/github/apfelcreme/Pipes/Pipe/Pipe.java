@@ -11,7 +11,9 @@ import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.stream.Stream;
 
 /**
  * Copyright (C) 2016 Lord36 aka Apfelcreme
@@ -64,28 +66,6 @@ public class Pipe {
      */
     public List<PipeOutput> getOutputs() {
         return outputs;
-    }
-
-    /**
-     * Get the outputs that match this item
-     *
-     * @param item
-     * @return The filtered outputs that match this item or every unfiltered ones
-     */
-    public List<PipeOutput> getOutputs(ItemStack item) {
-        List<PipeOutput> filteredOutputs = new ArrayList<>();
-        List<PipeOutput> unfilteredOutputs = new ArrayList<>();
-        for (PipeOutput output : outputs) {
-            if (!output.isPowered()) {
-                List<ItemStack> filterItems = output.getFilterItems();
-                if (filterItems.isEmpty()) {
-                    unfilteredOutputs.add(output);
-                } else if (PipesUtil.containsSimilar(filterItems, item)) {
-                    filteredOutputs.add(output);
-                }
-            }
-        }
-        return filteredOutputs.isEmpty() ? unfilteredOutputs : filteredOutputs;
     }
 
     /**

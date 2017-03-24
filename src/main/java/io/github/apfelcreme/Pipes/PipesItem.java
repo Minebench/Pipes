@@ -72,11 +72,11 @@ public enum PipesItem {
         ItemStack item = new ItemStack(this.material);
         ItemMeta meta = item.getItemMeta();
         List<String> lore = Arrays.asList(PipesConfig.getText("info." + this.loreKey),
-                ChatColor.BLUE + "" + ChatColor.ITALIC + PipesUtil.hideString(this.toString(), IDENTIFIER));
+                ChatColor.BLUE + "" + ChatColor.ITALIC + PipesUtil.hideString(toString(), IDENTIFIER));
         meta.setLore(lore);
         meta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
         meta.addEnchant(Enchantment.ARROW_DAMAGE, 1, true);
-        meta.setDisplayName(ChatColor.RESET + "" + ChatColor.WHITE + PipesUtil.hideString(this.toString(), this.name));
+        meta.setDisplayName(ChatColor.RESET + "" + ChatColor.WHITE + PipesUtil.hideString(toString(), name));
         item.setItemMeta(meta);
         this.item = item;
         return item;
@@ -89,7 +89,7 @@ public enum PipesItem {
 
         String hidden = PipesUtil.getHiddenString(((InventoryHolder) block.getState()).getInventory().getTitle());
 
-        return hidden != null && this.toString().equals(hidden) || IDENTIFIER.equals(hidden);
+        return hidden != null && toString().equals(hidden.split(",")[0]) || IDENTIFIER.equals(hidden);
     }
 
     public boolean check(ItemStack item) {
@@ -100,6 +100,6 @@ public enum PipesItem {
         List<String> lore = item.getItemMeta().getLore();
         String hidden = PipesUtil.getHiddenString(lore.get(lore.size() - 1));
 
-        return hidden != null && this.name.equals(hidden) || IDENTIFIER.equals(hidden);
+        return hidden != null && toString().equals(hidden) || IDENTIFIER.equals(hidden);
     }
 }

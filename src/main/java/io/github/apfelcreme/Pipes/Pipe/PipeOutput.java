@@ -2,6 +2,8 @@ package io.github.apfelcreme.Pipes.Pipe;
 
 import io.github.apfelcreme.Pipes.PipesItem;
 import io.github.apfelcreme.Pipes.PipesUtil;
+import org.bukkit.ChatColor;
+import org.bukkit.Nameable;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.block.BlockState;
@@ -33,6 +35,8 @@ import java.util.List;
 public class PipeOutput extends AbstractPipePart {
 
     private final BlockFace facing;
+    private boolean whiteList = true;
+    private boolean overflowAllowed = false;
 
     public PipeOutput(SimpleLocation location, BlockFace facing) {
         super(PipesItem.PIPE_OUTPUT, location);
@@ -41,6 +45,22 @@ public class PipeOutput extends AbstractPipePart {
 
     public PipeOutput(Block block) {
         this(new SimpleLocation(block.getLocation()), ((Directional) block.getState()).getFacing());
+        if (block.getState() instanceof Nameable) {
+            String hidden = PipesUtil.getHiddenString(((Nameable) block.getState()).getCustomName());
+            if (hidden != null) {
+                for (String group : hidden.split(",")) {
+                    String[] parts = group.split("=");
+                    if (parts.length < 2) {
+                        continue;
+                    }
+                    if ("whitelist".equals(parts[0])) {
+                        whiteList = Boolean.parseBoolean(parts[1]);
+                    } else if ("overflow".equals(parts[0])) {
+                        overflowAllowed = Boolean.parseBoolean(parts[1]);
+                    }
+                }
+            }
+        }
     }
 
     /**
@@ -82,10 +102,125 @@ public class PipeOutput extends AbstractPipePart {
         return sorterItems;
     }
 
+    /**
+     * Check whether or not this output can accept that item stack
+     * @param itemStack The item to check
+     * @return  A result that represents why or why not the item is accepted by this output
+     */
+    public AcceptResult accepts(ItemStack itemStack) {
+        Block block = getLocation().getBlock();
+        if (block == null || !(block.getState() instanceof InventoryHolder)) {
+            return new AcceptResult(ResultType.DENY_INVALID, false);
+        }
+        if (isOverflowAllowed() && block.isBlockPowered()) {
+            return new AcceptResult(ResultType.DENY_REDSTONE, false);
+        }
+
+        boolean inFilter = false;
+        for (ItemStack filterItem : ((InventoryHolder) block.getState()).getInventory().getContents()) {
+            if (PipesUtil.isSimilarFuzzy(filterItem, itemStack)) {
+                if (isWhiteList()) {
+                    inFilter = true;
+                    break;
+                } else {
+                    return new AcceptResult(ResultType.DENY_BLACKLIST, true);
+                }
+            }
+        }
+
+        if (block.isBlockPowered()) {
+            return new AcceptResult(ResultType.DENY_REDSTONE, inFilter);
+        } else {
+            return new AcceptResult(ResultType.ACCEPT, inFilter);
+        }
+    }
+
+    /**
+     * Get if this output works in white- or blacklist mode. This changes how the filter items are used.
+     * @return  <tt>true</tt> if this output is in whitelist mode; <tt>false</tt> if not
+     */
+    public boolean isWhiteList() {
+        return whiteList;
+    }
+
+    /**
+     * Set whether or not this output is in whitelist mode. This changes how the filter items are used.
+     * @param whiteList <tt>true</tt> if this output is in whitelist mode; <tt>false</tt> if it is in blacklist mode
+     */
+    public void setWhiteList(boolean whiteList) {
+        this.whiteList = whiteList;
+        saveOptions();
+    }
+
+    /**
+     * Get whether or not this output allows overflowing
+     * @return  <tt>true</tt> if this output should force items to end up here even 'though the target is full;
+     *          <tt>false</tt> if the items should end up in the overflow
+     */
+    public boolean isOverflowAllowed() {
+        return overflowAllowed;
+    }
+
+    /**
+     * Set whether or not this output can overflow
+     * @param overflowAllowed   Whether or not this output oferflows if the target is full
+     */
+    public void setOverflowAllowed(boolean overflowAllowed) {
+        this.overflowAllowed = overflowAllowed;
+        saveOptions();
+    }
+
+    private void saveOptions() {
+        BlockState state = getLocation().getBlock().getState();
+        if (state.getType() == getType().getMaterial() && state instanceof Nameable) {
+            ((Nameable) state).setCustomName(ChatColor.RESET + "" + ChatColor.WHITE + PipesUtil.hideString(toString(), getType().getName()));
+            state.update();
+        }
+    }
+
     @Override
     public boolean equals(Object o) {
         return this == o
                 || super.equals(o)
                 && !(facing != null ? !facing.equals(((PipeOutput) o).facing) : ((PipeOutput) o).facing != null);
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder s = new StringBuilder(getType().toString());
+        if (!whiteList) {
+            s.append(",whitelist=" + whiteList);
+        }
+        if (overflowAllowed) {
+            s.append(",overflow=" + overflowAllowed);
+        }
+        return s.toString();
+    }
+
+    public class AcceptResult {
+
+        private final ResultType type;
+        private final boolean inFilter;
+
+        public AcceptResult(ResultType type, boolean inFilter) {
+            this.type = type;
+            this.inFilter = inFilter;
+        }
+
+        public ResultType getType() {
+            return type;
+        }
+
+        public boolean isInFilter() {
+            return inFilter;
+        }
+    }
+
+    public enum ResultType {
+        ACCEPT,
+        DENY_REDSTONE,
+        DENY_WHITELIST,
+        DENY_BLACKLIST,
+        DENY_INVALID;
     }
 }

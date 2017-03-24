@@ -14,4 +14,7 @@ chunkLoaderRecipe:
   GOLD_BLOCK: 1
 maxPipeLength: 128
 maxPipeOutputs: 64
-
+gui:
+  enabled: "WOOL:5"
+  disabled: "WOOL:14"
+  filler: "STAINED_GLASS:15"

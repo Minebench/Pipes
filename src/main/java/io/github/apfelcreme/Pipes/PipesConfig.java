@@ -1,13 +1,18 @@
 package io.github.apfelcreme.Pipes;
 
 import org.bukkit.ChatColor;
+import org.bukkit.DyeColor;
 import org.bukkit.Material;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.material.MaterialData;
 
 import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.logging.Level;
 
 /**
  * Copyright (C) 2016 Lord36 aka Apfelcreme
@@ -35,6 +40,9 @@ public class PipesConfig {
     private static long transferCooldown;
     private static int maxPipeOutputs;
     private static int maxPipeLength;
+    private static ItemStack guiFiller;
+    private static ItemStack guiEnabled;
+    private static ItemStack guiDisabled;
 
     /**
      * loads the config
@@ -121,5 +129,46 @@ public class PipesConfig {
         } else {
             return "Missing text node: " + key;
         }
+    }
+
+    private static ItemStack getItemStack(String key) {
+        String[] parts = plugin.getConfig().getString(key).split(":");
+        try {
+            Material mat = Material.valueOf(parts[0].toUpperCase());
+            byte data = 0;
+            if (parts.length > 0) {
+                data = Byte.parseByte(parts[1]);
+            }
+            return new ItemStack(mat, 1, data);
+        } catch (NumberFormatException e) {
+            plugin.getLogger().log(Level.WARNING, parts[1] + " is not a valid Byte!");
+        } catch (IllegalArgumentException e) {
+            plugin.getLogger().log(Level.WARNING, parts[0].toUpperCase() + " is not a valid Material name!");
+        }
+        return new ItemStack(Material.BARRIER);
+    }
+
+    public static ItemStack getGuiFiller() {
+        if (guiFiller == null) {
+            guiFiller = getItemStack("gui.filler");
+            ItemMeta meta = guiFiller.getItemMeta();
+            meta.setDisplayName(" ");
+            guiFiller.setItemMeta(meta);
+        }
+        return guiFiller;
+    }
+
+    public static ItemStack getGuiEnabled() {
+        if (guiEnabled == null) {
+            guiFiller = getItemStack("gui.enabled");
+        }
+        return guiEnabled;
+    }
+
+    public static ItemStack getGuiDisabled() {
+        if (guiDisabled == null) {
+            guiFiller = getItemStack("gui.disabled");
+        }
+        return guiDisabled;
     }
 }

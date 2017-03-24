@@ -4,13 +4,18 @@ import io.github.apfelcreme.Pipes.Exception.ChunkNotLoadedException;
 import io.github.apfelcreme.Pipes.Exception.PipeTooLongException;
 import io.github.apfelcreme.Pipes.Exception.TooManyOutputsException;
 import io.github.apfelcreme.Pipes.Manager.PipeManager;
+import io.github.apfelcreme.Pipes.Pipe.AbstractPipePart;
 import io.github.apfelcreme.Pipes.Pipe.Pipe;
+import io.github.apfelcreme.Pipes.Pipe.PipeOutput;
 import io.github.apfelcreme.Pipes.Pipes;
 import io.github.apfelcreme.Pipes.PipesConfig;
+import io.github.apfelcreme.Pipes.PipesItem;
+import io.github.apfelcreme.Pipes.PipesUtil;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.scheduler.BukkitTask;
 
 /**
@@ -41,7 +46,7 @@ public class PlayerRightclickListener implements Listener {
 
     @EventHandler
     public void onPlayerRightclick(PlayerInteractEvent event) {
-        if (event.getAction() == Action.RIGHT_CLICK_BLOCK) {
+        if (event.getAction() == Action.RIGHT_CLICK_BLOCK && event.getHand() == EquipmentSlot.HAND) {
             String action = plugin.getRegisterRightClick(event.getPlayer());
             if ("info".equals(action)) {
                 event.setCancelled(true);
@@ -62,6 +67,12 @@ public class PlayerRightclickListener implements Listener {
                 } catch (PipeTooLongException e) {
                     Pipes.sendMessage(event.getPlayer(), PipesConfig.getText("error.pipeTooLong")
                             .replace("{0}", String.valueOf(PipesConfig.getMaxPipeLength())));
+                }
+            } else if (!event.getPlayer().isSneaking()) {
+                AbstractPipePart pipePart = PipesUtil.getPipesPart(event.getClickedBlock());
+                if (pipePart != null && pipePart.getType() == PipesItem.PIPE_OUTPUT) {
+                    event.setCancelled(true);
+                    ((PipeOutput) pipePart).showGui(event.getPlayer());
                 }
             }
 

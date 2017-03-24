@@ -34,3 +34,10 @@ texts:
       reloaded: '&a Die Config wurde neu geladen'
     tp:
       teleported: '&a Du wurdest teleportiert!'
+  gui:
+    whitelist:
+      enabled: '&aPipe Output ist im &fWhitelist&a Modus!'
+      disabled: '&cPipe Output ist im &fBlacklist&c Modus!'
+    overflow:
+      enabled: '&aOverflowing ist erlaubt!'
+      disabled: '&cOverflowing ist nicht erlaubt!'

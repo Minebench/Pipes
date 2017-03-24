@@ -1,14 +1,19 @@
 package io.github.apfelcreme.Pipes.Pipe;
 
+import io.github.apfelcreme.Pipes.PipesConfig;
 import io.github.apfelcreme.Pipes.PipesItem;
 import io.github.apfelcreme.Pipes.PipesUtil;
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Nameable;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.block.BlockState;
+import org.bukkit.entity.Player;
+import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.material.Directional;
 
 import java.util.ArrayList;
@@ -37,6 +42,8 @@ public class PipeOutput extends AbstractPipePart {
     private final BlockFace facing;
     private boolean whiteList = true;
     private boolean overflowAllowed = false;
+
+    public final static int[] GUI_ITEM_SLOTS = {3,4,5,12,13,14,21,22,23};
 
     public PipeOutput(SimpleLocation location, BlockFace facing) {
         super(PipesItem.PIPE_OUTPUT, location);
@@ -117,7 +124,9 @@ public class PipeOutput extends AbstractPipePart {
         }
 
         boolean inFilter = false;
+        boolean isEmpty = true;
         for (ItemStack filterItem : ((InventoryHolder) block.getState()).getInventory().getContents()) {
+            isEmpty &= filterItem == null;
             if (PipesUtil.isSimilarFuzzy(filterItem, itemStack)) {
                 if (isWhiteList()) {
                     inFilter = true;
@@ -130,6 +139,8 @@ public class PipeOutput extends AbstractPipePart {
 
         if (block.isBlockPowered()) {
             return new AcceptResult(ResultType.DENY_REDSTONE, inFilter);
+        } else if (!isEmpty && isWhiteList() && !inFilter) {
+            return new AcceptResult(ResultType.DENY_WHITELIST, false);
         } else {
             return new AcceptResult(ResultType.ACCEPT, inFilter);
         }
@@ -195,6 +206,58 @@ public class PipeOutput extends AbstractPipePart {
             s.append(",overflow=" + overflowAllowed);
         }
         return s.toString();
+    }
+
+    public void showGui(Player player) {
+        Inventory realInv = getHolder().getInventory();
+
+        Inventory gui = Bukkit.createInventory(getHolder(), 27, realInv.getTitle());
+
+        gui.setItem(0, getGuiWhitelistItem());
+        gui.setItem(1, getGuiOverflowItem());
+
+        for (int i = 0; i < gui.getSize(); i++) {
+            if (gui.getItem(i) == null) {
+                gui.setItem(i, PipesConfig.getGuiFiller());
+            }
+        }
+
+        for (int i = 0; i < GUI_ITEM_SLOTS.length; i++) {
+            gui.setItem(GUI_ITEM_SLOTS[i], realInv.getItem(i));
+        }
+        player.openInventory(gui);
+    }
+
+    public ItemStack getGuiWhitelistItem() {
+        ItemStack whitelistItem;
+        if (isWhiteList()) {
+            whitelistItem = new ItemStack(PipesConfig.getGuiEnabled());
+            ItemMeta meta = whitelistItem.getItemMeta();
+            meta.setDisplayName(PipesConfig.getText("gui.whitelist.enabled"));
+            whitelistItem.setItemMeta(meta);
+        } else {
+            whitelistItem = new ItemStack(PipesConfig.getGuiDisabled());
+            ItemMeta meta = whitelistItem.getItemMeta();
+            meta.setDisplayName(PipesConfig.getText("gui.whitelist.disabled"));
+            whitelistItem.setItemMeta(meta);
+        }
+        return whitelistItem;
+    }
+
+    public ItemStack getGuiOverflowItem() {
+        ItemStack overflowItem;
+        if (isOverflowAllowed()) {
+            overflowItem = new ItemStack(PipesConfig.getGuiEnabled());
+            ItemMeta meta = overflowItem.getItemMeta();
+            meta.setDisplayName(PipesConfig.getText("gui.overflow.enabled"));
+            overflowItem.setItemMeta(meta);
+        } else {
+            overflowItem = new ItemStack(PipesConfig.getGuiDisabled());
+            ItemMeta meta = overflowItem.getItemMeta();
+            meta.setDisplayName(PipesConfig.getText("gui.overflow.disabled"));
+            overflowItem.setItemMeta(meta);
+        }
+        return overflowItem;
     }
 
     public class AcceptResult {

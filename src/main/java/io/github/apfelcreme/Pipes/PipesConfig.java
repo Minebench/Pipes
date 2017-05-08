@@ -160,14 +160,14 @@ public class PipesConfig {
 
     public static ItemStack getGuiEnabled() {
         if (guiEnabled == null) {
-            guiFiller = getItemStack("gui.enabled");
+            guiEnabled = getItemStack("gui.enabled");
         }
         return guiEnabled;
     }
 
     public static ItemStack getGuiDisabled() {
         if (guiDisabled == null) {
-            guiFiller = getItemStack("gui.disabled");
+            guiDisabled = getItemStack("gui.disabled");
         }
         return guiDisabled;
     }

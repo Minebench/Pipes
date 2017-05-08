@@ -362,16 +362,7 @@ public class PipesUtil {
             target.addItem(itemStack);
             itemStack.setAmount(0);
         } else {
-            // CraftBukkit doesn't return leftovers when adding to partial stacks
-            // To work around this we add the items via an array with one item in
-            // each position so that we will get a leftover map in every case
-            ItemStack[] stacks = new ItemStack[itemStack.getAmount()];
-            for (int i = 0; i < itemStack.getAmount(); i++) {
-                ItemStack clone = new ItemStack(itemStack);
-                clone.setAmount(1);
-                stacks[i] = clone;
-            }
-            Map<Integer, ItemStack> rest = target.addItem(stacks);
+            Map<Integer, ItemStack> rest = target.addItem(itemStack);
             int newAmount = 0;
             for (ItemStack item : rest.values()) {
                 newAmount += item.getAmount();

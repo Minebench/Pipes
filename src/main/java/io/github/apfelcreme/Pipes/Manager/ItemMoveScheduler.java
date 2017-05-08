@@ -182,16 +182,15 @@ public class ItemMoveScheduler {
                 continue;
             }
 
+            Inventory inputInventory = inputHolder.getInventory();
             Inventory targetInventory = targetHolder.getInventory();
             // call move event before doing any moving to check if it was cancelled
-            PipeMoveItemEvent pipeMoveEvent = new PipeMoveItemEvent(pipe, inputHolder.getInventory(),
-                    itemStack, targetInventory);
+            PipeMoveItemEvent pipeMoveEvent = new PipeMoveItemEvent(pipe, inputInventory, itemStack, targetInventory);
             Pipes.getInstance().getServer().getPluginManager().callEvent(pipeMoveEvent);
             if (pipeMoveEvent.isCancelled()) {
                 continue;
             }
 
-            Inventory inputInventory = inputHolder.getInventory();
             switch (targetInventory.getType()) {
                     /*
                     BEGIN FURNACE

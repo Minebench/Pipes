@@ -193,28 +193,21 @@ public class ItemMoveScheduler {
                      */
                 case FURNACE:
                     // try to put coal etc in the correct place
-                    switch (itemStack.getType()) {
-                        case COAL:
-                        case COAL_BLOCK:
-                        case LAVA_BUCKET:
-                            // the transported item is either coal, or a coal block or a lava bucket
-                            PipesUtil.addFuel(inputInventory, targetInventory, itemStack);
-                            break;
-                        default:
-                            // the item is anything but a fuel (at least what we regard a fuel)
-                            FurnaceInventory furnaceInventory = (FurnaceInventory) targetInventory;
-                            ItemStack smelting = furnaceInventory.getSmelting();
-                            if (smelting == null) {
-                                inputInventory.removeItem(new ItemStack(itemStack));
-                                furnaceInventory.setSmelting(itemStack);
-                                itemStack.setAmount(0);
-                            } else if (smelting.isSimilar(itemStack)) {
-                                ItemStack itemToSet = PipesUtil.moveToSingleSlot(inputInventory, smelting, itemStack);
-                                if (itemToSet != null) {
-                                    furnaceInventory.setSmelting(itemToSet);
-                                }
+                    if (itemStack.getType().isFuel()) {
+                        PipesUtil.addFuel(inputInventory, targetInventory, itemStack);
+                    } else {
+                        FurnaceInventory furnaceInventory = (FurnaceInventory) targetInventory;
+                        ItemStack smelting = furnaceInventory.getSmelting();
+                        if (smelting == null) {
+                            inputInventory.removeItem(new ItemStack(itemStack));
+                            furnaceInventory.setSmelting(itemStack);
+                            itemStack.setAmount(0);
+                        } else if (smelting.isSimilar(itemStack)) {
+                            ItemStack itemToSet = PipesUtil.moveToSingleSlot(inputInventory, smelting, itemStack);
+                            if (itemToSet != null) {
+                                furnaceInventory.setSmelting(itemToSet);
                             }
-                            break;
+                        }
                     }
                     break;
                     /*

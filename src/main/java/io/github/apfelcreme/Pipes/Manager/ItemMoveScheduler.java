@@ -146,7 +146,7 @@ public class ItemMoveScheduler {
             }
         }
 
-        // createDetection the current transfer to all the running detections
+        // add the current transfer to all the running detections
         for (Detection detection : DetectionManager.getInstance().getDetections().values()) {
             detection.addLocation(new SimpleLocation(input.getLocation()));
         }
@@ -276,7 +276,7 @@ public class ItemMoveScheduler {
                         case EMERALD:
                         case GOLD_INGOT:
                         case IRON_INGOT:
-                            PipesUtil.addItem(inputInventory, targetInventory, itemStack);
+                            PipesUtil.addItem(targetInventory, itemStack);
                             break;
                     }
                     break;
@@ -288,7 +288,7 @@ public class ItemMoveScheduler {
                      */
                 default:
                     // for chests, dropper etc...
-                    PipesUtil.addItem(inputInventory, targetInventory, itemStack);
+                    PipesUtil.addItem(targetInventory, itemStack);
                     break;
                     /*
                     END DEFAULT

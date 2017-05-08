@@ -350,28 +350,22 @@ public class PipesUtil {
     }
 
     /**
-     * Add an item to an inventory. This more complex method is necessary as CraftBukkit doesn't properly
-     * return leftovers with partial item stacks
-     * @param source The inventory that we move it from
+     * Add an item to an inventory. This more complex method is necessary as not every implementation sets the leftover amount
      * @param target Where to move the item to
      * @param itemStack The item stack
      */
-    public static void addItem(Inventory source, Inventory target, ItemStack itemStack) {
-        source.removeItem(itemStack);
+    public static void addItem(Inventory target, ItemStack itemStack) {
         if (target.firstEmpty() != -1) {
             target.addItem(itemStack);
             itemStack.setAmount(0);
         } else {
             Map<Integer, ItemStack> rest = target.addItem(itemStack);
+            // Recalculate the leftover amount as changing the input stack's size depends on the implementation
             int newAmount = 0;
             for (ItemStack item : rest.values()) {
                 newAmount += item.getAmount();
             }
             itemStack.setAmount(newAmount);
-            if (itemStack.getAmount() > 0) {
-                source.addItem(itemStack);
-                itemStack.setAmount(newAmount); // Need to reset the amount as addItem might change the size
-            }
         }
     }
 

@@ -19,7 +19,12 @@ import org.bukkit.inventory.ItemStack;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.logging.Level;
 
 /**
@@ -134,7 +139,7 @@ public class ItemMoveScheduler {
             return true;
         }
 
-        Queue<ItemStack> itemQueue = new LinkedList<>();
+        List<ItemStack> itemQueue = new ArrayList<>();
         for (ItemStack itemStack : inputHolder.getInventory()) {
             if (itemStack != null) {
                 itemQueue.add(itemStack);
@@ -272,7 +277,7 @@ public class ItemMoveScheduler {
                         case EMERALD:
                         case GOLD_INGOT:
                         case IRON_INGOT:
-                            PipesUtil.addItem(inputHolder.getInventory(), targetInventory, itemStack);
+                            PipesUtil.addItem(inputInventory, targetInventory, itemStack);
                             break;
                     }
                     break;
@@ -284,7 +289,7 @@ public class ItemMoveScheduler {
                      */
                 default:
                     // for chests, dropper etc...
-                    PipesUtil.addItem(inputHolder.getInventory(), targetInventory, itemStack);
+                    PipesUtil.addItem(inputInventory, targetInventory, itemStack);
                     break;
                     /*
                     END DEFAULT

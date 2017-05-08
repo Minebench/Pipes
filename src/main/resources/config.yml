@@ -17,4 +17,4 @@ maxPipeOutputs: 64
 gui:
   enabled: "WOOL:5"
   disabled: "WOOL:14"
-  filler: "STAINED_GLASS:15"
+  filler: "STAINED_GLASS_PANE:15"

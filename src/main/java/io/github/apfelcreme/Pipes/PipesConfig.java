@@ -151,24 +151,21 @@ public class PipesConfig {
     public static ItemStack getGuiFiller() {
         if (guiFiller == null) {
             guiFiller = getItemStack("gui.filler");
-            ItemMeta meta = guiFiller.getItemMeta();
-            meta.setDisplayName(" ");
-            guiFiller.setItemMeta(meta);
         }
-        return guiFiller;
+        return new ItemStack(guiFiller);
     }
 
     public static ItemStack getGuiEnabled() {
         if (guiEnabled == null) {
             guiEnabled = getItemStack("gui.enabled");
         }
-        return guiEnabled;
+        return new ItemStack(guiEnabled);
     }
 
     public static ItemStack getGuiDisabled() {
         if (guiDisabled == null) {
             guiDisabled = getItemStack("gui.disabled");
         }
-        return guiDisabled;
+        return new ItemStack(guiDisabled);
     }
 }

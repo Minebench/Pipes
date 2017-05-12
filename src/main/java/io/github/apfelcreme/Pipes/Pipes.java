@@ -3,14 +3,11 @@ package io.github.apfelcreme.Pipes;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import io.github.apfelcreme.Pipes.Listener.BlockListener;
-import io.github.apfelcreme.Pipes.Listener.GuiListener;
 import io.github.apfelcreme.Pipes.Listener.InventoryChangeListener;
 import io.github.apfelcreme.Pipes.Listener.PlayerRightclickListener;
 import io.github.apfelcreme.Pipes.Manager.ItemMoveScheduler;
-import io.github.apfelcreme.Pipes.Pipe.SimpleLocation;
 import org.bukkit.Material;
 import org.bukkit.command.CommandSender;
-import org.bukkit.configuration.serialization.ConfigurationSerialization;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ShapelessRecipe;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -58,7 +55,6 @@ public class Pipes extends JavaPlugin {
         getServer().getPluginManager().registerEvents(new InventoryChangeListener(this), this);
         getServer().getPluginManager().registerEvents(new PlayerRightclickListener(this), this);
         getServer().getPluginManager().registerEvents(new BlockListener(this), this);
-        getServer().getPluginManager().registerEvents(new GuiListener(this), this);
         getServer().getPluginCommand("pipe").setExecutor(new PipeCommand());
 
         //create the custom recipes

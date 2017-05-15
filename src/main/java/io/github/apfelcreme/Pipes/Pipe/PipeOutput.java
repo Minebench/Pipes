@@ -232,19 +232,23 @@ public class PipeOutput extends AbstractPipePart {
 
             gui.addElement(new GuiStorageElement('i', holder.getInventory()));
             gui.setFiller(PipesConfig.getGuiFiller());
-            gui.addElement(new GuiElementGroup('s',
-                    new GuiStateElement('w', (boolean) getOption(Option.WHITELIST) ? 0 : 1,
-                            new GuiStateElement.State(click -> setOption(Option.WHITELIST, Option.Value.TRUE), "enabled", PipesConfig.getGuiEnabled(), PipesConfig.getText("gui.whitelist.enabled")),
-                            new GuiStateElement.State(click -> setOption(Option.WHITELIST, Option.Value.FALSE), "disabled", PipesConfig.getGuiDisabled(), PipesConfig.getText("gui.whitelist.disabled"))
-                    ),
-                    new GuiStateElement('o', (boolean) getOption(Option.OVERFLOW) ? 0 : 1,
-                            new GuiStateElement.State(click -> setOption(Option.OVERFLOW, Option.Value.TRUE), "enabled", PipesConfig.getGuiEnabled(), PipesConfig.getText("gui.overflow.enabled")),
-                            new GuiStateElement.State(click -> setOption(Option.OVERFLOW, Option.Value.FALSE), "disabled", PipesConfig.getGuiDisabled(), PipesConfig.getText("gui.overflow.disabled"))
-                    ),
-                    gui.getFiller()
-            ));
+            GuiElementGroup optionsGroup = new GuiElementGroup('s');
+            for (Option option : Option.values()) {
+                optionsGroup.addElement(getElement(option));
+            }
+            optionsGroup.addElement(gui.getFiller());
         }
         gui.show(player);
+    }
+
+    private GuiStateElement getElement(Option option) {
+        if (option.getValueType() == Boolean.class) {
+            return new GuiStateElement(option.name().charAt(0), (boolean) getOption(option) ? 0 : 1,
+                    new GuiStateElement.State(click -> setOption(option, Option.Value.TRUE), "enabled", PipesConfig.getGuiEnabled(), PipesConfig.getText("gui." + option.toString().toLowerCase() + ".enabled")),
+                    new GuiStateElement.State(click -> setOption(option, Option.Value.FALSE), "disabled", PipesConfig.getGuiDisabled(), PipesConfig.getText("gui." + option.toString().toLowerCase() + ".disabled"))
+            );
+        }
+        return null;
     }
 
     public class AcceptResult {

@@ -231,6 +231,7 @@ public class PipeOutput extends AbstractPipePart {
                 optionsGroup.addElement(option.getElement(this));
             }
             optionsGroup.addElement(gui.getFiller());
+            gui.addElement(optionsGroup);
         }
         gui.show(player);
     }

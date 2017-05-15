@@ -41,9 +41,7 @@ public class PipesConfig {
     private static int maxPipeOutputs;
     private static int maxPipeLength;
     private static ItemStack guiFiller;
-    private static ItemStack guiEnabled;
-    private static ItemStack guiDisabled;
-    private static Map<String, ItemStack> itemStacks = new HashMap<>();
+    private static Map<String, ItemStack> itemStacks;
 
     /**
      * loads the config
@@ -60,6 +58,7 @@ public class PipesConfig {
         maxPipeOutputs = plugin.getConfig().getInt("maxPipeOutputs");
         maxPipeLength = plugin.getConfig().getInt("maxPipeLength");
         languageConfig = YamlConfiguration.loadConfiguration(new File(plugin.getDataFolder(), "lang.de.yml"));
+        itemStacks = new HashMap<>();
     }
 
     /**
@@ -137,27 +136,31 @@ public class PipesConfig {
             return new ItemStack(itemStacks.get(key));
         }
 
-        String error;
-        String[] parts = plugin.getConfig().getString(key).split(":");
-        try {
-            Material mat = Material.valueOf(parts[0].toUpperCase());
-            byte data = 0;
-            if (parts.length > 0) {
-                data = Byte.parseByte(parts[1]);
+        String error = "Missing item config entry for " + key;
+        String input = plugin.getConfig().getString(key);
+        if (input != null) {
+            String[] parts = input.split(":");
+            try {
+                Material mat = Material.valueOf(parts[0].toUpperCase());
+                byte data = 0;
+                if (parts.length > 0) {
+                    data = Byte.parseByte(parts[1]);
+                }
+                ItemStack item = new ItemStack(mat, 1, data);
+                itemStacks.put(key, item);
+                return item;
+            } catch (NumberFormatException e) {
+                error = parts[1] + " is not a valid Byte!";
+            } catch (IllegalArgumentException e) {
+                error = parts[0].toUpperCase() + " is not a valid Material name!";
             }
-            ItemStack item =  new ItemStack(mat, 1, data);
-            itemStacks.put(key, item);
-            return item;
-        } catch (NumberFormatException e) {
-            error = parts[1] + " is not a valid Byte!";
-        } catch (IllegalArgumentException e) {
-            error = parts[0].toUpperCase() + " is not a valid Material name!";
         }
         plugin.getLogger().log(Level.WARNING, error);
         ItemStack item = new ItemStack(Material.BARRIER);
         ItemMeta meta = item.getItemMeta();
         meta.setDisplayName(ChatColor.RED + error);
         item.setItemMeta(meta);
+        itemStacks.put(key, item);
         return item;
     }
 

@@ -1,6 +1,5 @@
 package io.github.apfelcreme.Pipes.Pipe;
 
-import com.google.common.collect.ImmutableMap;
 import de.themoep.inventorygui.GuiElementGroup;
 import de.themoep.inventorygui.GuiStateElement;
 import de.themoep.inventorygui.GuiStorageElement;
@@ -44,11 +43,6 @@ import java.util.logging.Level;
  * @author Lord36 aka Apfelcreme
  */
 public class PipeOutput extends AbstractPipePart {
-
-    private static final Map<Option, Option.Value> DEFAULT_OPTIONS = ImmutableMap.of(
-            Option.WHITELIST, Option.Value.TRUE,
-            Option.OVERFLOW, Option.Value.FALSE
-    );
 
     private final BlockFace facing;
     private Map<Option, Option.Value> options = new HashMap<>();
@@ -168,7 +162,7 @@ public class PipeOutput extends AbstractPipePart {
      * @return          The value of the option or <tt>null</tt> if it wasn't set and there is no default one
      */
     public Object getOption(Option option) {
-        return getOption(option, DEFAULT_OPTIONS.get(option));
+        return getOption(option, option.getDefaultValue());
     }
 
     /**
@@ -285,22 +279,25 @@ public class PipeOutput extends AbstractPipePart {
          * <li><tt>true</tt> if this output is in whitelist mode and should only let items through that are in the inventory</li>
          * <li><tt>false</tt> if this output is in blacklist mode and should only let items through that are <strong>not</strong> in the inventory</li></p>
          */
-        WHITELIST(Boolean.class),
+        WHITELIST(Value.TRUE, Boolean.class),
         /**
          * Whether or not this output can overflow into other available outputs
          * <p><strong>Possible Values:</strong>
          * <li><tt>true</tt> if this output should force items to end up here even 'though the target is full</li>
          * <li><tt>false</tt> if the items should end up in the overflow</li></p>
          */
-        OVERFLOW(Boolean.class);
+        OVERFLOW(Value.FALSE, Boolean.class);
 
+        private final Value defaultValue;
         private final Class<?> valueType;
 
         /**
          * An option that this pipe output can have
-         * @param valueType The class of the values that this option accepts
+         * @param defaultValue  The default value when none is set
+         * @param valueType     The class of the values that this option accepts
          */
-        Option(Class<?> valueType) {
+        Option(Value defaultValue, Class<?> valueType) {
+            this.defaultValue = defaultValue;
             this.valueType = valueType;
         }
 
@@ -310,6 +307,14 @@ public class PipeOutput extends AbstractPipePart {
          */
         public Class<?> getValueType() {
             return valueType;
+        }
+
+        /**
+         * Get the default value for this option if it isn't set
+         * @return  The default value of this option
+         */
+        public Value getDefaultValue() {
+            return defaultValue;
         }
 
         public static class Value<T> {

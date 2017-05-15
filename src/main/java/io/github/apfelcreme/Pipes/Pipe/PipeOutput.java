@@ -183,8 +183,8 @@ public class PipeOutput extends AbstractPipePart {
      * @throws IllegalArgumentException When the values type is not compatible with the option
      */
     public void setOption(Option option, Option.Value value) throws IllegalArgumentException {
-        if (value.getValue().getClass() != option.getValueType()) {
-            throw new IllegalArgumentException("The option " + option + "< " + option.getValueType().getSimpleName() + "> does not accept " + value.getValue().getClass().getSimpleName() + " values!");
+        if (!option.isValid(value)) {
+            throw new IllegalArgumentException("The option " + option + "< " + option.getValueType().getSimpleName() + "> does not accept the value " + value + " values!");
         }
         options.put(option, value);
         saveOptions();
@@ -228,21 +228,11 @@ public class PipeOutput extends AbstractPipePart {
             gui.setFiller(PipesConfig.getGuiFiller());
             GuiElementGroup optionsGroup = new GuiElementGroup('s');
             for (Option option : Option.values()) {
-                optionsGroup.addElement(getElement(option));
+                optionsGroup.addElement(option.getElement(this));
             }
             optionsGroup.addElement(gui.getFiller());
         }
         gui.show(player);
-    }
-
-    private GuiStateElement getElement(Option option) {
-        if (option.getValueType() == Boolean.class) {
-            return new GuiStateElement(option.name().charAt(0), (boolean) getOption(option) ? 0 : 1,
-                    new GuiStateElement.State(click -> setOption(option, Option.Value.TRUE), "enabled", PipesConfig.getGuiEnabled(), PipesConfig.getText("gui." + option.toString().toLowerCase() + ".enabled")),
-                    new GuiStateElement.State(click -> setOption(option, Option.Value.FALSE), "disabled", PipesConfig.getGuiDisabled(), PipesConfig.getText("gui." + option.toString().toLowerCase() + ".disabled"))
-            );
-        }
-        return null;
     }
 
     public class AcceptResult {
@@ -290,6 +280,7 @@ public class PipeOutput extends AbstractPipePart {
 
         private final Value defaultValue;
         private final Class<?> valueType;
+        private final Value[] possibleValues;
 
         /**
          * An option that this pipe output can have
@@ -299,6 +290,36 @@ public class PipeOutput extends AbstractPipePart {
         Option(Value defaultValue, Class<?> valueType) {
             this.defaultValue = defaultValue;
             this.valueType = valueType;
+            possibleValues = new Value[0];
+        }
+
+        /**
+         * An option that this pipe output can have
+         * @param possibleValues    An array of possible values that this option accepts
+         * @throws IllegalArgumentException Thrown when there are less than two possible values defined
+         */
+        Option(Value... possibleValues) throws IllegalArgumentException {
+            if (possibleValues.length < 2) {
+                throw new IllegalArgumentException("An option needs to have at least two values!");
+            }
+            this.possibleValues = possibleValues;
+            defaultValue = possibleValues[0];
+            valueType = defaultValue.getValue().getClass();
+        }
+
+        public boolean isValid(Value value) {
+            if (value.getValue().getClass() != getValueType()) {
+                return false;
+            }
+            if (possibleValues.length == 0) {
+                return true;
+            }
+            for (Value v : possibleValues) {
+                if (v.getValue().equals(value.getValue())) {
+                    return true;
+                }
+            }
+            return false;
         }
 
         /**
@@ -317,6 +338,41 @@ public class PipeOutput extends AbstractPipePart {
             return defaultValue;
         }
 
+        /**
+         * Get the array of possible values
+         * @return  The array of possible values
+         */
+        public Value[] getPossibleValues() {
+            return possibleValues;
+        }
+
+        /**
+         * Get the GUI element of this option for a certain output
+         * @param output    The output to get the element for
+         * @return          The GuiStateElement of this option
+         */
+        public GuiStateElement getElement(PipeOutput output) {
+            Object value = output.getOption(this);
+            List<GuiStateElement.State> states = new ArrayList<>();
+            int index = 0;
+            for (int i = 0; i < possibleValues.length; i++) {
+                if (possibleValues[i].getValue().equals(value)) {
+                    index = i;
+                    break;
+                }
+            }
+            Value nextValue = possibleValues.length > index + 1 ? possibleValues[index + 1] : possibleValues[0];
+            for (Value v : possibleValues) {
+                states.add(new GuiStateElement.State(
+                        click -> output.setOption(this, nextValue),
+                        v.toString(),
+                        PipesConfig.getItemStack("gui." + name().toLowerCase() + "." + v.toString()),
+                        PipesConfig.getText("gui." + name().toLowerCase() + "." + v.toString())
+                ));
+            }
+            return new GuiStateElement(name().charAt(0), index, states.toArray(new GuiStateElement.State[states.size()]));
+        }
+
         public static class Value<T> {
             public static final Value TRUE = new Value<>(true);
             public static final Value FALSE = new Value<>(false);
@@ -332,7 +388,7 @@ public class PipeOutput extends AbstractPipePart {
             }
 
             public String toString() {
-                return value.toString();
+                return "Value<" + value.getClass().getSimpleName() + ">{value=" + value.toString() + "}";
             }
         }
     }

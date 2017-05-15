@@ -15,6 +15,10 @@ chunkLoaderRecipe:
 maxPipeLength: 128
 maxPipeOutputs: 64
 gui:
-  enabled: "WOOL:5"
-  disabled: "WOOL:14"
+  whitelist:
+    true: "WOOL:5"
+    false: "WOOL:14"
+  overflow:
+    true: "WOOL:5"
+    false: "WOOL:14"
   filler: "STAINED_GLASS_PANE:15"

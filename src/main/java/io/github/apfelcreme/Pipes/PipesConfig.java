@@ -43,6 +43,7 @@ public class PipesConfig {
     private static ItemStack guiFiller;
     private static ItemStack guiEnabled;
     private static ItemStack guiDisabled;
+    private static Map<String, ItemStack> itemStacks = new HashMap<>();
 
     /**
      * loads the config
@@ -131,7 +132,12 @@ public class PipesConfig {
         }
     }
 
-    private static ItemStack getItemStack(String key) {
+    public static ItemStack getItemStack(String key) {
+        if (itemStacks.containsKey(key)) {
+            return new ItemStack(itemStacks.get(key));
+        }
+
+        String error;
         String[] parts = plugin.getConfig().getString(key).split(":");
         try {
             Material mat = Material.valueOf(parts[0].toUpperCase());
@@ -139,13 +145,20 @@ public class PipesConfig {
             if (parts.length > 0) {
                 data = Byte.parseByte(parts[1]);
             }
-            return new ItemStack(mat, 1, data);
+            ItemStack item =  new ItemStack(mat, 1, data);
+            itemStacks.put(key, item);
+            return item;
         } catch (NumberFormatException e) {
-            plugin.getLogger().log(Level.WARNING, parts[1] + " is not a valid Byte!");
+            error = parts[1] + " is not a valid Byte!";
         } catch (IllegalArgumentException e) {
-            plugin.getLogger().log(Level.WARNING, parts[0].toUpperCase() + " is not a valid Material name!");
+            error = parts[0].toUpperCase() + " is not a valid Material name!";
         }
-        return new ItemStack(Material.BARRIER);
+        plugin.getLogger().log(Level.WARNING, error);
+        ItemStack item = new ItemStack(Material.BARRIER);
+        ItemMeta meta = item.getItemMeta();
+        meta.setDisplayName(ChatColor.RED + error);
+        item.setItemMeta(meta);
+        return item;
     }
 
     public static ItemStack getGuiFiller() {
@@ -153,19 +166,5 @@ public class PipesConfig {
             guiFiller = getItemStack("gui.filler");
         }
         return new ItemStack(guiFiller);
-    }
-
-    public static ItemStack getGuiEnabled() {
-        if (guiEnabled == null) {
-            guiEnabled = getItemStack("gui.enabled");
-        }
-        return new ItemStack(guiEnabled);
-    }
-
-    public static ItemStack getGuiDisabled() {
-        if (guiDisabled == null) {
-            guiDisabled = getItemStack("gui.disabled");
-        }
-        return new ItemStack(guiDisabled);
     }
 }

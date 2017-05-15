@@ -361,13 +361,12 @@ public class PipeOutput extends AbstractPipePart {
                     break;
                 }
             }
-            Value nextValue = possibleValues.length > index + 1 ? possibleValues[index + 1] : possibleValues[0];
             for (Value v : possibleValues) {
                 states.add(new GuiStateElement.State(
-                        click -> output.setOption(this, nextValue),
-                        v.toString(),
-                        PipesConfig.getItemStack("gui." + name().toLowerCase() + "." + v.toString()),
-                        PipesConfig.getText("gui." + name().toLowerCase() + "." + v.toString())
+                        change -> output.setOption(this, v),
+                        v.getValue().toString(),
+                        PipesConfig.getItemStack("gui." + name().toLowerCase() + "." + v.getValue().toString()),
+                        PipesConfig.getText("gui." + name().toLowerCase() + "." + v.getValue().toString())
                 ));
             }
             return new GuiStateElement(name().charAt(0), index, states.toArray(new GuiStateElement.State[states.size()]));

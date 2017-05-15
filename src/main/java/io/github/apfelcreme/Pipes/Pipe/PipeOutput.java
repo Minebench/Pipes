@@ -1,6 +1,6 @@
 package io.github.apfelcreme.Pipes.Pipe;
 
-import de.themoep.inventorygui.GuiElement;
+import com.google.common.collect.ImmutableMap;
 import de.themoep.inventorygui.GuiElementGroup;
 import de.themoep.inventorygui.GuiStateElement;
 import de.themoep.inventorygui.GuiStorageElement;
@@ -20,7 +20,10 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.material.Directional;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.logging.Level;
 
 /**
  * Copyright (C) 2016 Lord36 aka Apfelcreme
@@ -42,9 +45,13 @@ import java.util.List;
  */
 public class PipeOutput extends AbstractPipePart {
 
+    private static final Map<Option, Option.Value> DEFAULT_OPTIONS = ImmutableMap.of(
+            Option.WHITELIST, Option.Value.TRUE,
+            Option.OVERFLOW, Option.Value.FALSE
+    );
+
     private final BlockFace facing;
-    private boolean whiteList = true;
-    private boolean overflowAllowed = false;
+    private Map<Option, Option.Value> options = new HashMap<>();
 
     public final static String[] GUI_SETUP = {
             "sssiiisss",
@@ -67,10 +74,11 @@ public class PipeOutput extends AbstractPipePart {
                     if (parts.length < 2) {
                         continue;
                     }
-                    if ("whitelist".equals(parts[0])) {
-                        whiteList = Boolean.parseBoolean(parts[1]);
-                    } else if ("overflow".equals(parts[0])) {
-                        overflowAllowed = Boolean.parseBoolean(parts[1]);
+                    try {
+                        Option option = Option.valueOf(parts[0].toUpperCase());
+                        options.put(option, new Option.Value<>(Boolean.parseBoolean(parts[1])));
+                    } catch (IllegalArgumentException e) {
+                        Pipes.getInstance().getLogger().log(Level.WARNING, "PipeOutput at " + block.getLocation() + " has an invalid option " + parts[0] + "=" + parts[1] + "?");
                     }
                 }
             }
@@ -126,16 +134,17 @@ public class PipeOutput extends AbstractPipePart {
         if (block == null || !(block.getState() instanceof InventoryHolder)) {
             return new AcceptResult(ResultType.DENY_INVALID, false);
         }
-        if (isOverflowAllowed() && block.isBlockPowered()) {
+        if ((boolean) getOption(PipeOutput.Option.OVERFLOW) && block.isBlockPowered()) {
             return new AcceptResult(ResultType.DENY_REDSTONE, false);
         }
 
         boolean inFilter = false;
         boolean isEmpty = true;
+        boolean isWhitelist = (boolean) getOption(Option.WHITELIST);
         for (ItemStack filterItem : ((InventoryHolder) block.getState()).getInventory().getContents()) {
             isEmpty &= filterItem == null;
             if (PipesUtil.isSimilarFuzzy(filterItem, itemStack)) {
-                if (isWhiteList()) {
+                if (isWhitelist) {
                     inFilter = true;
                     break;
                 } else {
@@ -146,7 +155,7 @@ public class PipeOutput extends AbstractPipePart {
 
         if (block.isBlockPowered()) {
             return new AcceptResult(ResultType.DENY_REDSTONE, inFilter);
-        } else if (!isEmpty && isWhiteList() && !inFilter) {
+        } else if (!isEmpty && isWhitelist && !inFilter) {
             return new AcceptResult(ResultType.DENY_WHITELIST, false);
         } else {
             return new AcceptResult(ResultType.ACCEPT, inFilter);
@@ -154,37 +163,36 @@ public class PipeOutput extends AbstractPipePart {
     }
 
     /**
-     * Get if this output works in white- or blacklist mode. This changes how the filter items are used.
-     * @return  <tt>true</tt> if this output is in whitelist mode; <tt>false</tt> if not
+     * Get a certain option of this output
+     * @param option    The option to get
+     * @return          The value of the option or <tt>null</tt> if it wasn't set and there is no default one
      */
-    public boolean isWhiteList() {
-        return whiteList;
+    public Object getOption(Option option) {
+        return getOption(option, DEFAULT_OPTIONS.get(option));
     }
 
     /**
-     * Set whether or not this output is in whitelist mode. This changes how the filter items are used.
-     * @param whiteList <tt>true</tt> if this output is in whitelist mode; <tt>false</tt> if it is in blacklist mode
+     * Get a certain option of this output
+     * @param option        The option to get
+     * @param defaultValue  The default value to return if the value wasn't found
+     * @return              The value of the option or <tt>null</tt> if it wasn't set
      */
-    public void setWhiteList(boolean whiteList) {
-        this.whiteList = whiteList;
-        saveOptions();
+    public Object getOption(Option option, Option.Value defaultValue) {
+        Option.Value value = options.getOrDefault(option, defaultValue);
+        return value != null ? value.getValue() : null;
     }
 
     /**
-     * Get whether or not this output allows overflowing
-     * @return  <tt>true</tt> if this output should force items to end up here even 'though the target is full;
-     *          <tt>false</tt> if the items should end up in the overflow
+     * Set an option of this output. This also saves the options to the block
+     * @param option    The option to set
+     * @param value     The value to set the option to
+     * @throws IllegalArgumentException When the values type is not compatible with the option
      */
-    public boolean isOverflowAllowed() {
-        return overflowAllowed;
-    }
-
-    /**
-     * Set whether or not this output can overflow
-     * @param overflowAllowed   Whether or not this output oferflows if the target is full
-     */
-    public void setOverflowAllowed(boolean overflowAllowed) {
-        this.overflowAllowed = overflowAllowed;
+    public void setOption(Option option, Option.Value value) throws IllegalArgumentException {
+        if (value.getValue().getClass() != option.getValueType()) {
+            throw new IllegalArgumentException("The option " + option + "< " + option.getValueType().getSimpleName() + "> does not accept " + value.getValue().getClass().getSimpleName() + " values!");
+        }
+        options.put(option, value);
         saveOptions();
     }
 
@@ -206,11 +214,8 @@ public class PipeOutput extends AbstractPipePart {
     @Override
     public String toString() {
         StringBuilder s = new StringBuilder(getType().toString());
-        if (!whiteList) {
-            s.append(",whitelist=" + whiteList);
-        }
-        if (overflowAllowed) {
-            s.append(",overflow=" + overflowAllowed);
+        for (Map.Entry<Option, Option.Value> option : options.entrySet()) {
+            s.append(',').append(option.getKey()).append('=').append(option.getValue());
         }
         return s.toString();
     }
@@ -228,13 +233,13 @@ public class PipeOutput extends AbstractPipePart {
             gui.addElement(new GuiStorageElement('i', holder.getInventory()));
             gui.setFiller(PipesConfig.getGuiFiller());
             gui.addElement(new GuiElementGroup('s',
-                    new GuiStateElement('w', isWhiteList() ? 0 : 1,
-                            new GuiStateElement.State(click -> setWhiteList(true), "enabled", PipesConfig.getGuiEnabled(), PipesConfig.getText("gui.whitelist.enabled")),
-                            new GuiStateElement.State(click -> setWhiteList(false), "disabled", PipesConfig.getGuiDisabled(), PipesConfig.getText("gui.whitelist.disabled"))
+                    new GuiStateElement('w', (boolean) getOption(Option.WHITELIST) ? 0 : 1,
+                            new GuiStateElement.State(click -> setOption(Option.WHITELIST, Option.Value.TRUE), "enabled", PipesConfig.getGuiEnabled(), PipesConfig.getText("gui.whitelist.enabled")),
+                            new GuiStateElement.State(click -> setOption(Option.WHITELIST, Option.Value.FALSE), "disabled", PipesConfig.getGuiDisabled(), PipesConfig.getText("gui.whitelist.disabled"))
                     ),
-                    new GuiStateElement('o', isOverflowAllowed() ? 0 : 1,
-                            new GuiStateElement.State(click -> setOverflowAllowed(true), "enabled", PipesConfig.getGuiEnabled(), PipesConfig.getText("gui.overflow.enabled")),
-                            new GuiStateElement.State(click -> setOverflowAllowed(false), "disabled", PipesConfig.getGuiDisabled(), PipesConfig.getText("gui.overflow.disabled"))
+                    new GuiStateElement('o', (boolean) getOption(Option.OVERFLOW) ? 0 : 1,
+                            new GuiStateElement.State(click -> setOption(Option.OVERFLOW, Option.Value.TRUE), "enabled", PipesConfig.getGuiEnabled(), PipesConfig.getText("gui.overflow.enabled")),
+                            new GuiStateElement.State(click -> setOption(Option.OVERFLOW, Option.Value.FALSE), "disabled", PipesConfig.getGuiDisabled(), PipesConfig.getText("gui.overflow.disabled"))
                     ),
                     gui.getFiller()
             ));
@@ -267,5 +272,59 @@ public class PipeOutput extends AbstractPipePart {
         DENY_WHITELIST,
         DENY_BLACKLIST,
         DENY_INVALID;
+    }
+
+    public enum Option {
+        /**
+         * Whether or not this output is in whitelist mode. This changes how the filter items are used.
+         * <p><strong>Possible Values:</strong>
+         * <li><tt>true</tt> if this output is in whitelist mode and should only let items through that are in the inventory</li>
+         * <li><tt>false</tt> if this output is in blacklist mode and should only let items through that are <strong>not</strong> in the inventory</li></p>
+         */
+        WHITELIST(Boolean.class),
+        /**
+         * Whether or not this output can overflow into other available outputs
+         * <p><strong>Possible Values:</strong>
+         * <li><tt>true</tt> if this output should force items to end up here even 'though the target is full</li>
+         * <li><tt>false</tt> if the items should end up in the overflow</li></p>
+         */
+        OVERFLOW(Boolean.class);
+
+        private final Class<?> valueType;
+
+        /**
+         * An option that this pipe output can have
+         * @param valueType The class of the values that this option accepts
+         */
+        Option(Class<?> valueType) {
+            this.valueType = valueType;
+        }
+
+        /**
+         * Get the class of the values that this option accepts
+         * @return  The class of the values that this option accepts
+         */
+        public Class<?> getValueType() {
+            return valueType;
+        }
+
+        public static class Value<T> {
+            public static final Value TRUE = new Value<>(true);
+            public static final Value FALSE = new Value<>(false);
+
+            private final T value;
+
+            public Value(T value) {
+                this.value = value;
+            }
+
+            public T getValue() {
+                return value;
+            }
+
+            public String toString() {
+                return value.toString();
+            }
+        }
     }
 }

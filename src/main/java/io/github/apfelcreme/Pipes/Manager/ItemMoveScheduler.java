@@ -169,9 +169,10 @@ public class ItemMoveScheduler {
                 return true;
             }
 
+            boolean overflowIsAllowed = (boolean) output.getOption(PipeOutput.Option.OVERFLOW);
             PipeOutput.AcceptResult acceptResult = output.accepts(itemStack);
             if (acceptResult.getType() != PipeOutput.ResultType.ACCEPT) {
-                if (acceptResult.isInFilter() && !output.isOverflowAllowed()) {
+                if (acceptResult.isInFilter() && !overflowIsAllowed) {
                     return false;
                 }
                 continue;
@@ -295,7 +296,7 @@ public class ItemMoveScheduler {
                      */
             }
 
-            if (itemStack.getAmount() > 0 && acceptResult.isInFilter() && !output.isOverflowAllowed()) {
+            if (itemStack.getAmount() > 0 && acceptResult.isInFilter() && !overflowIsAllowed) {
                 return false;
             }
         }

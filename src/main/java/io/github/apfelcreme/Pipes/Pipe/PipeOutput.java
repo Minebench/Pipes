@@ -209,7 +209,7 @@ public class PipeOutput extends AbstractPipePart {
     public String toString() {
         StringBuilder s = new StringBuilder(getType().toString());
         for (Map.Entry<Option, Option.Value> option : options.entrySet()) {
-            s.append(',').append(option.getKey()).append('=').append(option.getValue());
+            s.append(',').append(option.getKey()).append('=').append(option.getValue().getValue());
         }
         return s.toString();
     }

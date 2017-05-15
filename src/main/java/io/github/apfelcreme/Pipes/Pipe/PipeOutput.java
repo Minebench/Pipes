@@ -269,14 +269,14 @@ public class PipeOutput extends AbstractPipePart {
          * <li><tt>true</tt> if this output is in whitelist mode and should only let items through that are in the inventory</li>
          * <li><tt>false</tt> if this output is in blacklist mode and should only let items through that are <strong>not</strong> in the inventory</li></p>
          */
-        WHITELIST(Value.TRUE, Boolean.class),
+        WHITELIST(Value.TRUE, Value.FALSE),
         /**
          * Whether or not this output can overflow into other available outputs
          * <p><strong>Possible Values:</strong>
          * <li><tt>true</tt> if this output should force items to end up here even 'though the target is full</li>
          * <li><tt>false</tt> if the items should end up in the overflow</li></p>
          */
-        OVERFLOW(Value.FALSE, Boolean.class);
+        OVERFLOW(Value.FALSE, Value.TRUE);
 
         private final Value defaultValue;
         private final Class<?> valueType;

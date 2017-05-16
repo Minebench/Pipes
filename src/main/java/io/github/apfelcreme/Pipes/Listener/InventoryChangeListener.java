@@ -100,21 +100,4 @@ public class InventoryChangeListener implements Listener {
         }
         return true;
     }
-
-    /**
-     * cancels all events where hoppers are trying to move items out of a pipe output or a pipe input
-     *
-     * @param event the event
-     */
-    @EventHandler
-    private void onHopperTransfer(InventoryMoveItemEvent event) {
-        if (event.getInitiator().getType() == InventoryType.HOPPER &&
-                (event.getSource().getType() == InventoryType.DISPENSER
-                        || event.getSource().getType() == InventoryType.DROPPER)) {
-            if (event.getSource().getHolder() instanceof BlockState
-                    && PipesUtil.getPipesItem(((BlockState) event.getSource().getHolder()).getBlock()) != null) {
-                event.setCancelled(true);
-            }
-        }
-    }
 }

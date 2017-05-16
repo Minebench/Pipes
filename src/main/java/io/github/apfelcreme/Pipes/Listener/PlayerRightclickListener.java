@@ -68,7 +68,9 @@ public class PlayerRightclickListener implements Listener {
                     Pipes.sendMessage(event.getPlayer(), PipesConfig.getText("error.pipeTooLong")
                             .replace("{0}", String.valueOf(PipesConfig.getMaxPipeLength())));
                 }
-            } else if (!event.getPlayer().isSneaking() || event.getPlayer().hasPermission("Pipes.gui.bypass")) {
+            } else if (!event.getPlayer().isSneaking() || (
+                    !event.getItem().getType().isBlock() && !event.getItem().getType().isEdible()
+                            && !event.getPlayer().hasPermission("Pipes.gui.bypass"))) {
                 AbstractPipePart pipePart = PipesUtil.getPipesPart(event.getClickedBlock());
                 if (pipePart != null) {
                     event.setCancelled(true);

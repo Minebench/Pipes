@@ -14,6 +14,7 @@ import org.bukkit.block.Block;
 import org.bukkit.block.BlockState;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.InventoryHolder;
+import org.bukkit.inventory.ItemStack;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -266,10 +267,19 @@ public abstract class AbstractPipePart {
                 }
             }
             for (Value v : getPossibleValues()) {
+                ItemStack icon = PipesConfig.getItemStack("gui." + pipePart.getType().toConfigKey() + "." + toConfigKey().toLowerCase() + "." + v.getValue().toString());
+                if (!Pipes.getInstance().getConfig().contains("gui." + pipePart.getType().toConfigKey() + "." + toConfigKey().toLowerCase() + "." + v.getValue().toString())) {
+                    if (Pipes.getInstance().getConfig().contains("gui." + toConfigKey().toLowerCase() + "." + v.getValue().toString())) {
+                        icon = PipesConfig.getItemStack("gui." + toConfigKey().toLowerCase() + "." + v.getValue().toString());
+                    } else if (Pipes.getInstance().getConfig().contains("gui." + v.getValue().toString())) {
+                        icon = PipesConfig.getItemStack("gui." + v.getValue().toString());
+                    }
+                }
+
                 states.add(new GuiStateElement.State(
                         change -> pipePart.setOption(this, v),
                         v.getValue().toString(),
-                        PipesConfig.getItemStack("gui." + pipePart.getType().toConfigKey() + "." + toConfigKey().toLowerCase() + "." + v.getValue().toString()),
+                        icon,
                         PipesConfig.getText("gui." + pipePart.getType().toConfigKey() + "." + toConfigKey().toLowerCase() + "." + v.getValue().toString())
                 ));
             }

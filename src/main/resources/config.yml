@@ -15,26 +15,6 @@ chunkLoaderRecipe:
 maxPipeLength: 128
 maxPipeOutputs: 64
 gui:
-  pipe-output:
-    whitelist:
-      true: "WOOL:5"
-      false: "WOOL:14"
-    overflow:
-      true: "WOOL:5"
-      false: "WOOL:14"
-    smart-insert:
-      true: "WOOL:5"
-      false: "WOOL:14"
-    material-filter:
-      true: "WOOL:5"
-      false: "WOOL:14"
-    damage-filter:
-      true: "WOOL:5"
-      false: "WOOL:14"
-    display-filter:
-      true: "WOOL:5"
-      false: "WOOL:14"
-    amount-filter:
-      true: "WOOL:5"
-      false: "WOOL:14"
+  true: "WOOL:5"
+  false: "WOOL:14"
   filler: "STAINED_GLASS_PANE:15"

@@ -495,4 +495,22 @@ public class PipesUtil {
         }
         return false;
     }
+
+    /**
+     * Get the amount of times that a character appears in a certain string (array)
+     * @param c         The character
+     * @param strings   The string(s) to search ing
+     * @return          The amount of times the character appears in the string(s)
+     */
+    public static int countChar(char c, String... strings) {
+        int amount = 0;
+        for (String string : strings) {
+            for (char stringChar : string.toCharArray()) {
+                if (stringChar == c) {
+                    amount++;
+                }
+            }
+        }
+        return amount;
+    }
 }

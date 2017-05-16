@@ -43,9 +43,9 @@ public abstract class AbstractPipePart {
     private Map<IOption, Value> options = new HashMap<>();
 
     public final static String[] GUI_SETUP = {
-            "sssiiisss",
-            "sssiiisss",
-            "sssiiisss"
+            "sssiiizzz",
+            "sssiiizzz",
+            "sssiiizzz"
     };
 
     protected AbstractPipePart(PipesItem type, SimpleLocation location) {
@@ -167,8 +167,13 @@ public abstract class AbstractPipePart {
             gui.addElement(new GuiStorageElement('i', holder.getInventory()));
             gui.setFiller(PipesConfig.getGuiFiller());
             GuiElementGroup optionsGroup = new GuiElementGroup('s');
-            for (IOption option : getOptions()) {
-                optionsGroup.addElement(option.getElement(this));
+            int sCount = PipesUtil.countChar(optionsGroup.getSlotChar(), getGuiSetup());
+            for (int i = 0; i< getOptions().length; i++) {
+                if (i == sCount) {
+                    gui.addElement(optionsGroup);
+                    optionsGroup = new GuiElementGroup('z');
+                }
+                optionsGroup.addElement(getOptions()[i].getElement(this));
             }
             optionsGroup.addElement(gui.getFiller());
             gui.addElement(optionsGroup);

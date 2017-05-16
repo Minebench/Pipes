@@ -35,9 +35,10 @@ texts:
     tp:
       teleported: '&a Du wurdest teleportiert!'
   gui:
-    whitelist:
-      true: '&aPipe Output ist im &fWhitelist&a Modus!'
-      false: '&cPipe Output ist im &fBlacklist&c Modus!'
-    overflow:
-      true: '&aOverflowing ist erlaubt!'
-      false: '&cOverflowing ist nicht erlaubt!'
+    pipe-output:
+      whitelist:
+        true: '&aPipe Output ist im &fWhitelist&a Modus!'
+        false: '&cPipe Output ist im &fBlacklist&c Modus!'
+      overflow:
+        true: '&aOverflowing ist erlaubt!'
+        false: '&cOverflowing ist nicht erlaubt!'

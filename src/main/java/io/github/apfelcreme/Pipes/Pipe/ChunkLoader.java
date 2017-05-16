@@ -2,6 +2,8 @@ package io.github.apfelcreme.Pipes.Pipe;
 
 import io.github.apfelcreme.Pipes.PipesItem;
 import org.bukkit.block.Block;
+import org.bukkit.entity.Player;
+import org.bukkit.inventory.InventoryHolder;
 
 /**
  * Copyright (C) 2016 Lord36 aka Apfelcreme
@@ -29,5 +31,18 @@ public class ChunkLoader extends AbstractPipePart {
 
     public ChunkLoader(Block block) {
         this(new SimpleLocation(block.getLocation()));
+    }
+
+    @Override
+    public void showGui(Player player) {
+        InventoryHolder holder = getHolder();
+        if (holder != null) {
+            player.openInventory(holder.getInventory());
+        }
+    }
+
+    @Override
+    protected IOption[] getOptions() {
+        return new IOption[0];
     }
 }

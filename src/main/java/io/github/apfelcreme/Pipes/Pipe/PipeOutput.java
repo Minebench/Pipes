@@ -1,27 +1,18 @@
 package io.github.apfelcreme.Pipes.Pipe;
 
-import de.themoep.inventorygui.GuiElementGroup;
-import de.themoep.inventorygui.GuiStateElement;
-import de.themoep.inventorygui.GuiStorageElement;
-import de.themoep.inventorygui.InventoryGui;
 import io.github.apfelcreme.Pipes.Pipes;
-import io.github.apfelcreme.Pipes.PipesConfig;
 import io.github.apfelcreme.Pipes.PipesItem;
 import io.github.apfelcreme.Pipes.PipesUtil;
-import org.bukkit.ChatColor;
 import org.bukkit.Nameable;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
-import org.bukkit.block.BlockState;
-import org.bukkit.entity.Player;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.material.Directional;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.logging.Level;
 
 /**
@@ -45,13 +36,6 @@ import java.util.logging.Level;
 public class PipeOutput extends AbstractPipePart {
 
     private final BlockFace facing;
-    private Map<Option, Option.Value> options = new HashMap<>();
-
-    public final static String[] GUI_SETUP = {
-            "sssiiisss",
-            "sssiiisss",
-            "sssiiisss"
-    };
 
     public PipeOutput(SimpleLocation location, BlockFace facing) {
         super(PipesItem.PIPE_OUTPUT, location);
@@ -70,7 +54,7 @@ public class PipeOutput extends AbstractPipePart {
                     }
                     try {
                         Option option = Option.valueOf(parts[0].toUpperCase());
-                        options.put(option, new Option.Value<>(Boolean.parseBoolean(parts[1])));
+                        setOption(option, new Value<>(Boolean.parseBoolean(parts[1])), false);
                     } catch (IllegalArgumentException e) {
                         Pipes.getInstance().getLogger().log(Level.WARNING, "PipeOutput at " + block.getLocation() + " has an invalid option " + parts[0] + "=" + parts[1] + "?");
                     }
@@ -137,7 +121,7 @@ public class PipeOutput extends AbstractPipePart {
         boolean isWhitelist = (boolean) getOption(Option.WHITELIST);
         for (ItemStack filterItem : ((InventoryHolder) block.getState()).getInventory().getContents()) {
             isEmpty &= filterItem == null;
-            if (PipesUtil.isSimilarFuzzy(filterItem, itemStack)) {
+            if (matchesFilter(filterItem, itemStack)) {
                 if (isWhitelist) {
                     inFilter = true;
                     break;
@@ -157,45 +141,56 @@ public class PipeOutput extends AbstractPipePart {
     }
 
     /**
-     * Get a certain option of this output
-     * @param option    The option to get
-     * @return          The value of the option or <tt>null</tt> if it wasn't set and there is no default one
+     * Check whether or not an item stack matches the filter of this output
+     * @param filter    The filter item to match against
+     * @param item      The item stack to check
+     * @return          <tt>true</tt> if the filter is similar; <tt>false</tt> if not
      */
-    public Object getOption(Option option) {
-        return getOption(option, option.getDefaultValue());
-    }
-
-    /**
-     * Get a certain option of this output
-     * @param option        The option to get
-     * @param defaultValue  The default value to return if the value wasn't found
-     * @return              The value of the option or <tt>null</tt> if it wasn't set
-     */
-    public Object getOption(Option option, Option.Value defaultValue) {
-        Option.Value value = options.getOrDefault(option, defaultValue);
-        return value != null ? value.getValue() : null;
-    }
-
-    /**
-     * Set an option of this output. This also saves the options to the block
-     * @param option    The option to set
-     * @param value     The value to set the option to
-     * @throws IllegalArgumentException When the values type is not compatible with the option
-     */
-    public void setOption(Option option, Option.Value value) throws IllegalArgumentException {
-        if (!option.isValid(value)) {
-            throw new IllegalArgumentException("The option " + option + "< " + option.getValueType().getSimpleName() + "> does not accept the value " + value + " values!");
+    private boolean matchesFilter(ItemStack filter, ItemStack item) {
+        if (filter == null || item == null) {
+            return false;
         }
-        options.put(option, value);
-        saveOptions();
+
+        if ((boolean) getOption(Option.MATERIAL_FILTER)) {
+            if (!filter.getData().equals(item.getData())) {
+                return false;
+            }
+        }
+
+        if ((boolean) getOption(Option.DAMAGE_FILTER)) {
+            if (filter.getDurability() != item.getDurability()) {
+                return false;
+            }
+        }
+
+        if ((boolean) getOption(Option.DISPLAY_FILTER)) {
+            if (filter.hasItemMeta() != item.hasItemMeta()) {
+                return false;
+            }
+            if (filter.hasItemMeta()) {
+                ItemMeta filterMeta = filter.getItemMeta();
+                ItemMeta meta = item.getItemMeta();
+                if (filterMeta.hasDisplayName() != meta.hasDisplayName()) {
+                    return false;
+                }
+                if (filterMeta.hasDisplayName() && !filterMeta.getDisplayName().equals(meta.getDisplayName())) {
+                    return false;
+                }
+                if (filterMeta.hasLore() != meta.hasLore()) {
+                    return false;
+                }
+                if (filterMeta.hasLore() && !filterMeta.getLore().equals(meta.getLore())) {
+                    return false;
+                }
+            }
+        }
+
+        return true;
     }
 
-    private void saveOptions() {
-        BlockState state = getLocation().getBlock().getState();
-        if (state.getType() == getType().getMaterial() && state instanceof Nameable) {
-            ((Nameable) state).setCustomName(ChatColor.RESET + "" + ChatColor.WHITE + PipesUtil.hideString(toString(), getType().getName()));
-            state.update();
-        }
+    @Override
+    protected IOption[] getOptions() {
+        return Option.values();
     }
 
     @Override
@@ -207,33 +202,7 @@ public class PipeOutput extends AbstractPipePart {
 
     @Override
     public String toString() {
-        StringBuilder s = new StringBuilder(getType().toString());
-        for (Map.Entry<Option, Option.Value> option : options.entrySet()) {
-            s.append(',').append(option.getKey()).append('=').append(option.getValue().getValue());
-        }
-        return s.toString();
-    }
-
-    public void showGui(Player player) {
-        InventoryHolder holder = getHolder();
-        if (holder == null) {
-            return;
-        }
-
-        InventoryGui gui = InventoryGui.get(holder);
-        if (gui == null) {
-            gui = new InventoryGui(Pipes.getInstance(), holder, holder.getInventory().getTitle(), GUI_SETUP);
-
-            gui.addElement(new GuiStorageElement('i', holder.getInventory()));
-            gui.setFiller(PipesConfig.getGuiFiller());
-            GuiElementGroup optionsGroup = new GuiElementGroup('s');
-            for (Option option : Option.values()) {
-                optionsGroup.addElement(option.getElement(this));
-            }
-            optionsGroup.addElement(gui.getFiller());
-            gui.addElement(optionsGroup);
-        }
-        gui.show(player);
+        return getType().toString() + getOptionsString();
     }
 
     public class AcceptResult {
@@ -263,7 +232,7 @@ public class PipeOutput extends AbstractPipePart {
         DENY_INVALID;
     }
 
-    public enum Option {
+    public enum Option implements IOption {
         /**
          * Whether or not this output is in whitelist mode. This changes how the filter items are used.
          * <p><strong>Possible Values:</strong>
@@ -277,7 +246,31 @@ public class PipeOutput extends AbstractPipePart {
          * <li><tt>true</tt> if this output should force items to end up here even 'though the target is full</li>
          * <li><tt>false</tt> if the items should end up in the overflow</li></p>
          */
-        OVERFLOW(Value.FALSE, Value.TRUE);
+        OVERFLOW(Value.FALSE, Value.TRUE),
+        /**
+         * Whether or not to try to insert into the appropriate slots depending on the item type (like fuel)
+         * <p><strong>Possible Values:</strong>
+         * <li><tt>true</tt> Detect the item type and put it in the slot that it belongs to</li>
+         * <li><tt>false</tt> Use the face that the output is facing to select the slot</li></p>
+         */
+        SMART_INSERT(Value.TRUE, Value.FALSE),
+        /**
+         * Whether or not to respect the material of the filter item when filtering.
+         */
+        MATERIAL_FILTER(Value.TRUE, Value.FALSE),
+        /**
+         * Whether or not to respect tool damage values when filtering
+         */
+        DAMAGE_FILTER(Value.FALSE, Value.TRUE),
+        /**
+         * Whether or not to respect custom item names and lores when filtering
+         */
+        DISPLAY_FILTER(Value.FALSE, Value.TRUE),
+        /**
+         * Whether or not to respect filter item amounts when filtering. Will only result in transfers that are multiple of the filter item's amount
+         * TODO: Implementation
+         */
+        AMOUNT_FILTER(Value.TRUE, Value.FALSE);
 
         private final Value defaultValue;
         private final Class<?> valueType;
@@ -308,88 +301,16 @@ public class PipeOutput extends AbstractPipePart {
             valueType = defaultValue.getValue().getClass();
         }
 
-        public boolean isValid(Value value) {
-            if (value.getValue().getClass() != getValueType()) {
-                return false;
-            }
-            if (possibleValues.length == 0) {
-                return true;
-            }
-            for (Value v : possibleValues) {
-                if (v.getValue().equals(value.getValue())) {
-                    return true;
-                }
-            }
-            return false;
-        }
-
-        /**
-         * Get the class of the values that this option accepts
-         * @return  The class of the values that this option accepts
-         */
         public Class<?> getValueType() {
             return valueType;
         }
 
-        /**
-         * Get the default value for this option if it isn't set
-         * @return  The default value of this option
-         */
         public Value getDefaultValue() {
             return defaultValue;
         }
 
-        /**
-         * Get the array of possible values
-         * @return  The array of possible values
-         */
         public Value[] getPossibleValues() {
             return possibleValues;
-        }
-
-        /**
-         * Get the GUI element of this option for a certain output
-         * @param output    The output to get the element for
-         * @return          The GuiStateElement of this option
-         */
-        public GuiStateElement getElement(PipeOutput output) {
-            Object value = output.getOption(this);
-            List<GuiStateElement.State> states = new ArrayList<>();
-            int index = 0;
-            for (int i = 0; i < possibleValues.length; i++) {
-                if (possibleValues[i].getValue().equals(value)) {
-                    index = i;
-                    break;
-                }
-            }
-            for (Value v : possibleValues) {
-                states.add(new GuiStateElement.State(
-                        change -> output.setOption(this, v),
-                        v.getValue().toString(),
-                        PipesConfig.getItemStack("gui." + name().toLowerCase() + "." + v.getValue().toString()),
-                        PipesConfig.getText("gui." + name().toLowerCase() + "." + v.getValue().toString())
-                ));
-            }
-            return new GuiStateElement(name().charAt(0), index, states.toArray(new GuiStateElement.State[states.size()]));
-        }
-
-        public static class Value<T> {
-            public static final Value TRUE = new Value<>(true);
-            public static final Value FALSE = new Value<>(false);
-
-            private final T value;
-
-            public Value(T value) {
-                this.value = value;
-            }
-
-            public T getValue() {
-                return value;
-            }
-
-            public String toString() {
-                return "Value<" + value.getClass().getSimpleName() + ">{value=" + value.toString() + "}";
-            }
         }
     }
 }

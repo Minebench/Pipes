@@ -1,9 +1,24 @@
 package io.github.apfelcreme.Pipes.Pipe;
 
+import de.themoep.inventorygui.GuiElementGroup;
+import de.themoep.inventorygui.GuiStateElement;
+import de.themoep.inventorygui.GuiStorageElement;
+import de.themoep.inventorygui.InventoryGui;
+import io.github.apfelcreme.Pipes.Pipes;
+import io.github.apfelcreme.Pipes.PipesConfig;
 import io.github.apfelcreme.Pipes.PipesItem;
+import io.github.apfelcreme.Pipes.PipesUtil;
+import org.bukkit.ChatColor;
+import org.bukkit.Nameable;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockState;
+import org.bukkit.entity.Player;
 import org.bukkit.inventory.InventoryHolder;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Copyright (C) 2017 Phoenix616 aka Max Lee
@@ -25,6 +40,13 @@ public abstract class AbstractPipePart {
 
     private final PipesItem type;
     private final SimpleLocation location;
+    private Map<IOption, Value> options = new HashMap<>();
+
+    public final static String[] GUI_SETUP = {
+            "sssiiisss",
+            "sssiiisss",
+            "sssiiisss"
+    };
 
     protected AbstractPipePart(PipesItem type, SimpleLocation location) {
         this.type = type;
@@ -63,18 +85,209 @@ public abstract class AbstractPipePart {
     }
 
     /**
-     * Check whether or not this part is powered
-     * @return true if powered or when there doesn't exist a block anymore at that point
+     * Get a certain option of this pipe part
+     * @param option    The option to get
+     * @return          The value of the option or <tt>null</tt> if it wasn't set and there is no default one
      */
-    public boolean isPowered() {
-        InventoryHolder holder = getHolder();
-        return holder == null || ((BlockState) holder).getBlock().isBlockPowered();
+    public Object getOption(IOption option) {
+        return getOption(option, option.getDefaultValue());
     }
+
+    /**
+     * Get a certain option of this  pipe part
+     * @param option        The option to get
+     * @param defaultValue  The default value to return if the value wasn't found
+     * @return              The value of the option or <tt>null</tt> if it wasn't set
+     */
+    public Object getOption(IOption option, Value defaultValue) {
+        Value value = options.getOrDefault(option, defaultValue);
+        return value != null ? value.getValue() : null;
+    }
+
+    /**
+     * Set an option of this output. This also saves the options to the block
+     * @param option    The option to set
+     * @param value     The value to set the option to
+     * @throws IllegalArgumentException When the values type is not compatible with the option
+     */
+    public void setOption(IOption option, Value value) throws IllegalArgumentException {
+        setOption(option, value, true);
+    }
+
+    /**
+     * Set an option of this output.
+     * @param option    The option to set
+     * @param value     The value to set the option to
+     * @param save      Whether or not to save the options after setting the value
+     * @throws IllegalArgumentException When the values type is not compatible with the option
+     */
+    public void setOption(IOption option, Value value, boolean save) {
+        if (!option.isValid(value)) {
+            throw new IllegalArgumentException("The option " + option + "< " + option.getValueType().getSimpleName() + "> does not accept the value " + value + " values!");
+        }
+        options.put(option, value);
+        if (save) {
+            saveOptions();
+        }
+    }
+
+    /**
+     * Save the options to the block. This is done by hiding strings with color codes
+     */
+    protected void saveOptions() {
+        BlockState state = getLocation().getBlock().getState();
+        if (state.getType() == getType().getMaterial() && state instanceof Nameable) {
+            ((Nameable) state).setCustomName(ChatColor.RESET + "" + ChatColor.WHITE + PipesUtil.hideString(toString(), getType().getName()));
+            state.update();
+        }
+    }
+
+    /**
+     * Generate a mapped string of the options to write to the block's name
+     * @return  The options as a string, mapped as option=value
+     */
+    protected String getOptionsString() {
+        StringBuilder s = new StringBuilder();
+        for (Map.Entry<IOption, Value> option : options.entrySet()) {
+            s.append(',').append(option.getKey()).append('=').append(option.getValue().getValue());
+        }
+        return s.toString();
+    }
+
+    public void showGui(Player player) {
+        InventoryHolder holder = getHolder();
+        if (holder == null) {
+            return;
+        }
+
+        InventoryGui gui = InventoryGui.get(holder);
+        if (gui == null) {
+            gui = new InventoryGui(Pipes.getInstance(), holder, holder.getInventory().getTitle(), getGuiSetup());
+
+            gui.addElement(new GuiStorageElement('i', holder.getInventory()));
+            gui.setFiller(PipesConfig.getGuiFiller());
+            GuiElementGroup optionsGroup = new GuiElementGroup('s');
+            for (IOption option : getOptions()) {
+                optionsGroup.addElement(option.getElement(this));
+            }
+            optionsGroup.addElement(gui.getFiller());
+            gui.addElement(optionsGroup);
+        }
+        gui.show(player);
+    }
+
+    /**
+     * Get the setup of the GUI with the character 'i' standing for the block's inventory and 's' for settings
+     * @return  The setup for the GUI
+     */
+    public String[] getGuiSetup() {
+        return GUI_SETUP;
+    }
+
+    /**
+     * Get all possible options
+     * @return  All possible options of this part
+     */
+    protected abstract IOption[] getOptions();
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         return getLocation() != null ? !getLocation().equals(((AbstractPipePart) o).getLocation()) : ((AbstractPipePart) o).getLocation() != null;
+    }
+
+    public interface IOption {
+
+        /**
+         * Get the class of the values that this option accepts
+         * @return  The class of the values that this option accepts
+         */
+        Class<?> getValueType();
+
+        /**
+         * Get the default value for this option if it isn't set
+         * @return  The default value of this option
+         */
+        Value getDefaultValue();
+
+        /**
+         * Get the array of possible values
+         * @return  The array of possible values
+         */
+        Value[] getPossibleValues();
+
+        /**
+         * Get the enum name as a lowercase string with underscores replaced with dashes
+         * @return  The enum name as a config key
+         */
+        default String toConfigKey() {
+            return toString().toLowerCase().replace('_', '-');
+        }
+
+        /**
+         * Check whether or not this option can be set to a value
+         * @param value The value to check
+         * @return      <tt>true</tt> if this option accepts it; <tt>false</tt> otherwhise
+         */
+        default boolean isValid(Value value) {
+            if (value.getValue().getClass() != getValueType()) {
+                return false;
+            }
+            if (getPossibleValues().length == 0) {
+                return true;
+            }
+            for (Value v : getPossibleValues()) {
+                if (v.getValue().equals(value.getValue())) {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        /**
+         * Get the GUI element of this option for a certain pipe part
+         * @param pipePart  The pipe part to get the element for
+         * @return          The GuiStateElement of this option
+         */
+        default GuiStateElement getElement(AbstractPipePart pipePart) {
+            Object value = pipePart.getOption(this);
+            List<GuiStateElement.State> states = new ArrayList<>();
+            int index = 0;
+            for (int i = 0; i < getPossibleValues().length; i++) {
+                if (getPossibleValues()[i].getValue().equals(value)) {
+                    index = i;
+                    break;
+                }
+            }
+            for (Value v : getPossibleValues()) {
+                states.add(new GuiStateElement.State(
+                        change -> pipePart.setOption(this, v),
+                        v.getValue().toString(),
+                        PipesConfig.getItemStack("gui." + pipePart.getType().toConfigKey() + "." + toConfigKey().toLowerCase() + "." + v.getValue().toString()),
+                        PipesConfig.getText("gui." + pipePart.getType().toConfigKey() + "." + toConfigKey().toLowerCase() + "." + v.getValue().toString())
+                ));
+            }
+            return new GuiStateElement(toString().charAt(0), index, states.toArray(new GuiStateElement.State[states.size()]));
+        }
+    }
+
+    public static class Value<T> {
+        public static final Value TRUE = new Value<>(true);
+        public static final Value FALSE = new Value<>(false);
+
+        private final T value;
+
+        public Value(T value) {
+            this.value = value;
+        }
+
+        public T getValue() {
+            return value;
+        }
+
+        public String toString() {
+            return "Value<" + value.getClass().getSimpleName() + ">{value=" + value.toString() + "}";
+        }
     }
 }

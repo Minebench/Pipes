@@ -102,4 +102,12 @@ public enum PipesItem {
 
         return hidden != null && toString().equals(hidden) || IDENTIFIER.equals(hidden);
     }
+
+    /**
+     * Get the enum name as a lowercase string with underscores replaced with dashes
+     * @return  The enum name as a config key
+     */
+    public String toConfigKey() {
+        return toString().toLowerCase().replace('_', '-');
+    }
 }

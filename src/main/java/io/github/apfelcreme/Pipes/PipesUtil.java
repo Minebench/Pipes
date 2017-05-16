@@ -16,7 +16,9 @@ import org.bukkit.inventory.FurnaceInventory;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.PotionMeta;
 import org.bukkit.material.DirectionalContainer;
+import org.bukkit.potion.PotionType;
 
 import java.util.Collection;
 import java.util.List;
@@ -435,5 +437,62 @@ public class PipesUtil {
         // the inventory is full, so find continue with the list of outputs
         // and try to fill one that isnt full
         return null;
+    }
+
+    /**
+     * Check whether or not a certain potion item can accepts an ingredient
+     * @param itemStack     The potion to check
+     * @param ingredient    The ingredient
+     * @throws IllegalArgumentException When the input item is not a potion
+     * @return              <tt>true</tt> if the potion can be brewed with the ingredient; <tt>false</tt> if not
+     */
+    public static boolean potionAcceptsIngredient(ItemStack itemStack, ItemStack ingredient) throws IllegalArgumentException {
+        if (itemStack.getType() != Material.POTION || itemStack.getType() != Material.SPLASH_POTION || itemStack.getType() != Material.LINGERING_POTION) {
+            throw new IllegalArgumentException("Input itemstack is not a potion but " + itemStack.getType());
+        }
+        if (ingredient == null || ingredient.getAmount() <= 0) {
+            return false;
+        }
+        if (ingredient.getType() == Material.SULPHUR && itemStack.getType() == Material.POTION) {
+            return true;
+        }
+        if (ingredient.getType() == Material.DRAGONS_BREATH && itemStack.getType() == Material.SPLASH_POTION) {
+            return true;
+        }
+
+        PotionMeta meta = (PotionMeta) itemStack.getItemMeta();
+        PotionType type = meta.getBasePotionData().getType();
+
+        if (type == PotionType.MUNDANE || type == PotionType.THICK) {
+            return false;
+        }
+        switch (ingredient.getType()) {
+            case REDSTONE:
+            case GLOWSTONE_DUST:
+                return meta.getBasePotionData().isUpgraded() || meta.getBasePotionData().isExtended();
+            case FERMENTED_SPIDER_EYE:
+                // List of potions that can be corrupted
+                return !(type != PotionType.WATER
+                        && type != PotionType.POISON
+                        && type != PotionType.INSTANT_HEAL
+                        && type != PotionType.SPEED
+                        && type != PotionType.JUMP
+                        && type != PotionType.NIGHT_VISION);
+            case RAW_FISH:
+                // Check if ingredient is pufferfish
+                if (ingredient.getData().getData() != 3) {
+                    return false;
+                }
+            case GOLDEN_CARROT:
+            case MAGMA_CREAM:
+            case RABBIT_FOOT:
+            case SUGAR:
+            case SPECKLED_MELON:
+            case SPIDER_EYE:
+            case GHAST_TEAR:
+            case BLAZE_POWDER:
+                return type == PotionType.AWKWARD;
+        }
+        return false;
     }
 }

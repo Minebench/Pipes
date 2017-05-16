@@ -45,9 +45,64 @@ public class PipeInput extends AbstractPipePart {
     }
 
     @Override
+    protected IOption[] getOptions() {
+        return Option.values();
+    }
+
+    @Override
     public boolean equals(Object o) {
         return this == o
                 || super.equals(o)
                 && !(facing != null ? !facing.equals(((PipeInput) o).facing) : ((PipeInput) o).facing != null);
+    }
+
+    public enum Option implements IOption {
+        /**
+         * Whether or not to spread the items equally over all outputs
+         * TODO: Implementation
+         */
+        SPREAD(Value.FALSE, Value.TRUE);
+
+        private final Value defaultValue;
+        private final Class<?> valueType;
+        private final Value[] possibleValues;
+
+        /**
+         * An option that this pipe output can have
+         * @param defaultValue  The default value when none is set
+         * @param valueType     The class of the values that this option accepts
+         */
+        Option(Value defaultValue, Class<?> valueType) {
+            this.defaultValue = defaultValue;
+            this.valueType = valueType;
+            possibleValues = new Value[0];
+        }
+
+        /**
+         * An option that this pipe output can have
+         * @param possibleValues    An array of possible values that this option accepts
+         * @throws IllegalArgumentException Thrown when there are less than two possible values defined
+         */
+        Option(Value... possibleValues) throws IllegalArgumentException {
+            if (possibleValues.length < 2) {
+                throw new IllegalArgumentException("An option needs to have at least two values!");
+            }
+            this.possibleValues = possibleValues;
+            defaultValue = possibleValues[0];
+            valueType = defaultValue.getValue().getClass();
+        }
+
+        public Class<?> getValueType() {
+            return valueType;
+        }
+
+        public Value getDefaultValue() {
+            return defaultValue;
+        }
+
+        public Value[] getPossibleValues() {
+            return possibleValues;
+        }
+
     }
 }

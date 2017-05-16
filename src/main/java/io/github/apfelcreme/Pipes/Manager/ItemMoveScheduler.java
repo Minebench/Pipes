@@ -10,6 +10,7 @@ import io.github.apfelcreme.Pipes.Pipes;
 import io.github.apfelcreme.Pipes.PipesConfig;
 import io.github.apfelcreme.Pipes.PipesUtil;
 import org.bukkit.Location;
+import org.bukkit.block.BlockFace;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.inventory.BrewerInventory;
 import org.bukkit.inventory.FurnaceInventory;
@@ -192,6 +193,8 @@ public class ItemMoveScheduler {
                 continue;
             }
 
+            boolean smartInsert = (boolean) output.getOption(PipeOutput.Option.SMART_INSERT);
+
             switch (targetInventory.getType()) {
                     /*
                     BEGIN FURNACE
@@ -199,18 +202,22 @@ public class ItemMoveScheduler {
                 case FURNACE:
                     // try to put coal etc in the correct place
                     if (itemStack.getType().isFuel()) {
-                        PipesUtil.addFuel(inputInventory, targetInventory, itemStack);
+                        if (smartInsert || (output.getFacing() != BlockFace.DOWN && output.getFacing() != BlockFace.UP)) {
+                            PipesUtil.addFuel(inputInventory, targetInventory, itemStack);
+                        }
                     } else {
-                        FurnaceInventory furnaceInventory = (FurnaceInventory) targetInventory;
-                        ItemStack smelting = furnaceInventory.getSmelting();
-                        if (smelting == null) {
-                            inputInventory.removeItem(new ItemStack(itemStack));
-                            furnaceInventory.setSmelting(itemStack);
-                            itemStack.setAmount(0);
-                        } else if (smelting.isSimilar(itemStack)) {
-                            ItemStack itemToSet = PipesUtil.moveToSingleSlot(inputInventory, smelting, itemStack);
-                            if (itemToSet != null) {
-                                furnaceInventory.setSmelting(itemToSet);
+                        if (smartInsert || output.getFacing() == BlockFace.DOWN) {
+                            FurnaceInventory furnaceInventory = (FurnaceInventory) targetInventory;
+                            ItemStack smelting = furnaceInventory.getSmelting();
+                            if (smelting == null) {
+                                inputInventory.removeItem(new ItemStack(itemStack));
+                                furnaceInventory.setSmelting(itemStack);
+                                itemStack.setAmount(0);
+                            } else if (smelting.isSimilar(itemStack)) {
+                                ItemStack itemToSet = PipesUtil.moveToSingleSlot(inputInventory, smelting, itemStack);
+                                if (itemToSet != null) {
+                                    furnaceInventory.setSmelting(itemToSet);
+                                }
                             }
                         }
                     }
@@ -226,40 +233,50 @@ public class ItemMoveScheduler {
                     switch (itemStack.getType()) {
                         case BLAZE_POWDER:
                             // the transported item is fuel
-                            if (!PipesUtil.addFuel(inputInventory, brewerInventory, itemStack)) {
-                                continue;
+                            if (smartInsert || (output.getFacing() != BlockFace.DOWN && output.getFacing() != BlockFace.UP)) {
+                                if (!PipesUtil.addFuel(inputInventory, brewerInventory, itemStack)) {
+                                    continue;
+                                }
                             }
                             break;
                         case POTION:
                         case SPLASH_POTION:
                         case LINGERING_POTION:
-                            int firstEmpty = brewerInventory.firstEmpty();
-                            while (firstEmpty != -1 && firstEmpty < 3 && itemStack.getAmount() > 0) {
-                                ItemStack remove = new ItemStack(itemStack);
-                                remove.setAmount(1);
-                                inputInventory.removeItem(remove);
+                            if (smartInsert || (output.getFacing() != BlockFace.DOWN && output.getFacing() != BlockFace.UP)) {
+                                ItemStack ingredient = brewerInventory.getIngredient();
+                                if (!PipesUtil.potionAcceptsIngredient(itemStack, ingredient)) {
+                                    break;
+                                }
+                                int firstEmpty = brewerInventory.firstEmpty();
+                                while (firstEmpty != -1 && firstEmpty < 3 && itemStack.getAmount() > 0) {
+                                    ItemStack remove = new ItemStack(itemStack);
+                                    remove.setAmount(1);
+                                    inputInventory.removeItem(remove);
 
-                                ItemStack result = new ItemStack(itemStack);
-                                result.setAmount(1);
+                                    ItemStack result = new ItemStack(itemStack);
+                                    result.setAmount(1);
 
-                                itemStack.setAmount(itemStack.getAmount() - 1);
+                                    itemStack.setAmount(itemStack.getAmount() - 1);
 
-                                brewerInventory.setItem(firstEmpty, result);
-                                if (itemStack.getAmount() > 0) {
-                                    firstEmpty = brewerInventory.firstEmpty();
+                                    brewerInventory.setItem(firstEmpty, result);
+                                    if (itemStack.getAmount() > 0) {
+                                        firstEmpty = brewerInventory.firstEmpty();
+                                    }
                                 }
                             }
                             break;
                         default:
-                            ItemStack ingredient = brewerInventory.getIngredient();
-                            if (ingredient == null) {
-                                inputInventory.removeItem(new ItemStack(itemStack));
-                                brewerInventory.setIngredient(itemStack);
-                                itemStack.setAmount(0);
-                            } else if (ingredient.isSimilar(itemStack)) {
-                                ItemStack itemToSet = PipesUtil.moveToSingleSlot(inputInventory, ingredient, itemStack);
-                                if (itemToSet != null) {
-                                    brewerInventory.setIngredient(itemToSet);
+                            if (smartInsert || output.getFacing() == BlockFace.DOWN) {
+                                ItemStack ingredient = brewerInventory.getIngredient();
+                                if (ingredient == null) {
+                                    inputInventory.removeItem(new ItemStack(itemStack));
+                                    brewerInventory.setIngredient(itemStack);
+                                    itemStack.setAmount(0);
+                                } else if (ingredient.isSimilar(itemStack)) {
+                                    ItemStack itemToSet = PipesUtil.moveToSingleSlot(inputInventory, ingredient, itemStack);
+                                    if (itemToSet != null) {
+                                        brewerInventory.setIngredient(itemToSet);
+                                    }
                                 }
                             }
                             break;

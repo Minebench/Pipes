@@ -1,7 +1,9 @@
 package io.github.apfelcreme.Pipes.Listener;
 
+import de.themoep.inventorygui.InventoryGui;
 import io.github.apfelcreme.Pipes.Event.PipeMoveItemEvent;
 import io.github.apfelcreme.Pipes.Manager.PipeManager;
+import io.github.apfelcreme.Pipes.Pipe.AbstractPipePart;
 import io.github.apfelcreme.Pipes.Pipe.Pipe;
 import io.github.apfelcreme.Pipes.Pipe.PipeInput;
 import io.github.apfelcreme.Pipes.Pipe.SimpleLocation;

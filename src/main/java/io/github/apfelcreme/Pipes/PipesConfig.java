@@ -136,6 +136,12 @@ public class PipesConfig {
             return new ItemStack(itemStacks.get(key));
         }
 
+        ItemStack serializedItem = plugin.getConfig().getItemStack(key);
+        if (serializedItem != null) {
+            itemStacks.put(key, serializedItem);
+            return serializedItem;
+        }
+
         String error = "Missing item config entry for " + key;
         String input = plugin.getConfig().getString(key);
         if (input != null) {

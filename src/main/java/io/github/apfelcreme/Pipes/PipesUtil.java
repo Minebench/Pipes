@@ -23,6 +23,7 @@ import org.bukkit.potion.PotionType;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 import java.util.regex.Pattern;
 
 /**
@@ -44,6 +45,8 @@ import java.util.regex.Pattern;
  * @author Lord36 aka Apfelcreme
  */
 public class PipesUtil {
+
+    public final static Random RANDOM = new Random();
 
     /**
      * returns whether a string only contains numbers

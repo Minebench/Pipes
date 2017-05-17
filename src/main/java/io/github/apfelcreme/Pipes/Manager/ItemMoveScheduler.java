@@ -1,5 +1,6 @@
 package io.github.apfelcreme.Pipes.Manager;
 
+import io.github.apfelcreme.Pipes.Event.PipeDispenseEvent;
 import io.github.apfelcreme.Pipes.Event.PipeMoveItemEvent;
 import io.github.apfelcreme.Pipes.LoopDetection.Detection;
 import io.github.apfelcreme.Pipes.Pipe.Pipe;
@@ -9,15 +10,22 @@ import io.github.apfelcreme.Pipes.Pipe.SimpleLocation;
 import io.github.apfelcreme.Pipes.Pipes;
 import io.github.apfelcreme.Pipes.PipesConfig;
 import io.github.apfelcreme.Pipes.PipesUtil;
+import org.bukkit.Effect;
 import org.bukkit.Location;
+import org.bukkit.Particle;
+import org.bukkit.Sound;
+import org.bukkit.SoundCategory;
 import org.bukkit.block.BlockFace;
 import org.bukkit.block.BlockState;
+import org.bukkit.block.Dropper;
 import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.entity.Item;
 import org.bukkit.inventory.BrewerInventory;
 import org.bukkit.inventory.FurnaceInventory;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.util.Vector;
 
 import java.io.File;
 import java.io.IOException;
@@ -172,17 +180,18 @@ public class ItemMoveScheduler {
             }
 
             InventoryHolder targetHolder = output.getTargetHolder();
-            if (targetHolder == null) {
-                continue;
+            Inventory targetInventory = null;
+            if (targetHolder != null) {
+                targetInventory = targetHolder.getInventory();
             }
-            Inventory targetInventory = targetHolder.getInventory();
 
             ItemStack transferring = itemStack;
             PipeOutput.AcceptResult acceptResult = output.accepts(transferring);
 
             // Check the target amount option
             int leftOverAmount = 0;
-            if (acceptResult.getType() == PipeOutput.ResultType.ACCEPT
+            if (targetInventory != null
+                    && acceptResult.getType() == PipeOutput.ResultType.ACCEPT
                     && acceptResult.isInFilter()
                     && (boolean) output.getOption(PipeOutput.Option.WHITELIST)
                     && (boolean) output.getOption(PipeOutput.Option.TARGET_AMOUNT)) {
@@ -213,140 +222,164 @@ public class ItemMoveScheduler {
 
             Inventory inputInventory = inputHolder.getInventory();
 
-            // call move event before doing any moving to check if it was cancelled
-            PipeMoveItemEvent pipeMoveEvent = new PipeMoveItemEvent(pipe, inputInventory, transferring, targetInventory);
-            Pipes.getInstance().getServer().getPluginManager().callEvent(pipeMoveEvent);
-            if (pipeMoveEvent.isCancelled()) {
-                continue;
-            }
+            if (targetInventory == null) {
+                Location dropLocation = output.getTargetLocation().getLocation().add(0.5, 0.5, 0.5);
 
-            boolean smartInsert = (boolean) output.getOption(PipeOutput.Option.SMART_INSERT);
+                double speed = PipesUtil.RANDOM.nextDouble() * 0.1d + 0.2d;
+                Vector motion = new Vector(
+                        output.getFacing().getModX() * speed + PipesUtil.RANDOM.nextGaussian() * 0.0075 * 6,
+                        0.2                                  + PipesUtil.RANDOM.nextGaussian() * 0.0075 * 6,
+                        output.getFacing().getModZ() * speed + PipesUtil.RANDOM.nextGaussian() * 0.0075 * 6
+                );
 
-            switch (targetInventory.getType()) {
+                PipeDispenseEvent pipeDispenseEvent = new PipeDispenseEvent(pipe, output, transferring, motion);
+                Pipes.getInstance().getServer().getPluginManager().callEvent(pipeDispenseEvent);
+                if (pipeDispenseEvent.isCancelled()) {
+                    continue;
+                }
+
+                Item droppedItem = dropLocation.getWorld().dropItem(dropLocation, transferring);
+                droppedItem.setVelocity(pipeDispenseEvent.getVelocity());
+
+                dropLocation.getWorld().playEffect(dropLocation, Effect.CLICK2, null);
+                dropLocation.getWorld().playEffect(dropLocation, Effect.SMOKE, output.getFacing());
+
+            } else {
+                // call move event before doing any moving to check if it was cancelled
+                PipeMoveItemEvent pipeMoveEvent = new PipeMoveItemEvent(pipe, output, inputInventory, transferring, targetInventory);
+                Pipes.getInstance().getServer().getPluginManager().callEvent(pipeMoveEvent);
+                if (pipeMoveEvent.isCancelled()) {
+                    continue;
+                }
+
+                boolean smartInsert = (boolean) output.getOption(PipeOutput.Option.SMART_INSERT);
+
+                switch (targetInventory.getType()) {
                     /*
                     BEGIN FURNACE
                      */
-                case FURNACE:
-                    // try to put coal etc in the correct place
-                    if (transferring.getType().isFuel()) {
-                        if (smartInsert || (output.getFacing() != BlockFace.DOWN && output.getFacing() != BlockFace.UP)) {
-                            PipesUtil.addFuel(inputInventory, targetInventory, transferring);
-                        }
-                    } else {
-                        if (smartInsert || output.getFacing() == BlockFace.DOWN) {
-                            FurnaceInventory furnaceInventory = (FurnaceInventory) targetInventory;
-                            ItemStack smelting = furnaceInventory.getSmelting();
-                            if (smelting == null) {
-                                inputInventory.removeItem(new ItemStack(transferring));
-                                furnaceInventory.setSmelting(transferring);
-                                transferring.setAmount(0);
-                            } else if (smelting.isSimilar(transferring)) {
-                                ItemStack itemToSet = PipesUtil.moveToSingleSlot(inputInventory, smelting, transferring);
-                                if (itemToSet != null) {
-                                    furnaceInventory.setSmelting(itemToSet);
+                    case FURNACE:
+                        // try to put coal etc in the correct place
+                        if (transferring.getType().isFuel()) {
+                            if (smartInsert || (output.getFacing() != BlockFace.DOWN && output.getFacing() != BlockFace.UP)) {
+                                PipesUtil.addFuel(inputInventory, targetInventory, transferring);
+                            }
+                        } else {
+                            if (smartInsert || output.getFacing() == BlockFace.DOWN) {
+                                FurnaceInventory furnaceInventory = (FurnaceInventory) targetInventory;
+                                ItemStack smelting = furnaceInventory.getSmelting();
+                                if (smelting == null) {
+                                    inputInventory.removeItem(new ItemStack(transferring));
+                                    furnaceInventory.setSmelting(transferring);
+                                    transferring.setAmount(0);
+                                } else if (smelting.isSimilar(transferring)) {
+                                    ItemStack itemToSet = PipesUtil.moveToSingleSlot(inputInventory, smelting, transferring);
+                                    if (itemToSet != null) {
+                                        furnaceInventory.setSmelting(itemToSet);
+                                    }
                                 }
                             }
                         }
-                    }
-                    break;
+                        break;
                     /*
                     END FURNACE
                      */
                     /*
                     BEGIN BREWING STAND
                      */
-                case BREWING:
-                    BrewerInventory brewerInventory = (BrewerInventory) targetInventory;
-                    switch (transferring.getType()) {
-                        case BLAZE_POWDER:
-                            // the transported item is fuel
-                            if (smartInsert || (output.getFacing() != BlockFace.DOWN && output.getFacing() != BlockFace.UP)) {
-                                if (!PipesUtil.addFuel(inputInventory, brewerInventory, transferring)) {
-                                    continue;
-                                }
-                            }
-                            break;
-                        case POTION:
-                        case SPLASH_POTION:
-                        case LINGERING_POTION:
-                            if (smartInsert || (output.getFacing() != BlockFace.DOWN && output.getFacing() != BlockFace.UP)) {
-                                ItemStack ingredient = brewerInventory.getIngredient();
-                                if (!PipesUtil.potionAcceptsIngredient(transferring, ingredient)) {
-                                    break;
-                                }
-                                int firstEmpty = brewerInventory.firstEmpty();
-                                while (firstEmpty != -1 && firstEmpty < 3 && transferring.getAmount() > 0) {
-                                    ItemStack remove = new ItemStack(transferring);
-                                    remove.setAmount(1);
-                                    inputInventory.removeItem(remove);
-
-                                    ItemStack result = new ItemStack(transferring);
-                                    result.setAmount(1);
-
-                                    transferring.setAmount(transferring.getAmount() - 1);
-
-                                    brewerInventory.setItem(firstEmpty, result);
-                                    if (transferring.getAmount() > 0) {
-                                        firstEmpty = brewerInventory.firstEmpty();
+                    case BREWING:
+                        BrewerInventory brewerInventory = (BrewerInventory) targetInventory;
+                        switch (transferring.getType()) {
+                            case BLAZE_POWDER:
+                                // the transported item is fuel
+                                if (smartInsert || (output.getFacing() != BlockFace.DOWN && output.getFacing() != BlockFace.UP)) {
+                                    if (!PipesUtil.addFuel(inputInventory, brewerInventory, transferring)) {
+                                        continue;
                                     }
                                 }
-                            }
-                            break;
-                        default:
-                            if (smartInsert || output.getFacing() == BlockFace.DOWN) {
-                                ItemStack ingredient = brewerInventory.getIngredient();
-                                if (ingredient == null) {
-                                    inputInventory.removeItem(new ItemStack(transferring));
-                                    brewerInventory.setIngredient(transferring);
-                                    transferring.setAmount(0);
-                                } else if (ingredient.isSimilar(transferring)) {
-                                    ItemStack itemToSet = PipesUtil.moveToSingleSlot(inputInventory, ingredient, transferring);
-                                    if (itemToSet != null) {
-                                        brewerInventory.setIngredient(itemToSet);
+                                break;
+                            case POTION:
+                            case SPLASH_POTION:
+                            case LINGERING_POTION:
+                                if (smartInsert || (output.getFacing() != BlockFace.DOWN && output.getFacing() != BlockFace.UP)) {
+                                    ItemStack ingredient = brewerInventory.getIngredient();
+                                    if (!PipesUtil.potionAcceptsIngredient(transferring, ingredient)) {
+                                        break;
+                                    }
+                                    int firstEmpty = brewerInventory.firstEmpty();
+                                    while (firstEmpty != -1 && firstEmpty < 3 && transferring.getAmount() > 0) {
+                                        ItemStack remove = new ItemStack(transferring);
+                                        remove.setAmount(1);
+                                        inputInventory.removeItem(remove);
+
+                                        ItemStack result = new ItemStack(transferring);
+                                        result.setAmount(1);
+
+                                        transferring.setAmount(transferring.getAmount() - 1);
+
+                                        brewerInventory.setItem(firstEmpty, result);
+                                        if (transferring.getAmount() > 0) {
+                                            firstEmpty = brewerInventory.firstEmpty();
+                                        }
                                     }
                                 }
-                            }
-                            break;
-                    }
-                    break;
+                                break;
+                            default:
+                                if (smartInsert || output.getFacing() == BlockFace.DOWN) {
+                                    ItemStack ingredient = brewerInventory.getIngredient();
+                                    if (ingredient == null) {
+                                        inputInventory.removeItem(new ItemStack(transferring));
+                                        brewerInventory.setIngredient(transferring);
+                                        transferring.setAmount(0);
+                                    } else if (ingredient.isSimilar(transferring)) {
+                                        ItemStack itemToSet = PipesUtil.moveToSingleSlot(inputInventory, ingredient, transferring);
+                                        if (itemToSet != null) {
+                                            brewerInventory.setIngredient(itemToSet);
+                                        }
+                                    }
+                                }
+                                break;
+                        }
+                        break;
                     /*
                     END BREWING STAND
                      */
                     /*
                     BEGIN BEACON
                      */
-                case BEACON:
-                    switch (transferring.getType()) {
-                        case DIAMOND:
-                        case EMERALD:
-                        case GOLD_INGOT:
-                        case IRON_INGOT:
-                            PipesUtil.addItem(targetInventory, transferring);
-                            break;
-                    }
-                    break;
+                    case BEACON:
+                        switch (transferring.getType()) {
+                            case DIAMOND:
+                            case EMERALD:
+                            case GOLD_INGOT:
+                            case IRON_INGOT:
+                                PipesUtil.addItem(targetInventory, transferring);
+                                break;
+                        }
+                        break;
                     /*
                     END BEACON
                      */
                     /*
                     BEGIN DEFAULT
                      */
-                default:
-                    // for chests, dropper etc...
-                    PipesUtil.addItem(targetInventory, transferring);
-                    break;
+                    default:
+                        // for chests, dropper etc...
+                        PipesUtil.addItem(targetInventory, transferring);
+                        break;
                     /*
                     END DEFAULT
                      */
-            }
+                }
 
-            if (itemStack != transferring) {
-                // Check if the item stack that we transferred is the one that was given to us.
-                // If not merge their amounts (this split can happen due to the amount filtering)
-                itemStack.setAmount(leftOverAmount + transferring.getAmount());
-            }
+                if (itemStack != transferring) {
+                    // Check if the item stack that we transferred is the one that was given to us.
+                    // If not merge their amounts (this split can happen due to the amount filtering)
+                    itemStack.setAmount(leftOverAmount + transferring.getAmount());
+                }
 
-            ((BlockState) inputHolder).update();
+                ((BlockState) inputHolder).update();
+            }
 
             if (itemStack.getAmount() > 0) {
                 if (acceptResult.isInFilter() && !overflowIsAllowed) {

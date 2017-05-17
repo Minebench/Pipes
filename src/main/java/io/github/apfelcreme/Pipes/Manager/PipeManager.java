@@ -172,13 +172,13 @@ public class PipeManager {
                                 break;
                             case PIPE_OUTPUT:
                                 PipeOutput pipeOutput = (PipeOutput) pipesPart;
+                                if (PipesConfig.getMaxPipeOutputs() > 0 && outputs.size() >= PipesConfig.getMaxPipeOutputs()) {
+                                    throw new TooManyOutputsException(location);
+                                }
+                                outputs.add(pipeOutput);
+                                found.add(block);
                                 Block relativeToOutput = pipeOutput.getTargetLocation().getBlock();
                                 if (relativeToOutput.getState() instanceof InventoryHolder) {
-                                    if (PipesConfig.getMaxPipeOutputs() > 0 && outputs.size() >= PipesConfig.getMaxPipeOutputs()) {
-                                        throw new TooManyOutputsException(location);
-                                    }
-                                    outputs.add(pipeOutput);
-                                    found.add(block);
                                     found.add(relativeToOutput);
                                 }
                                 break;

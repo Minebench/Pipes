@@ -379,9 +379,9 @@ public class ItemMoveScheduler {
                     // If not merge their amounts (this split can happen due to the amount filtering)
                     itemStack.setAmount(leftOverAmount + transferring.getAmount());
                 }
-
-                ((BlockState) inputHolder).update();
             }
+
+            ((BlockState) inputHolder).update();
 
             if (itemStack.getAmount() > 0) {
                 if (acceptResult.isInFilter() && !overflowIsAllowed) {

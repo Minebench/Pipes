@@ -37,8 +37,76 @@ texts:
   gui:
     pipe-output:
       whitelist:
-        true: '&aPipe Output ist im &fWhitelist&a Modus!'
-        false: '&cPipe Output ist im &fBlacklist&c Modus!'
+        true: |
+          &aPipe Output ist im &2Whitelist&a Modus!
+          &7Der Output akzeptiert nur Items die
+          &7dem eingestellten Filter entsprechen!
+        false: |
+          &cPipe Output ist im &4Blacklist&c Modus!
+          &7Der Output akzeptiert nur Items die nicht
+          &7dem eingestellten Filter entsprechen!
       overflow:
-        true: '&aOverflowing ist erlaubt!'
-        false: '&cOverflowing ist nicht erlaubt!'
+        true: |
+          &aOverflowing ist erlaubt!
+          &7Items werden nun in andere Outputs
+          &7(auch ungefilterte) transportiert
+          &7wenn dies hier nicht möglich ist.
+        false: |
+          &cOverflowing ist nicht erlaubt!
+          &7Items werden nicht in mögliche
+          &7andere Outputs transportiert
+          &7wenn dies hier nicht möglich ist.
+      smart-insert:
+        true: |
+          &aIntelligentes Einfügen ist eingeschaltet!
+          &7Der Output versucht Items direkt in
+          &7den Slot zu transferieren der zu
+          &7dem Typ des Items passt.
+        false: |
+          &cIntelligentes Einfügen ist abgeschaltet!
+          &7Der Output wird die Items abhängig
+          &7von der Container-Seite in die er
+          &7zeigt einsortieren. (Wie Trichter)
+      material-filter:
+        true: |
+          &aDer Itemtyp wird gefiltert!
+          &7Nur Items die den selben Typ wie
+          &7Items im Output besitzen stimmen
+          &7mit dem Filter überein.
+        false: |
+          &cDer Itemtyp wird nicht gefiltert!
+          &7Der Typ der Items spielt keine
+          &7Rolle für den Filter.
+      damage-filter:
+        true: |
+          &aDer Schaden wird gefiltert!
+          &7Nur Items die den selben Schaden
+          &7wie Items im Output besitzen stimmen
+          &7mit dem Filter überein.
+        false: |
+          &cDer Schaden wird nicht gefiltert!
+          &7Der Schaden der Items spielt
+          &7keine Rolle für den Filter.
+      display-filter:
+        true: |
+          &aName und Beschreibung wird gefiltert!
+          &7Nur Items die den selben Namen
+          &7und die selbe Beschreibung wie
+          &7Items im Output besitzen stimmen
+          &7mit dem Filter überein.
+        false: |
+          &cName und Beschreibung wird nicht gefiltert!
+          &7Der Name und die Beschreibung
+          &7der Items spielt keine Rolle
+          &7für den Filter.
+      target-amount:
+        true: |
+          &aFüllmengen-Begrenzung ist eingeschaltet!
+          &7Der Zielcontainer wird maximal
+          &7mit der Menge an Items aufgefüllt
+          &7die die Filteritems besitzen.
+          &8(Nur Auswirkungen auf &7Whitelist&8)
+        false: |
+          &aFüllmengen-Begrenzung ist abgeschaltet!
+          &7Der Zielcontainer wird
+          &7ohne Begrenzung aufgefüllt.

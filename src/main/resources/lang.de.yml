@@ -113,7 +113,7 @@ texts:
       data-filter:
         true: |
           &aExakter Filter ist eingeschaltet!
-          &7Alle Daten (außer die Anzahl)
+          &7Die Daten (außer Verzauberungen)
           &7müssen mit einem Filteritem
           &7übereinstimmen!
         false: |

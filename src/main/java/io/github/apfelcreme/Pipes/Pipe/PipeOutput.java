@@ -154,7 +154,10 @@ public class PipeOutput extends AbstractPipePart {
         }
 
         if ((boolean) getOption(Option.DATA_FILTER)) {
-            if (!PipesUtil.isSimilarFuzzy(filter, item)) {
+            if (filter.hasItemMeta() != item.hasItemMeta()) {
+                return false;
+            }
+            if (filter.hasItemMeta() && !filter.getItemMeta().equals(item.getItemMeta())) {
                 return false;
             }
         }

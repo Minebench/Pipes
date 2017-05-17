@@ -339,12 +339,13 @@ public class ItemMoveScheduler {
                      */
             }
 
-            if (transferring.getAmount() > 0) {
-                if (itemStack != transferring) {
-                    // Check if the item stack that we transferred is the one that was given to us.
-                    // If not merge their amounts (this split can happen due to the amount filtering)
-                    itemStack.setAmount(leftOverAmount + transferring.getAmount());
-                }
+            if (itemStack != transferring) {
+                // Check if the item stack that we transferred is the one that was given to us.
+                // If not merge their amounts (this split can happen due to the amount filtering)
+                itemStack.setAmount(leftOverAmount + transferring.getAmount());
+            }
+
+            if (itemStack.getAmount() > 0) {
                 if (acceptResult.isInFilter() && !overflowIsAllowed) {
                     return false;
                 }

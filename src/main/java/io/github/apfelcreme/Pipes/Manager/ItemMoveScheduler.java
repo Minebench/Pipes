@@ -238,7 +238,9 @@ public class ItemMoveScheduler {
                     continue;
                 }
 
-                Item droppedItem = dropLocation.getWorld().dropItem(dropLocation, transferring);
+                ItemStack dropping = new ItemStack(transferring);
+                transferring.setAmount(0);
+                Item droppedItem = dropLocation.getWorld().dropItem(dropLocation, dropping);
                 droppedItem.setVelocity(pipeDispenseEvent.getVelocity());
 
                 dropLocation.getWorld().playEffect(dropLocation, Effect.CLICK2, null);

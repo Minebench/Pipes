@@ -69,7 +69,7 @@ public class PlayerRightclickListener implements Listener {
                             .replace("{0}", String.valueOf(PipesConfig.getMaxPipeLength())));
                 }
             } else if (!event.getPlayer().isSneaking() || (
-                    !event.getItem().getType().isBlock() && !event.getItem().getType().isEdible()
+                    (event.getItem() == null || !event.getItem().getType().isBlock() && !event.getItem().getType().isEdible())
                             && !event.getPlayer().hasPermission("Pipes.gui.bypass"))) {
                 AbstractPipePart pipePart = PipesUtil.getPipesPart(event.getClickedBlock());
                 if (pipePart != null) {

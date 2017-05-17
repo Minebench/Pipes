@@ -170,8 +170,39 @@ public class ItemMoveScheduler {
                 return true;
             }
 
+            InventoryHolder targetHolder = output.getTargetHolder();
+            if (targetHolder == null) {
+                continue;
+            }
+            Inventory targetInventory = targetHolder.getInventory();
+
+            ItemStack transferring = itemStack;
+            PipeOutput.AcceptResult acceptResult = output.accepts(transferring);
+
+            // Check the target amount option
+            int leftOverAmount = 0;
+            if (acceptResult.getType() == PipeOutput.ResultType.ACCEPT
+                    && acceptResult.isInFilter()
+                    && (boolean) output.getOption(PipeOutput.Option.WHITELIST)
+                    && (boolean) output.getOption(PipeOutput.Option.TARGET_AMOUNT)) {
+                int amountInTarget = 0;
+                for (ItemStack item : targetInventory) {
+                    if (output.matchesFilter(acceptResult.getFilterItem(), item)) {
+                        amountInTarget += item.getAmount();
+                    }
+                    if (amountInTarget > acceptResult.getFilterItem().getAmount()) {
+                        acceptResult = new PipeOutput.AcceptResult(PipeOutput.ResultType.DENY_AMOUNT, acceptResult.getFilterItem());
+                        break;
+                    }
+                }
+                if (amountInTarget + itemStack.getAmount() > acceptResult.getFilterItem().getAmount()) {
+                    transferring = new ItemStack(itemStack);
+                    transferring.setAmount(acceptResult.getFilterItem().getAmount() - amountInTarget);
+                    leftOverAmount = itemStack.getAmount() - transferring.getAmount();
+                }
+            }
+
             boolean overflowIsAllowed = (boolean) output.getOption(PipeOutput.Option.OVERFLOW);
-            PipeOutput.AcceptResult acceptResult = output.accepts(itemStack);
             if (acceptResult.getType() != PipeOutput.ResultType.ACCEPT) {
                 if (acceptResult.isInFilter() && !overflowIsAllowed) {
                     return false;
@@ -179,15 +210,10 @@ public class ItemMoveScheduler {
                 continue;
             }
 
-            InventoryHolder targetHolder = output.getTargetHolder();
-            if (targetHolder == null) {
-                continue;
-            }
-
             Inventory inputInventory = inputHolder.getInventory();
-            Inventory targetInventory = targetHolder.getInventory();
+
             // call move event before doing any moving to check if it was cancelled
-            PipeMoveItemEvent pipeMoveEvent = new PipeMoveItemEvent(pipe, inputInventory, itemStack, targetInventory);
+            PipeMoveItemEvent pipeMoveEvent = new PipeMoveItemEvent(pipe, inputInventory, transferring, targetInventory);
             Pipes.getInstance().getServer().getPluginManager().callEvent(pipeMoveEvent);
             if (pipeMoveEvent.isCancelled()) {
                 continue;
@@ -201,20 +227,20 @@ public class ItemMoveScheduler {
                      */
                 case FURNACE:
                     // try to put coal etc in the correct place
-                    if (itemStack.getType().isFuel()) {
+                    if (transferring.getType().isFuel()) {
                         if (smartInsert || (output.getFacing() != BlockFace.DOWN && output.getFacing() != BlockFace.UP)) {
-                            PipesUtil.addFuel(inputInventory, targetInventory, itemStack);
+                            PipesUtil.addFuel(inputInventory, targetInventory, transferring);
                         }
                     } else {
                         if (smartInsert || output.getFacing() == BlockFace.DOWN) {
                             FurnaceInventory furnaceInventory = (FurnaceInventory) targetInventory;
                             ItemStack smelting = furnaceInventory.getSmelting();
                             if (smelting == null) {
-                                inputInventory.removeItem(new ItemStack(itemStack));
-                                furnaceInventory.setSmelting(itemStack);
-                                itemStack.setAmount(0);
-                            } else if (smelting.isSimilar(itemStack)) {
-                                ItemStack itemToSet = PipesUtil.moveToSingleSlot(inputInventory, smelting, itemStack);
+                                inputInventory.removeItem(new ItemStack(transferring));
+                                furnaceInventory.setSmelting(transferring);
+                                transferring.setAmount(0);
+                            } else if (smelting.isSimilar(transferring)) {
+                                ItemStack itemToSet = PipesUtil.moveToSingleSlot(inputInventory, smelting, transferring);
                                 if (itemToSet != null) {
                                     furnaceInventory.setSmelting(itemToSet);
                                 }
@@ -230,11 +256,11 @@ public class ItemMoveScheduler {
                      */
                 case BREWING:
                     BrewerInventory brewerInventory = (BrewerInventory) targetInventory;
-                    switch (itemStack.getType()) {
+                    switch (transferring.getType()) {
                         case BLAZE_POWDER:
                             // the transported item is fuel
                             if (smartInsert || (output.getFacing() != BlockFace.DOWN && output.getFacing() != BlockFace.UP)) {
-                                if (!PipesUtil.addFuel(inputInventory, brewerInventory, itemStack)) {
+                                if (!PipesUtil.addFuel(inputInventory, brewerInventory, transferring)) {
                                     continue;
                                 }
                             }
@@ -244,22 +270,22 @@ public class ItemMoveScheduler {
                         case LINGERING_POTION:
                             if (smartInsert || (output.getFacing() != BlockFace.DOWN && output.getFacing() != BlockFace.UP)) {
                                 ItemStack ingredient = brewerInventory.getIngredient();
-                                if (!PipesUtil.potionAcceptsIngredient(itemStack, ingredient)) {
+                                if (!PipesUtil.potionAcceptsIngredient(transferring, ingredient)) {
                                     break;
                                 }
                                 int firstEmpty = brewerInventory.firstEmpty();
-                                while (firstEmpty != -1 && firstEmpty < 3 && itemStack.getAmount() > 0) {
-                                    ItemStack remove = new ItemStack(itemStack);
+                                while (firstEmpty != -1 && firstEmpty < 3 && transferring.getAmount() > 0) {
+                                    ItemStack remove = new ItemStack(transferring);
                                     remove.setAmount(1);
                                     inputInventory.removeItem(remove);
 
-                                    ItemStack result = new ItemStack(itemStack);
+                                    ItemStack result = new ItemStack(transferring);
                                     result.setAmount(1);
 
-                                    itemStack.setAmount(itemStack.getAmount() - 1);
+                                    transferring.setAmount(transferring.getAmount() - 1);
 
                                     brewerInventory.setItem(firstEmpty, result);
-                                    if (itemStack.getAmount() > 0) {
+                                    if (transferring.getAmount() > 0) {
                                         firstEmpty = brewerInventory.firstEmpty();
                                     }
                                 }
@@ -269,11 +295,11 @@ public class ItemMoveScheduler {
                             if (smartInsert || output.getFacing() == BlockFace.DOWN) {
                                 ItemStack ingredient = brewerInventory.getIngredient();
                                 if (ingredient == null) {
-                                    inputInventory.removeItem(new ItemStack(itemStack));
-                                    brewerInventory.setIngredient(itemStack);
-                                    itemStack.setAmount(0);
-                                } else if (ingredient.isSimilar(itemStack)) {
-                                    ItemStack itemToSet = PipesUtil.moveToSingleSlot(inputInventory, ingredient, itemStack);
+                                    inputInventory.removeItem(new ItemStack(transferring));
+                                    brewerInventory.setIngredient(transferring);
+                                    transferring.setAmount(0);
+                                } else if (ingredient.isSimilar(transferring)) {
+                                    ItemStack itemToSet = PipesUtil.moveToSingleSlot(inputInventory, ingredient, transferring);
                                     if (itemToSet != null) {
                                         brewerInventory.setIngredient(itemToSet);
                                     }
@@ -289,12 +315,12 @@ public class ItemMoveScheduler {
                     BEGIN BEACON
                      */
                 case BEACON:
-                    switch (itemStack.getType()) {
+                    switch (transferring.getType()) {
                         case DIAMOND:
                         case EMERALD:
                         case GOLD_INGOT:
                         case IRON_INGOT:
-                            PipesUtil.addItem(targetInventory, itemStack);
+                            PipesUtil.addItem(targetInventory, transferring);
                             break;
                     }
                     break;
@@ -306,15 +332,22 @@ public class ItemMoveScheduler {
                      */
                 default:
                     // for chests, dropper etc...
-                    PipesUtil.addItem(targetInventory, itemStack);
+                    PipesUtil.addItem(targetInventory, transferring);
                     break;
                     /*
                     END DEFAULT
                      */
             }
 
-            if (itemStack.getAmount() > 0 && acceptResult.isInFilter() && !overflowIsAllowed) {
-                return false;
+            if (transferring.getAmount() > 0) {
+                if (itemStack != transferring) {
+                    // Check if the item stack that we transferred is the one that was given to us.
+                    // If not merge their amounts (this split can happen due to the amount filtering)
+                    itemStack.setAmount(leftOverAmount + transferring.getAmount());
+                }
+                if (acceptResult.isInFilter() && !overflowIsAllowed) {
+                    return false;
+                }
             }
         }
 

@@ -110,33 +110,33 @@ public class PipeOutput extends AbstractPipePart {
     public AcceptResult accepts(ItemStack itemStack) {
         Block block = getLocation().getBlock();
         if (block == null || !(block.getState() instanceof InventoryHolder)) {
-            return new AcceptResult(ResultType.DENY_INVALID, false);
+            return new AcceptResult(ResultType.DENY_INVALID, null);
         }
         if ((boolean) getOption(PipeOutput.Option.OVERFLOW) && block.isBlockPowered()) {
-            return new AcceptResult(ResultType.DENY_REDSTONE, false);
+            return new AcceptResult(ResultType.DENY_REDSTONE, null);
         }
 
-        boolean inFilter = false;
+        ItemStack filter = null;
         boolean isEmpty = true;
         boolean isWhitelist = (boolean) getOption(Option.WHITELIST);
         for (ItemStack filterItem : ((InventoryHolder) block.getState()).getInventory().getContents()) {
             isEmpty &= filterItem == null;
             if (matchesFilter(filterItem, itemStack)) {
                 if (isWhitelist) {
-                    inFilter = true;
+                    filter = filterItem;
                     break;
                 } else {
-                    return new AcceptResult(ResultType.DENY_BLACKLIST, true);
+                    return new AcceptResult(ResultType.DENY_BLACKLIST, filterItem);
                 }
             }
         }
 
         if (block.isBlockPowered()) {
-            return new AcceptResult(ResultType.DENY_REDSTONE, inFilter);
-        } else if (!isEmpty && isWhitelist && !inFilter) {
-            return new AcceptResult(ResultType.DENY_WHITELIST, false);
+            return new AcceptResult(ResultType.DENY_REDSTONE, filter);
+        } else if (!isEmpty && isWhitelist && filter == null) {
+            return new AcceptResult(ResultType.DENY_WHITELIST, null);
         } else {
-            return new AcceptResult(ResultType.ACCEPT, inFilter);
+            return new AcceptResult(ResultType.ACCEPT, filter);
         }
     }
 
@@ -146,7 +146,7 @@ public class PipeOutput extends AbstractPipePart {
      * @param item      The item stack to check
      * @return          <tt>true</tt> if the filter is similar; <tt>false</tt> if not
      */
-    private boolean matchesFilter(ItemStack filter, ItemStack item) {
+    public boolean matchesFilter(ItemStack filter, ItemStack item) {
         if (filter == null || item == null) {
             return false;
         }
@@ -205,14 +205,14 @@ public class PipeOutput extends AbstractPipePart {
         return getType().toString() + getOptionsString();
     }
 
-    public class AcceptResult {
+    public static class AcceptResult {
 
         private final ResultType type;
-        private final boolean inFilter;
+        private final ItemStack filterItem;
 
-        public AcceptResult(ResultType type, boolean inFilter) {
+        public AcceptResult(ResultType type, ItemStack filterItem) {
             this.type = type;
-            this.inFilter = inFilter;
+            this.filterItem = filterItem;
         }
 
         public ResultType getType() {
@@ -220,7 +220,11 @@ public class PipeOutput extends AbstractPipePart {
         }
 
         public boolean isInFilter() {
-            return inFilter;
+            return filterItem != null;
+        }
+
+        public ItemStack getFilterItem() {
+            return filterItem;
         }
     }
 
@@ -229,6 +233,7 @@ public class PipeOutput extends AbstractPipePart {
         DENY_REDSTONE,
         DENY_WHITELIST,
         DENY_BLACKLIST,
+        DENY_AMOUNT,
         DENY_INVALID;
     }
 
@@ -267,10 +272,9 @@ public class PipeOutput extends AbstractPipePart {
          */
         DISPLAY_FILTER(Value.FALSE, Value.TRUE),
         /**
-         * Whether or not to respect filter item amounts when filtering. Will only result in transfers that are multiple of the filter item's amount
-         * TODO: Implementation
+         * Whether or not to use the amount of the filter item as the amount to which the target should be filled up to
          */
-        AMOUNT_FILTER(Value.TRUE, Value.FALSE);
+        TARGET_AMOUNT(Value.FALSE, Value.TRUE);
 
         private final Value defaultValue;
         private final Class<?> valueType;

@@ -11,6 +11,7 @@ import io.github.apfelcreme.Pipes.PipesConfig;
 import io.github.apfelcreme.Pipes.PipesUtil;
 import org.bukkit.Location;
 import org.bukkit.block.BlockFace;
+import org.bukkit.block.BlockState;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.inventory.BrewerInventory;
 import org.bukkit.inventory.FurnaceInventory;
@@ -344,6 +345,8 @@ public class ItemMoveScheduler {
                 // If not merge their amounts (this split can happen due to the amount filtering)
                 itemStack.setAmount(leftOverAmount + transferring.getAmount());
             }
+
+            ((BlockState) inputHolder).update();
 
             if (itemStack.getAmount() > 0) {
                 if (acceptResult.isInFilter() && !overflowIsAllowed) {

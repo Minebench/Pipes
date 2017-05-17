@@ -99,6 +99,29 @@ texts:
           &7Der Name und die Beschreibung
           &7der Items spielt keine Rolle
           &7für den Filter.
+      enchantment-filter:
+        true: |
+          &aVerzauberungen werden gefiltert!
+          &7Nur Items die die selben Ver-
+          &7zauberungen wie die Items im
+          &7Output besitzen stimmen mit
+          &7dem Filter überein.
+        false: |
+          &cVerzauberungen werden nicht gefiltert!
+          &7Die Verzauberungen der Items spielen
+          &7keine Rolle für den Filter.
+      data-filter:
+        true: |
+          &aExakter Filter ist eingeschaltet!
+          &7Alle Daten (außer die Anzahl)
+          &7müssen mit einem Filteritem
+          &7übereinstimmen!
+        false: |
+          &cExakter Filter ist abgeschaltet!
+          &7Die Daten müssen nicht genau
+          &7mit den Filteritems über-
+          &7einstimmen und die anderen
+          &7Filter werden angewandt.
       target-amount:
         true: |
           &aFüllmengen-Begrenzung ist eingeschaltet!

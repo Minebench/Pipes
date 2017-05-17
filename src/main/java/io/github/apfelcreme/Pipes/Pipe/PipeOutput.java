@@ -6,6 +6,7 @@ import io.github.apfelcreme.Pipes.PipesUtil;
 import org.bukkit.Nameable;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
+import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -13,6 +14,7 @@ import org.bukkit.material.Directional;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.logging.Level;
 
 /**
@@ -151,6 +153,12 @@ public class PipeOutput extends AbstractPipePart {
             return false;
         }
 
+        if ((boolean) getOption(Option.DATA_FILTER)) {
+            if (!PipesUtil.isSimilarFuzzy(filter, item)) {
+                return false;
+            }
+        }
+
         if ((boolean) getOption(Option.MATERIAL_FILTER)) {
             if (!filter.getData().equals(item.getData())) {
                 return false;
@@ -182,6 +190,12 @@ public class PipeOutput extends AbstractPipePart {
                 if (filterMeta.hasLore() && !filterMeta.getLore().equals(meta.getLore())) {
                     return false;
                 }
+            }
+        }
+
+        if ((boolean) getOption(Option.ENCHANTMENT_FILTER)) {
+            if (!filter.getEnchantments().equals(item.getEnchantments())) {
+                return false;
             }
         }
 
@@ -271,6 +285,14 @@ public class PipeOutput extends AbstractPipePart {
          * Whether or not to respect custom item names and lores when filtering
          */
         DISPLAY_FILTER(Value.FALSE, Value.TRUE),
+        /**
+         * Whether or to respect enchantments when filtering
+         */
+        ENCHANTMENT_FILTER(Value.FALSE, Value.TRUE),
+        /**
+         * Filter all the data of the items exactly
+         */
+        DATA_FILTER(Value.FALSE, Value.TRUE),
         /**
          * Whether or not to use the amount of the filter item as the amount to which the target should be filled up to
          */

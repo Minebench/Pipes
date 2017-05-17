@@ -119,17 +119,17 @@ texts:
         false: |
           &cExakter Filter ist abgeschaltet!
           &7Die Daten müssen nicht genau
-          &7mit den Filteritems über-
-          &7einstimmen und die anderen
-          &7Filter werden angewandt.
+          &7mit den Filteritems übereinstimmen
+          &7und die anderen Filteroptionen
+          &7werden angewandt.
       target-amount:
         true: |
           &aFüllmengen-Begrenzung ist eingeschaltet!
-          &7Der Zielcontainer wird maximal
-          &7mit der Menge an Items aufgefüllt
-          &7die die Filteritems besitzen.
+          &7Der Zielcontainer wird maximal mit
+          &7der Menge an Items aufgefüllt die
+          &7das passende Filteritem besitzt.
           &8(Nur Auswirkungen auf &7Whitelist&8)
         false: |
-          &aFüllmengen-Begrenzung ist abgeschaltet!
-          &7Der Zielcontainer wird
-          &7ohne Begrenzung aufgefüllt.
+          &cFüllmengen-Begrenzung ist abgeschaltet!
+          &7Der Zielcontainer wird ohne
+          &7Begrenzung aufgefüllt.

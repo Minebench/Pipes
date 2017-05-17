@@ -18,11 +18,13 @@ package io.github.apfelcreme.Pipes.Event;
  */
 
 import io.github.apfelcreme.Pipes.Pipe.Pipe;
+import org.bukkit.event.HandlerList;
 import org.bukkit.event.inventory.InventoryMoveItemEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
 public class PipeMoveItemEvent extends InventoryMoveItemEvent {
+    private static final HandlerList handlers = new HandlerList();
     private final Pipe pipe;
 
     public PipeMoveItemEvent(Pipe pipe, Inventory sourceInventory, ItemStack itemStack, Inventory destinationInventory) {
@@ -32,5 +34,14 @@ public class PipeMoveItemEvent extends InventoryMoveItemEvent {
 
     public Pipe getPipe() {
         return pipe;
+    }
+
+    @Override
+    public HandlerList getHandlers() {
+        return handlers;
+    }
+
+    public static HandlerList getHandlerList() {
+        return handlers;
     }
 }

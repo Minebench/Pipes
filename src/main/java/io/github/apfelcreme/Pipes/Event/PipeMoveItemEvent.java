@@ -25,7 +25,6 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
 public class PipeMoveItemEvent extends InventoryMoveItemEvent {
-    private static final HandlerList handlers = new HandlerList();
     private final Pipe pipe;
     private final PipeOutput output;
 
@@ -41,14 +40,5 @@ public class PipeMoveItemEvent extends InventoryMoveItemEvent {
 
     public PipeOutput getOutput() {
         return output;
-    }
-
-    @Override
-    public HandlerList getHandlers() {
-        return handlers;
-    }
-
-    public static HandlerList getHandlerList() {
-        return handlers;
     }
 }

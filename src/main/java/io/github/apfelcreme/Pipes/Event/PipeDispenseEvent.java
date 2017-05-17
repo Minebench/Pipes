@@ -24,7 +24,6 @@ import org.bukkit.util.Vector;
  * this program; if not, see <http://www.gnu.org/licenses/>.
  */
 public class PipeDispenseEvent extends BlockDispenseEvent {
-    private static final HandlerList handlers = new HandlerList();
     private final Pipe pipe;
     private final PipeOutput output;
 
@@ -40,14 +39,5 @@ public class PipeDispenseEvent extends BlockDispenseEvent {
 
     public PipeOutput getOutput() {
         return output;
-    }
-
-    @Override
-    public HandlerList getHandlers() {
-        return handlers;
-    }
-
-    public static HandlerList getHandlerList() {
-        return handlers;
     }
 }

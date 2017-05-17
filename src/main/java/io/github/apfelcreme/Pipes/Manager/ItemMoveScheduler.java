@@ -244,7 +244,7 @@ public class ItemMoveScheduler {
                 droppedItem.setVelocity(pipeDispenseEvent.getVelocity());
 
                 dropLocation.getWorld().playEffect(dropLocation, Effect.CLICK2, null);
-                dropLocation.getWorld().playEffect(dropLocation, Effect.SMOKE, output.getFacing());
+                dropLocation.getWorld().playEffect(dropLocation, Effect.SMOKE, output.getFacing().getOppositeFace());
 
             } else {
                 // call move event before doing any moving to check if it was cancelled

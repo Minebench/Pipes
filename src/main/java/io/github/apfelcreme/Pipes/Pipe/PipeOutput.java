@@ -265,8 +265,8 @@ public class PipeOutput extends AbstractPipePart {
         /**
          * Whether or not this output can overflow into other available outputs
          * <p><strong>Possible Values:</strong>
-         * <li><tt>true</tt> if this output should force items to end up here even 'though the target is full</li>
-         * <li><tt>false</tt> if the items should end up in the overflow</li></p>
+         * <li><tt>true</tt> if the items should end up in the overflow</li>
+         * <li><tt>false</tt> if this output should force items to end up here even 'though the target is full</li></p>
          */
         OVERFLOW(Value.FALSE, Value.TRUE),
         /**

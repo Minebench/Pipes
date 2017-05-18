@@ -3,6 +3,7 @@ package io.github.apfelcreme.Pipes.Listener;
 import de.diddiz.LogBlock.LogBlock;
 import de.diddiz.LogBlock.listeners.BlockBreakLogging;
 import io.github.apfelcreme.Pipes.Event.PipeBlockBreakEvent;
+import io.github.apfelcreme.Pipes.Event.PipeDispenseEvent;
 import io.github.apfelcreme.Pipes.Exception.ChunkNotLoadedException;
 import io.github.apfelcreme.Pipes.Exception.PipeTooLongException;
 import io.github.apfelcreme.Pipes.Exception.TooManyOutputsException;
@@ -60,15 +61,7 @@ public class BlockListener implements Listener {
 
     @EventHandler
     private void onItemDispense(BlockDispenseEvent event) {
-        if (PipesUtil.getPipesItem(event.getBlock()) != null) {
-            event.setCancelled(true);
-        }
-    }
-
-    @EventHandler
-    public void onInventoryMove(InventoryMoveItemEvent event) {
-        if (event.getSource().getHolder() instanceof BlockState
-                && PipesItem.PIPE_OUTPUT.check(((BlockState) event.getSource().getHolder()).getBlock())) {
+        if (!(event instanceof PipeDispenseEvent) && PipesUtil.getPipesItem(event.getBlock()) != null) {
             event.setCancelled(true);
         }
     }

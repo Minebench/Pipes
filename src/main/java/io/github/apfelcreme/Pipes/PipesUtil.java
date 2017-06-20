@@ -104,7 +104,7 @@ public class PipesUtil {
         }
         // Add hidden string
         for (int i = 0; i < hidden.length(); i++) {
-            string += ChatColor.COLOR_CHAR + hidden.substring(i, i + 1);
+            string += ChatColor.COLOR_CHAR + hidden.charAt(i);
         }
         return string;
     }

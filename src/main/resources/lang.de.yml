@@ -35,6 +35,16 @@ texts:
     tp:
       teleported: '&a Du wurdest teleportiert!'
   gui:
+    pipe-input:
+      spread:
+        true: |
+          &aPipe Input ist im &2Verteilungs&a Modus!
+          &7Items werden gleichmäßig über alle
+          &7passenden Outputs verteilt!
+        false: |
+          &cPipe Input ist im &4Einzel&c Modus!
+          &7Items werden in den ersten passenden
+          &7Output transferiert. (Oder overflowen)
     pipe-output:
       whitelist:
         true: |

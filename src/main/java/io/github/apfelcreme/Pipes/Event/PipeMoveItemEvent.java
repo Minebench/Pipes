@@ -19,7 +19,6 @@ package io.github.apfelcreme.Pipes.Event;
 
 import io.github.apfelcreme.Pipes.Pipe.Pipe;
 import io.github.apfelcreme.Pipes.Pipe.PipeOutput;
-import org.bukkit.event.HandlerList;
 import org.bukkit.event.inventory.InventoryMoveItemEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;

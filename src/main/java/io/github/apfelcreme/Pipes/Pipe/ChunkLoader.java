@@ -45,4 +45,14 @@ public class ChunkLoader extends AbstractPipePart {
     protected IOption[] getOptions() {
         return new IOption[0];
     }
+
+    @Override
+    public boolean equals(Object o) {
+        return this == o || super.equals(o);
+    }
+
+    @Override
+    public String toString() {
+        return super.toString();
+    }
 }

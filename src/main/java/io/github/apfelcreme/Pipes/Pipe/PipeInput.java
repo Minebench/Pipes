@@ -56,10 +56,14 @@ public class PipeInput extends AbstractPipePart {
                 && !(facing != null ? !facing.equals(((PipeInput) o).facing) : ((PipeInput) o).facing != null);
     }
 
+    @Override
+    public String toString() {
+        return super.toString();
+    }
+
     public enum Option implements IOption {
         /**
          * Whether or not to spread the items equally over all outputs
-         * TODO: Implementation
          */
         SPREAD(Value.FALSE, Value.TRUE);
 

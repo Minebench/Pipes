@@ -217,6 +217,11 @@ public class PipeOutput extends AbstractPipePart {
                 && !(facing != null ? !facing.equals(((PipeOutput) o).facing) : ((PipeOutput) o).facing != null);
     }
 
+    @Override
+    public String toString() {
+        return super.toString();
+    }
+
     public static class AcceptResult {
 
         private final ResultType type;

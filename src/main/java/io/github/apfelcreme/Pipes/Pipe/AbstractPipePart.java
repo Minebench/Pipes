@@ -203,6 +203,11 @@ public abstract class AbstractPipePart {
         return getLocation() != null ? !getLocation().equals(((AbstractPipePart) o).getLocation()) : ((AbstractPipePart) o).getLocation() != null;
     }
 
+    @Override
+    public String toString() {
+        return getType().toString() + getOptionsString();
+    }
+
     public interface IOption {
 
         /**

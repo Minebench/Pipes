@@ -31,6 +31,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -162,23 +163,45 @@ public class ItemMoveScheduler {
         }
 
         boolean transferredAll = true;
+        boolean spread = (boolean) input.getOption(PipeInput.Option.SPREAD);
 
         // loop through all items and try to move them
         for (ItemStack itemStack : itemQueue) {
-            transferredAll &= moveItem(inputHolder, pipe, itemStack);
+            transferredAll &= moveItem(inputHolder, pipe, itemStack, spread);
         }
 
         return transferredAll;
     }
 
-    private boolean moveItem(InventoryHolder inputHolder, Pipe pipe, ItemStack itemStack) {
+    private boolean moveItem(InventoryHolder inputHolder, Pipe pipe, ItemStack itemStack, boolean spread) {
+        Map<PipeOutput, PipeOutput.AcceptResult> outputs = new LinkedHashMap<>();
+        if (spread) {
+            for (PipeOutput output : pipe.getOutputs()) {
+                PipeOutput.AcceptResult acceptResult = output.accepts(itemStack);
+                if (acceptResult.getType() == PipeOutput.ResultType.ACCEPT) {
+                    outputs.put(output, acceptResult);
+                }
+            }
+        } else {
+            for (PipeOutput output : pipe.getOutputs()) {
+                outputs.put(output, null);
+            }
+        }
+
+        // Calculate amount that should be spread over the outputs (when in spread mode)
+        int spreadAmount = itemStack.getAmount() / outputs.size();
+        if (spread && spreadAmount == 0) { // not enough items to spread over all outputs, return
+            return false;
+        }
+
         // loop through all outputs
-        for (PipeOutput output : pipe.getOutputs()) {
+        for (Map.Entry<PipeOutput, PipeOutput.AcceptResult> entry : outputs.entrySet()) {
             // we don't need to move empty/already moved itemstacks
             if (itemStack.getAmount() <= 0) {
                 return true;
             }
 
+            PipeOutput output = entry.getKey();
             InventoryHolder targetHolder = output.getTargetHolder();
             Inventory targetInventory = null;
             if (targetHolder != null) {
@@ -186,10 +209,17 @@ public class ItemMoveScheduler {
             }
 
             ItemStack transferring = itemStack;
-            PipeOutput.AcceptResult acceptResult = output.accepts(transferring);
+            PipeOutput.AcceptResult acceptResult = spread ? entry.getValue() : output.accepts(transferring);
+
+            // Set the spread amount
+            if (spread && spreadAmount < transferring.getAmount()) {
+                if (transferring == itemStack) {
+                    transferring = new ItemStack(transferring);
+                }
+                transferring.setAmount(spreadAmount);
+            }
 
             // Check the target amount option
-            int leftOverAmount = 0;
             if (targetInventory != null
                     && acceptResult.getType() == PipeOutput.ResultType.ACCEPT
                     && acceptResult.isInFilter()
@@ -199,22 +229,26 @@ public class ItemMoveScheduler {
                 for (ItemStack item : targetInventory) {
                     if (output.matchesFilter(acceptResult.getFilterItem(), item)) {
                         amountInTarget += item.getAmount();
-                    }
-                    if (amountInTarget > acceptResult.getFilterItem().getAmount()) {
-                        acceptResult = new PipeOutput.AcceptResult(PipeOutput.ResultType.DENY_AMOUNT, acceptResult.getFilterItem());
-                        break;
+                        if (amountInTarget > acceptResult.getFilterItem().getAmount()) {
+                            acceptResult = new PipeOutput.AcceptResult(PipeOutput.ResultType.DENY_AMOUNT, acceptResult.getFilterItem());
+                            break;
+                        }
                     }
                 }
-                if (amountInTarget + itemStack.getAmount() > acceptResult.getFilterItem().getAmount()) {
-                    transferring = new ItemStack(itemStack);
+                if (amountInTarget + transferring.getAmount() > acceptResult.getFilterItem().getAmount()) {
+                    if (transferring == itemStack) {
+                        transferring = new ItemStack(transferring);
+                    }
                     transferring.setAmount(acceptResult.getFilterItem().getAmount() - amountInTarget);
-                    leftOverAmount = itemStack.getAmount() - transferring.getAmount();
                 }
             }
 
+            // Calculate the amount not transferred
+            int leftOverAmount = transferring == itemStack ? itemStack.getAmount() - transferring.getAmount() : 0;
+
             boolean overflowIsAllowed = (boolean) output.getOption(PipeOutput.Option.OVERFLOW);
             if (acceptResult.getType() != PipeOutput.ResultType.ACCEPT) {
-                if (acceptResult.isInFilter() && !overflowIsAllowed) {
+                if (!overflowIsAllowed && !spread && acceptResult.isInFilter()) {
                     return false;
                 }
                 continue;
@@ -373,20 +407,18 @@ public class ItemMoveScheduler {
                     END DEFAULT
                      */
                 }
+            }
 
-                if (itemStack != transferring) {
-                    // Check if the item stack that we transferred is the one that was given to us.
-                    // If not merge their amounts (this split can happen due to the amount filtering)
-                    itemStack.setAmount(leftOverAmount + transferring.getAmount());
-                }
+            if (itemStack != transferring) {
+                // Check if the item stack that we transferred is the one that was given to us.
+                // If not merge their amounts (this split can happen due to the amount filtering and spreading)
+                itemStack.setAmount(leftOverAmount + transferring.getAmount());
             }
 
             ((BlockState) inputHolder).update();
 
-            if (itemStack.getAmount() > 0) {
-                if (acceptResult.isInFilter() && !overflowIsAllowed) {
-                    return false;
-                }
+            if (!spread && itemStack.getAmount() > 0 && acceptResult.isInFilter() && !overflowIsAllowed) {
+                return false;
             }
         }
 

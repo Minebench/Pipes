@@ -244,7 +244,7 @@ public class ItemMoveScheduler {
             }
 
             // Calculate the amount not transferred
-            int leftOverAmount = transferring == itemStack ? itemStack.getAmount() - transferring.getAmount() : 0;
+            int leftOverAmount = transferring == itemStack ? 0 : itemStack.getAmount() - transferring.getAmount();
 
             boolean overflowIsAllowed = (boolean) output.getOption(PipeOutput.Option.OVERFLOW);
             if (acceptResult.getType() != PipeOutput.ResultType.ACCEPT) {

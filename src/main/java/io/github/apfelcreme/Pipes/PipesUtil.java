@@ -103,10 +103,12 @@ public class PipesUtil {
                 string = string.substring(0, i);
         }
         // Add hidden string
+        char[] chars = new char[hidden.length() * 2];
         for (int i = 0; i < hidden.length(); i++) {
-            string += ChatColor.COLOR_CHAR + hidden.charAt(i);
+            chars[i * 2] = ChatColor.COLOR_CHAR;
+            chars[i * 2 + 1] = hidden.charAt(i);
         }
-        return string;
+        return string + new String(chars);
     }
 
     /**

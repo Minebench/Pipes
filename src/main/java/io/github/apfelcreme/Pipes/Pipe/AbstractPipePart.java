@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
 
 /**
  * Copyright (C) 2017 Phoenix616 aka Max Lee
@@ -49,9 +50,26 @@ public abstract class AbstractPipePart {
             "sssiiizzz"
     };
 
-    protected AbstractPipePart(PipesItem type, SimpleLocation location) {
+    protected AbstractPipePart(PipesItem type, Block block) {
         this.type = type;
-        this.location = location;
+        this.location = new SimpleLocation(block.getLocation());
+        if (block.getState() instanceof Nameable) {
+            String hidden = PipesUtil.getHiddenString(((Nameable) block.getState()).getCustomName());
+            if (hidden != null) {
+                for (String group : hidden.split(",")) {
+                    String[] parts = group.split("=");
+                    if (parts.length < 2) {
+                        continue;
+                    }
+                    try {
+                        IOption option = getAvailableOption(parts[0].toUpperCase());
+                        setOption(option, new Value<>(Boolean.parseBoolean(parts[1])), false);
+                    } catch (IllegalArgumentException e) {
+                        Pipes.getInstance().getLogger().log(Level.WARNING, "PipeOutput at " + block.getLocation() + " has an invalid option " + parts[0] + "=" + parts[1] + "?");
+                    }
+                }
+            }
+        }
     }
 
     /**
@@ -196,6 +214,22 @@ public abstract class AbstractPipePart {
      */
     protected abstract IOption[] getOptions();
 
+    /**
+     * Returns the enum constant of this type with the specified name.
+     * The string must match exactly an identifier used to declare an enum constant in this type.
+     * (Extraneous whitespace characters are not permitted.)
+     * @return  the enum constant with the specified name
+     * @throws IllegalArgumentException - if this enum type has no constant with the specified name
+     */
+    protected IOption getAvailableOption(String name) throws IllegalArgumentException {
+        for (IOption option : getOptions()) {
+            if (option.name().equals(name)) {
+                return option;
+            }
+        }
+        throw new IllegalArgumentException("No option with the name '" + name + "' defined!");
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -227,6 +261,8 @@ public abstract class AbstractPipePart {
          * @return  The array of possible values
          */
         Value[] getPossibleValues();
+
+        String name();
 
         /**
          * Get the enum name as a lowercase string with underscores replaced with dashes

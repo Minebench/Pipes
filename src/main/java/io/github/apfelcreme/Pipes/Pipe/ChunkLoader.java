@@ -25,12 +25,8 @@ import org.bukkit.inventory.InventoryHolder;
  */
 public class ChunkLoader extends AbstractPipePart {
 
-    public ChunkLoader(SimpleLocation location) {
-        super(PipesItem.CHUNK_LOADER, location);
-    }
-
     public ChunkLoader(Block block) {
-        this(new SimpleLocation(block.getLocation()));
+        super(PipesItem.CHUNK_LOADER, block);
     }
 
     @Override

@@ -27,13 +27,9 @@ public class PipeInput extends AbstractPipePart {
 
     private final BlockFace facing;
 
-    public PipeInput(SimpleLocation location, BlockFace facing) {
-        super(PipesItem.PIPE_INPUT, location);
-        this.facing = facing;
-    }
-
     public PipeInput(Block block) {
-        this(new SimpleLocation(block.getLocation()), ((Directional) block.getState().getData()).getFacing());
+        super(PipesItem.PIPE_INPUT, block);
+        this.facing = ((Directional) block.getState().getData()).getFacing();
     }
 
     public SimpleLocation getTargetLocation() {
@@ -47,6 +43,11 @@ public class PipeInput extends AbstractPipePart {
     @Override
     protected IOption[] getOptions() {
         return Option.values();
+    }
+
+    @Override
+    protected IOption getAvailableOption(String name) {
+        return Option.valueOf(name);
     }
 
     @Override

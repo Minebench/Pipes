@@ -39,30 +39,9 @@ public class PipeOutput extends AbstractPipePart {
 
     private final BlockFace facing;
 
-    public PipeOutput(SimpleLocation location, BlockFace facing) {
-        super(PipesItem.PIPE_OUTPUT, location);
-        this.facing = facing;
-    }
-
     public PipeOutput(Block block) {
-        this(new SimpleLocation(block.getLocation()), ((Directional) block.getState().getData()).getFacing());
-        if (block.getState() instanceof Nameable) {
-            String hidden = PipesUtil.getHiddenString(((Nameable) block.getState()).getCustomName());
-            if (hidden != null) {
-                for (String group : hidden.split(",")) {
-                    String[] parts = group.split("=");
-                    if (parts.length < 2) {
-                        continue;
-                    }
-                    try {
-                        Option option = Option.valueOf(parts[0].toUpperCase());
-                        setOption(option, new Value<>(Boolean.parseBoolean(parts[1])), false);
-                    } catch (IllegalArgumentException e) {
-                        Pipes.getInstance().getLogger().log(Level.WARNING, "PipeOutput at " + block.getLocation() + " has an invalid option " + parts[0] + "=" + parts[1] + "?");
-                    }
-                }
-            }
-        }
+        super(PipesItem.PIPE_OUTPUT, block);
+        this.facing = ((Directional) block.getState().getData()).getFacing();
     }
 
     /**
@@ -208,6 +187,11 @@ public class PipeOutput extends AbstractPipePart {
     @Override
     protected IOption[] getOptions() {
         return Option.values();
+    }
+
+    @Override
+    protected IOption getAvailableOption(String name) {
+        return Option.valueOf(name);
     }
 
     @Override

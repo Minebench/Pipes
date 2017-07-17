@@ -127,7 +127,7 @@ public class ItemMoveScheduler {
      */
     public boolean execute(SimpleLocation simpleLocation) {
         Location location = simpleLocation.getLocation();
-        if (!location.getWorld().isChunkLoaded(location.getBlockX() >> 4, location.getBlockZ() >> 4)) {
+        if (location.getWorld() == null || !location.getWorld().isChunkLoaded(location.getBlockX() >> 4, location.getBlockZ() >> 4)) {
             // Chunk is not loaded, cannot transfer items
             return false;
         }

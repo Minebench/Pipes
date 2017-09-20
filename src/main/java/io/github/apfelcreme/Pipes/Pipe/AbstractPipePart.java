@@ -45,9 +45,12 @@ public abstract class AbstractPipePart {
     private Map<IOption, Value> options = new HashMap<>();
 
     public final static String[] GUI_SETUP = {
-            "sssiiizzz",
-            "sssiiizzz",
-            "sssiiizzz"
+            "sssssssss",
+            "sssssssss",
+            "sssssssss",
+            "   iii   ",
+            "   iii   ",
+            "   iii   "
     };
 
     protected AbstractPipePart(PipesItem type, Block block) {
@@ -186,12 +189,7 @@ public abstract class AbstractPipePart {
             gui.addElement(new GuiStorageElement('i', holder.getInventory()));
             gui.setFiller(PipesConfig.getGuiFiller());
             GuiElementGroup optionsGroup = new GuiElementGroup('s');
-            int sCount = PipesUtil.countChar(optionsGroup.getSlotChar(), getGuiSetup());
             for (int i = 0; i< getOptions().length; i++) {
-                if (i == sCount) {
-                    gui.addElement(optionsGroup);
-                    optionsGroup = new GuiElementGroup('z');
-                }
                 optionsGroup.addElement(getOptions()[i].getElement(this));
             }
             optionsGroup.addElement(gui.getFiller());

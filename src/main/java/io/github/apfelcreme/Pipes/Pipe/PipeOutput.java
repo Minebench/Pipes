@@ -1,12 +1,8 @@
 package io.github.apfelcreme.Pipes.Pipe;
 
-import io.github.apfelcreme.Pipes.Pipes;
 import io.github.apfelcreme.Pipes.PipesItem;
-import io.github.apfelcreme.Pipes.PipesUtil;
-import org.bukkit.Nameable;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
-import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -14,8 +10,6 @@ import org.bukkit.material.Directional;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-import java.util.logging.Level;
 
 /**
  * Copyright (C) 2016 Lord36 aka Apfelcreme
@@ -245,59 +239,61 @@ public class PipeOutput extends AbstractPipePart {
          * <li><tt>true</tt> if this output is in whitelist mode and should only let items through that are in the inventory</li>
          * <li><tt>false</tt> if this output is in blacklist mode and should only let items through that are <strong>not</strong> in the inventory</li></p>
          */
-        WHITELIST(Value.TRUE, Value.FALSE),
+        WHITELIST(GuiPosition.RIGHT, Value.TRUE, Value.FALSE),
         /**
          * Whether or not this output can overflow into other available outputs
          * <p><strong>Possible Values:</strong>
          * <li><tt>true</tt> if the items should end up in the overflow</li>
          * <li><tt>false</tt> if this output should force items to end up here even 'though the target is full</li></p>
          */
-        OVERFLOW(Value.FALSE, Value.TRUE),
+        OVERFLOW(GuiPosition.LEFT, Value.FALSE, Value.TRUE),
         /**
          * Whether or not to try to insert into the appropriate slots depending on the item type (like fuel)
          * <p><strong>Possible Values:</strong>
          * <li><tt>true</tt> Detect the item type and put it in the slot that it belongs to</li>
          * <li><tt>false</tt> Use the face that the output is facing to select the slot</li></p>
          */
-        SMART_INSERT(Value.TRUE, Value.FALSE),
+        SMART_INSERT(GuiPosition.LEFT, Value.TRUE, Value.FALSE),
         /**
          * Whether or not to respect the material of the filter item when filtering.
          */
-        MATERIAL_FILTER(Value.TRUE, Value.FALSE),
+        MATERIAL_FILTER(GuiPosition.RIGHT, Value.TRUE, Value.FALSE),
         /**
          * Whether or not to respect tool damage values when filtering
          */
-        DAMAGE_FILTER(Value.FALSE, Value.TRUE),
+        DAMAGE_FILTER(GuiPosition.RIGHT, Value.FALSE, Value.TRUE),
         /**
          * Whether or not to respect custom item names and lores when filtering
          */
-        DISPLAY_FILTER(Value.FALSE, Value.TRUE),
+        DISPLAY_FILTER(GuiPosition.RIGHT, Value.FALSE, Value.TRUE),
         /**
          * Whether or to respect enchantments when filtering
          */
-        ENCHANTMENT_FILTER(Value.FALSE, Value.TRUE),
+        ENCHANTMENT_FILTER(GuiPosition.RIGHT, Value.FALSE, Value.TRUE),
         /**
          * Filter all the data of the items exactly
          */
-        DATA_FILTER(Value.FALSE, Value.TRUE),
+        DATA_FILTER(GuiPosition.RIGHT, Value.FALSE, Value.TRUE),
         /**
          * Whether or not to use the amount of the filter item as the amount to which the target should be filled up to
          */
-        TARGET_AMOUNT(Value.FALSE, Value.TRUE);
+        TARGET_AMOUNT(GuiPosition.LEFT, Value.FALSE, Value.TRUE);
 
         private final Value defaultValue;
         private final Class<?> valueType;
         private final Value[] possibleValues;
+        private final GuiPosition guiPosition;
 
         /**
          * An option that this pipe output can have
          * @param defaultValue  The default value when none is set
          * @param valueType     The class of the values that this option accepts
          */
-        Option(Value defaultValue, Class<?> valueType) {
+        Option(GuiPosition guiPosition, Value defaultValue, Class<?> valueType) {
             this.defaultValue = defaultValue;
             this.valueType = valueType;
             possibleValues = new Value[0];
+            this.guiPosition = guiPosition;
         }
 
         /**
@@ -305,13 +301,14 @@ public class PipeOutput extends AbstractPipePart {
          * @param possibleValues    An array of possible values that this option accepts
          * @throws IllegalArgumentException Thrown when there are less than two possible values defined
          */
-        Option(Value... possibleValues) throws IllegalArgumentException {
+        Option(GuiPosition guiPosition, Value... possibleValues) throws IllegalArgumentException {
             if (possibleValues.length < 2) {
                 throw new IllegalArgumentException("An option needs to have at least two values!");
             }
             this.possibleValues = possibleValues;
             defaultValue = possibleValues[0];
             valueType = defaultValue.getValue().getClass();
+            this.guiPosition = guiPosition;
         }
 
         public Class<?> getValueType() {
@@ -324,6 +321,11 @@ public class PipeOutput extends AbstractPipePart {
 
         public Value[] getPossibleValues() {
             return possibleValues;
+        }
+
+        @Override
+        public GuiPosition getGuiPosition() {
+            return guiPosition;
         }
     }
 }

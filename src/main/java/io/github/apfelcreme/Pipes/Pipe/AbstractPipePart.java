@@ -45,12 +45,9 @@ public abstract class AbstractPipePart {
     private Map<IOption, Value> options = new HashMap<>();
 
     public final static String[] GUI_SETUP = {
-            "sssssssss",
-            "sssssssss",
-            "sssssssss",
-            "   iii   ",
-            "   iii   ",
-            "   iii   "
+            "ss iii zz",
+            "ss iii zz",
+            "ss iii zz"
     };
 
     protected AbstractPipePart(PipesItem type, Block block) {
@@ -188,12 +185,25 @@ public abstract class AbstractPipePart {
 
             gui.addElement(new GuiStorageElement('i', holder.getInventory()));
             gui.setFiller(PipesConfig.getGuiFiller());
-            GuiElementGroup optionsGroup = new GuiElementGroup('s');
-            for (int i = 0; i< getOptions().length; i++) {
-                optionsGroup.addElement(getOptions()[i].getElement(this));
+            GuiElementGroup optionsGroupLeft = new GuiElementGroup('s');
+            GuiElementGroup optionsGroupRight = new GuiElementGroup('z');
+            for (IOption option : getOptions()) {
+                if (option.getGuiPosition() == IOption.GuiPosition.NONE) {
+                    continue;
+                }
+                if (optionsGroupLeft.size() < 6
+                        && (option.getGuiPosition() == IOption.GuiPosition.LEFT
+                                || option.getGuiPosition() == IOption.GuiPosition.ANYWHERE
+                                || optionsGroupRight.size() >= 6)) {
+                    optionsGroupLeft.addElement(option.getElement(this));
+                } else {
+                    optionsGroupRight.addElement(option.getElement(this));
+                }
             }
-            optionsGroup.addElement(gui.getFiller());
-            gui.addElement(optionsGroup);
+            optionsGroupLeft.addElement(gui.getFiller());
+            optionsGroupRight.addElement(gui.getFiller());
+            gui.addElement(optionsGroupLeft);
+            gui.addElement(optionsGroupRight);
         }
         gui.show(player);
     }
@@ -323,6 +333,18 @@ public abstract class AbstractPipePart {
                 ));
             }
             return new GuiStateElement(toString().charAt(0), index, states.toArray(new GuiStateElement.State[states.size()]));
+        }
+
+        /**
+         * Get the position where to display this option in the GUI
+         * @return  The position to display this option in the GUI in
+         */
+        default GuiPosition getGuiPosition() {
+            return GuiPosition.ANYWHERE;
+        }
+
+        enum GuiPosition {
+            ANYWHERE, LEFT, RIGHT, NONE
         }
     }
 

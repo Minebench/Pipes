@@ -145,7 +145,7 @@ public class PipeManager {
                     if (color == null) {
                         color = blockColor;
                     }
-                    if (color == blockColor) {
+                    if (blockColor == color) {
                         if (PipesConfig.getMaxPipeLength() > 0 && pipeBlocks.size() >= PipesConfig.getMaxPipeLength()) {
                             throw new PipeTooLongException(location);
                         }
@@ -164,7 +164,9 @@ public class PipeManager {
                         switch (pipesPart.getType()) {
                             case PIPE_INPUT:
                                 PipeInput pipeInput = (PipeInput) pipesPart;
-                                if (block.getRelative(pipeInput.getFacing()).getType() == Material.STAINED_GLASS) {
+                                Block relativeBlock = block.getRelative(pipeInput.getFacing());
+                                if (relativeBlock.getType() == Material.STAINED_GLASS
+                                        && DyeColor.getByWoolData(relativeBlock.getState().getRawData()) == color) {
                                     inputs.add(pipeInput);
                                     found.add(block);
                                     queue.add(pipeInput.getTargetLocation());

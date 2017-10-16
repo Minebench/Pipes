@@ -256,7 +256,7 @@ public class ItemMoveScheduler {
 
             Inventory inputInventory = inputHolder.getInventory();
 
-            if (targetInventory == null) {
+            if ((boolean) output.getOption(PipeOutput.Option.DROP)) {
                 Location dropLocation = output.getTargetLocation().getLocation().add(0.5, 0.5, 0.5);
 
                 double speed = PipesUtil.RANDOM.nextDouble() * 0.1d + 0.2d;
@@ -280,7 +280,7 @@ public class ItemMoveScheduler {
                 dropLocation.getWorld().playEffect(dropLocation, Effect.CLICK2, null);
                 dropLocation.getWorld().playEffect(dropLocation, Effect.SMOKE, output.getFacing().getOppositeFace());
 
-            } else {
+            } else if (targetInventory != null) {
                 // call move event before doing any moving to check if it was cancelled
                 PipeMoveItemEvent pipeMoveEvent = new PipeMoveItemEvent(pipe, output, inputInventory, transferring, targetInventory);
                 Pipes.getInstance().getServer().getPluginManager().callEvent(pipeMoveEvent);

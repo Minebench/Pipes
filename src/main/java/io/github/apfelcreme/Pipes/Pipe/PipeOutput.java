@@ -277,7 +277,11 @@ public class PipeOutput extends AbstractPipePart {
         /**
          * Whether or not to use the amount of the filter item as the amount to which the target should be filled up to
          */
-        TARGET_AMOUNT(GuiPosition.LEFT, Value.FALSE, Value.TRUE);
+        TARGET_AMOUNT(GuiPosition.LEFT, Value.FALSE, Value.TRUE),
+        /**
+         * Whether or not to drop the item instead of adding to an inventory
+         */
+        DROP(GuiPosition.LEFT, Value.FALSE, Value.TRUE);
 
         private final Value defaultValue;
         private final Class<?> valueType;

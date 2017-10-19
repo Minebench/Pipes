@@ -186,7 +186,9 @@ public abstract class AbstractPipePart {
             gui.addElement(new GuiStorageElement('i', holder.getInventory()));
             gui.setFiller(PipesConfig.getGuiFiller());
             GuiElementGroup optionsGroupLeft = new GuiElementGroup('s');
+            gui.addElement(optionsGroupLeft);
             GuiElementGroup optionsGroupRight = new GuiElementGroup('z');
+            gui.addElement(optionsGroupRight);
             for (IOption option : getOptions()) {
                 if (option.getGuiPosition() == IOption.GuiPosition.NONE) {
                     continue;
@@ -202,8 +204,6 @@ public abstract class AbstractPipePart {
             }
             optionsGroupLeft.addElement(gui.getFiller());
             optionsGroupRight.addElement(gui.getFiller());
-            gui.addElement(optionsGroupLeft);
-            gui.addElement(optionsGroupRight);
         }
         gui.show(player);
     }

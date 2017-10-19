@@ -14,14 +14,17 @@ import io.github.apfelcreme.Pipes.PipesConfig;
 import io.github.apfelcreme.Pipes.PipesItem;
 import io.github.apfelcreme.Pipes.PipesUtil;
 import org.bukkit.Material;
+import org.bukkit.block.BlockState;
 import org.bukkit.event.Event;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockDispenseEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
+import org.bukkit.event.block.BlockRedstoneEvent;
 import org.bukkit.event.inventory.CraftItemEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.event.inventory.InventoryMoveItemEvent;
 import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -59,6 +62,16 @@ public class BlockListener implements Listener {
     @EventHandler
     private void onItemDispense(BlockDispenseEvent event) {
         if (!(event instanceof PipeDispenseEvent) && PipesUtil.getPipesItem(event.getBlock()) != null) {
+            event.setCancelled(true);
+        }
+    }
+
+    @EventHandler
+    private void onItemMove(InventoryMoveItemEvent event) {
+        if (event.getDestination().getType() != InventoryType.HOPPER // hoppers are allowed to remove items from the output
+                && event.getSource().getType() != InventoryType.HOPPER
+                && event.getSource().getHolder() instanceof BlockState
+                && PipesItem.PIPE_OUTPUT.check(((BlockState) event.getSource().getHolder()).getBlock())) {
             event.setCancelled(true);
         }
     }

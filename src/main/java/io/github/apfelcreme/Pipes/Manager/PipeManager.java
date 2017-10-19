@@ -166,7 +166,7 @@ public class PipeManager {
                                 PipeInput pipeInput = (PipeInput) pipesPart;
                                 Block relativeBlock = block.getRelative(pipeInput.getFacing());
                                 if (relativeBlock.getType() == Material.STAINED_GLASS
-                                        && DyeColor.getByWoolData(relativeBlock.getState().getRawData()) == color) {
+                                        && (color == null || DyeColor.getByWoolData(relativeBlock.getState().getRawData()) == color)) {
                                     inputs.add(pipeInput);
                                     found.add(block);
                                     queue.add(pipeInput.getTargetLocation());

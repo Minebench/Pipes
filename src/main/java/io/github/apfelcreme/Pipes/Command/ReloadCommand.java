@@ -3,7 +3,6 @@ package io.github.apfelcreme.Pipes.Command;
 import io.github.apfelcreme.Pipes.Pipes;
 import io.github.apfelcreme.Pipes.PipesConfig;
 import org.bukkit.command.CommandSender;
-import org.bukkit.command.ConsoleCommandSender;
 
 /**
  * Copyright (C) 2016 Lord36 aka Apfelcreme

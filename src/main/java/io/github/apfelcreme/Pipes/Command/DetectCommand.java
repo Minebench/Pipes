@@ -45,30 +45,27 @@ public class DetectCommand implements SubCommand {
                 duration = 20L * Integer.parseInt(strings[1]);
             }
             DetectionManager.getInstance().createDetection(commandSender);
-            Pipes.sendMessage(commandSender, PipesConfig.getText("info.detect.started")
-                    .replace("{0}", new DecimalFormat("0").format(duration / 20)));
-            Pipes.getInstance().getServer().getScheduler().runTaskLaterAsynchronously(Pipes.getInstance(), new Runnable() {
-                @Override
-                public void run() {
-                    Detection detection = DetectionManager.getInstance().getDetection(commandSender);
-                    if (detection != null) {
-                        List<TickingLocation> result = detection.getResult();
-                        if (!result.isEmpty()) {
-                            Pipes.sendMessage(commandSender, PipesConfig.getText("info.detect.finished"));
-                            int i = 0;
-                            for (TickingLocation tickingLocation : result) {
-                                Pipes.sendMessage(commandSender, PipesConfig.getText("info.detect.element")
-                                        .replace("{0}", String.valueOf(i))
-                                        .replace("{1}", String.valueOf(tickingLocation.getLocation().getWorldName()))
-                                        .replace("{2}", String.valueOf(tickingLocation.getLocation().getX()))
-                                        .replace("{3}", String.valueOf(tickingLocation.getLocation().getY()))
-                                        .replace("{4}", String.valueOf(tickingLocation.getLocation().getZ()))
-                                        .replace("{5}", String.valueOf(tickingLocation.getTimesTicked())));
-                                i++;
-                            }
-                        } else {
-                            Pipes.sendMessage(commandSender, PipesConfig.getText("info.detect.noElements"));
+            Pipes.sendMessage(commandSender, PipesConfig.getText("info.detect.started",
+                    new DecimalFormat("0").format(duration / 20)));
+            Pipes.getInstance().getServer().getScheduler().runTaskLaterAsynchronously(Pipes.getInstance(), () -> {
+                Detection detection = DetectionManager.getInstance().getDetection(commandSender);
+                if (detection != null) {
+                    List<TickingLocation> result = detection.getResult();
+                    if (!result.isEmpty()) {
+                        Pipes.sendMessage(commandSender, PipesConfig.getText("info.detect.finished"));
+                        int i = 0;
+                        for (TickingLocation tickingLocation : result) {
+                            Pipes.sendMessage(commandSender, PipesConfig.getText("info.detect.element",
+                                    String.valueOf(i),
+                                    String.valueOf(tickingLocation.getLocation().getWorldName()),
+                                    String.valueOf(tickingLocation.getLocation().getX()),
+                                    String.valueOf(tickingLocation.getLocation().getY()),
+                                    String.valueOf(tickingLocation.getLocation().getZ()),
+                                    String.valueOf(tickingLocation.getTimesTicked())));
+                            i++;
                         }
+                    } else {
+                        Pipes.sendMessage(commandSender, PipesConfig.getText("info.detect.noElements"));
                     }
                 }
             }, duration);

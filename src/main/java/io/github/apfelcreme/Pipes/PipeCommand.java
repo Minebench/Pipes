@@ -40,6 +40,9 @@ public class PipeCommand implements CommandExecutor {
                     case DETECT:
                         subCommand = new DetectCommand();
                         break;
+                    case GET:
+                        subCommand = new GetCommand();
+                        break;
                     case MONITOR:
                         subCommand = new MonitorCommand();
                         break;
@@ -68,6 +71,7 @@ public class PipeCommand implements CommandExecutor {
 
         CHECK,
         DETECT,
+        GET,
         INFO,
         MONITOR,
         RELOAD,

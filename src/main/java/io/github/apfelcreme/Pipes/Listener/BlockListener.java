@@ -14,7 +14,6 @@ import io.github.apfelcreme.Pipes.PipesConfig;
 import io.github.apfelcreme.Pipes.PipesItem;
 import io.github.apfelcreme.Pipes.PipesUtil;
 import org.bukkit.Material;
-import org.bukkit.block.BlockState;
 import org.bukkit.event.Event;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -23,9 +22,7 @@ import org.bukkit.event.block.BlockDispenseEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.inventory.CraftItemEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
-import org.bukkit.event.inventory.InventoryMoveItemEvent;
 import org.bukkit.event.inventory.InventoryType;
-import org.bukkit.event.inventory.PrepareAnvilEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
@@ -96,18 +93,18 @@ public class BlockListener implements Listener {
             try {
                 Pipe pipe = PipeManager.isPipe(event.getBlock());
                 if (pipe != null) {
-                    Pipes.sendMessage(event.getPlayer(), PipesConfig.getText("info.pipe.pipeBuilt")
-                            .replace("{0}", pipe.getString()));
+                    Pipes.sendMessage(event.getPlayer(), PipesConfig.getText("info.pipe.pipeBuilt",
+                            pipe.getString()));
                     pipe.highlight();
                 }
             } catch (ChunkNotLoadedException e) {
                 Pipes.sendMessage(event.getPlayer(), PipesConfig.getText("error.chunkNotLoaded"));
             } catch (TooManyOutputsException e) {
-                Pipes.sendMessage(event.getPlayer(), PipesConfig.getText("error.tooManyOutputs")
-                        .replace("{0}", String.valueOf(PipesConfig.getMaxPipeOutputs())));
+                Pipes.sendMessage(event.getPlayer(), PipesConfig.getText("error.tooManyOutputs",
+                        String.valueOf(PipesConfig.getMaxPipeOutputs())));
             } catch (PipeTooLongException e) {
-                Pipes.sendMessage(event.getPlayer(), PipesConfig.getText("error.pipeTooLong")
-                        .replace("{0}", String.valueOf(PipesConfig.getMaxPipeLength())));
+                Pipes.sendMessage(event.getPlayer(), PipesConfig.getText("error.pipeTooLong",
+                        String.valueOf(PipesConfig.getMaxPipeLength())));
             }
         }
     }

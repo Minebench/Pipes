@@ -21,6 +21,7 @@ permissions:
     children:
       Pipes.placeChunkLoader: true
       Pipes.reload: true
+      Pipes.get: true
   Pipes.mod:
     description: all mod permissions
     children:
@@ -33,6 +34,8 @@ permissions:
       Pipes.info: true
   Pipes.detect:
     description: detect all ongoing transfers for a given period of time
+  Pipes.get:
+    description: get pipes items
   Pipes.info:
     description: check a dispenser
   Pipes.monitor:

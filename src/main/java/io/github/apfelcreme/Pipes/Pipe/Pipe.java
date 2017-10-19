@@ -1,19 +1,12 @@
 package io.github.apfelcreme.Pipes.Pipe;
 
 import io.github.apfelcreme.Pipes.PipesConfig;
-import io.github.apfelcreme.Pipes.PipesUtil;
 import org.bukkit.DyeColor;
 import org.bukkit.Effect;
 import org.bukkit.Location;
-import org.bukkit.block.BlockState;
-import org.bukkit.event.inventory.InventoryType;
-import org.bukkit.inventory.InventoryHolder;
-import org.bukkit.inventory.ItemStack;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
-import java.util.stream.Stream;
 
 /**
  * Copyright (C) 2016 Lord36 aka Apfelcreme
@@ -144,10 +137,10 @@ public class Pipe {
      * @return a string with some info in it
      */
     public String getString() {
-        return PipesConfig.getText("info.pipe.pipeData")
-                .replace("{0}", String.valueOf(inputs.size()))
-                .replace("{1}", String.valueOf(outputs.size()))
-                .replace("{2}", String.valueOf(pipeBlocks.size()));
+        return PipesConfig.getText("info.pipe.pipeData",
+                String.valueOf(inputs.size()),
+                String.valueOf(outputs.size()),
+                String.valueOf(pipeBlocks.size()));
     }
 
     @Override

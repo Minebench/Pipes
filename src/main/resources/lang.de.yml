@@ -8,8 +8,11 @@ texts:
     noDetection: '&c Keine Detektion gefunden! Führe zunächst /pipe detect <Zeit> aus!'
     noPermission: '&c Du hast keine ausreichende Berechtigung'
     noPipe: '&c Es konnte keine Pipe gefunden werden!'
+    notEnoughInventorySpace: '&c Du hast keinen Platz im Inventar!'
     notThatManyResults: '&c Es wurden nicht so viele Objekte gefunden!'
+    unknownPipesItem: '&f {0}&c ist kein Pipes-Item!'
     wrongUsage:
+      get: '&c Falsche Eingabe! Probiere /pipe get <typ>'
       tp: '&c Falsche Eingabe! Probiere /pipe tp <#>'
   info:
     chunkLoaderLore: 'ChunkLoader für eine Item-Pipe'
@@ -20,6 +23,7 @@ texts:
       noElements: '&a Es wurden keine Objekte gefunden!'
     dispenserLore: 'Item-Input für eine Item-Pipe'
     dropperLore: 'Item-Output für eine Item-Pipe'
+    get: '&f{0}&a zu deinem Inventar hinzugefügt!'
     info:
       cooldownStarted: '&a Rechtsklicke in 10 Sekunden eine Pipe'
     monitor:

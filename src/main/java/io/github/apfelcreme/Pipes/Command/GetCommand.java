@@ -2,11 +2,12 @@ package io.github.apfelcreme.Pipes.Command;
 
 import io.github.apfelcreme.Pipes.Pipes;
 import io.github.apfelcreme.Pipes.PipesConfig;
+import io.github.apfelcreme.Pipes.PipesItem;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
 /**
- * Copyright (C) 2016 Lord36 aka Apfelcreme
+ * Copyright (C) 2017 Max Lee (https://github.com/Phoenix616)
  * <p>
  * This program is free software;
  * you can redistribute it and/or modify it under the terms of the GNU General
@@ -21,9 +22,9 @@ import org.bukkit.entity.Player;
  * You should have received a copy of the GNU General Public License along with
  * this program; if not, see <http://www.gnu.org/licenses/>.
  *
- * @author Lord36 aka Apfelcreme
+ * @author Max Lee (https://github.com/Phoenix616)
  */
-public class InfoCommand implements SubCommand {
+public class GetCommand implements SubCommand {
 
     /**
      * executes the command
@@ -35,9 +36,25 @@ public class InfoCommand implements SubCommand {
     public void execute(CommandSender commandSender, String[] strings) {
         if (commandSender instanceof Player) {
             final Player player = (Player) commandSender;
-            if (player.hasPermission("Pipes.info")) {
-                Pipes.getInstance().registerRightClick(player, "info");
-                Pipes.sendMessage(player, PipesConfig.getText("info.info.cooldownStarted"));
+            if (player.hasPermission("Pipes.get")) {
+                if (strings.length > 1) {
+                    try {
+                        PipesItem pipesItem = PipesItem.valueOf(strings[1].toUpperCase());
+                        if (pipesItem != PipesItem.CHUNK_LOADER || player.hasPermission("Pipes.placeChunkLoader")) {
+                            if (player.getInventory().addItem(pipesItem.toItemStack()).isEmpty()) {
+                                Pipes.sendMessage(player, PipesConfig.getText("info.get", pipesItem.getName()));
+                            } else {
+                                Pipes.sendMessage(player, PipesConfig.getText("error.notEnoughInventorySpace"));
+                            }
+                        } else {
+                            Pipes.sendMessage(player, PipesConfig.getText("error.noPermission"));
+                        }
+                    } catch (IllegalArgumentException e) {
+                        Pipes.sendMessage(commandSender, PipesConfig.getText("error.unknownPipesItem", strings[1].toLowerCase()));
+                    }
+                } else {
+                    Pipes.sendMessage(commandSender, PipesConfig.getText("error.wrongUsage.get"));
+                }
             } else {
                 Pipes.sendMessage(player, PipesConfig.getText("error.noPermission"));
             }

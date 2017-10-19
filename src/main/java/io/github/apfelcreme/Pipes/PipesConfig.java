@@ -1,13 +1,11 @@
 package io.github.apfelcreme.Pipes;
 
 import org.bukkit.ChatColor;
-import org.bukkit.DyeColor;
 import org.bukkit.Material;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
-import org.bukkit.material.MaterialData;
 
 import java.io.File;
 import java.util.HashMap;
@@ -119,11 +117,15 @@ public class PipesConfig {
      * returns a texty string
      *
      * @param key the config path
+     * @param replacements
      * @return the text
      */
-    public static String getText(String key) {
+    public static String getText(String key, String... replacements) {
         String ret = (String) languageConfig.get("texts." + key);
         if (ret != null && !ret.isEmpty()) {
+            for (int i = 0; i < replacements.length; i++) {
+                ret = ret.replace("{" + i + "}", replacements[i]);
+            }
             ret = ChatColor.translateAlternateColorCodes('&', ret);
             return ChatColor.translateAlternateColorCodes('§', ret);
         } else {

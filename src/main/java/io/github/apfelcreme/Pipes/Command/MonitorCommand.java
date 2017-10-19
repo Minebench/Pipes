@@ -35,16 +35,16 @@ public class MonitorCommand implements SubCommand {
     @Override
     public void execute(final CommandSender commandSender, String[] strings) {
         if (commandSender.hasPermission("Pipes.monitor")) {
-            Pipes.sendMessage(commandSender, PipesConfig.getText("info.monitor.pipeCache")
-                    .replace("{0}", String.valueOf(PipeManager.getInstance().getPipeCache().size())));
+            Pipes.sendMessage(commandSender, PipesConfig.getText("info.monitor.pipeCache",
+                    String.valueOf(PipeManager.getInstance().getPipeCache().size())));
             if (ItemMoveScheduler.getInstance().isActive()) {
-                Pipes.sendMessage(commandSender, PipesConfig.getText("info.monitor.schedulerActive")
-                        .replace("{0}", String.valueOf(ItemMoveScheduler.getInstance().getTransfers().size())));
+                Pipes.sendMessage(commandSender, PipesConfig.getText("info.monitor.schedulerActive",
+                        String.valueOf(ItemMoveScheduler.getInstance().getTransfers().size())));
             } else {
                 Pipes.sendMessage(commandSender, PipesConfig.getText("info.monitor.schedulerNotActive"));
             }
-            Pipes.sendMessage(commandSender, PipesConfig.getText("info.monitor.version")
-                    .replace("{0}", Pipes.getInstance().getDescription().getVersion()));
+            Pipes.sendMessage(commandSender, PipesConfig.getText("info.monitor.version",
+                    Pipes.getInstance().getDescription().getVersion()));
         } else {
             Pipes.sendMessage(commandSender, PipesConfig.getText("error.noPermission"));
         }

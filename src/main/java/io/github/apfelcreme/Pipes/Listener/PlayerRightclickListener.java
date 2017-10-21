@@ -10,6 +10,7 @@ import io.github.apfelcreme.Pipes.Pipes;
 import io.github.apfelcreme.Pipes.PipesConfig;
 import io.github.apfelcreme.Pipes.PipesUtil;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.player.PlayerInteractEvent;
@@ -41,7 +42,7 @@ public class PlayerRightclickListener implements Listener {
         this.plugin = plugin;
     }
 
-    @EventHandler
+    @EventHandler(priority = EventPriority.HIGHEST)
     public void onPlayerRightclick(PlayerInteractEvent event) {
         if (event.getAction() == Action.RIGHT_CLICK_BLOCK && event.getHand() == EquipmentSlot.HAND) {
             String action = plugin.getRegisterRightClick(event.getPlayer());
@@ -65,9 +66,9 @@ public class PlayerRightclickListener implements Listener {
                     Pipes.sendMessage(event.getPlayer(), PipesConfig.getText("error.pipeTooLong",
                             String.valueOf(PipesConfig.getMaxPipeLength())));
                 }
-            } else if (!event.getPlayer().isSneaking() || (
+            } else if (!event.isCancelled() && (!event.getPlayer().isSneaking() || (
                     (event.getItem() == null || !event.getItem().getType().isBlock() && !event.getItem().getType().isEdible())
-                            && !event.getPlayer().hasPermission("Pipes.gui.bypass"))) {
+                            && !event.getPlayer().hasPermission("Pipes.gui.bypass")))) {
                 AbstractPipePart pipePart = PipesUtil.getPipesPart(event.getClickedBlock());
                 if (pipePart != null) {
                     event.setCancelled(true);

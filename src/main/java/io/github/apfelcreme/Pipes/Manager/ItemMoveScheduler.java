@@ -292,23 +292,19 @@ public class ItemMoveScheduler {
                      */
                     case FURNACE:
                         // try to put coal etc in the correct place
-                        if (transferring.getType().isFuel()) {
-                            if (smartInsert || (output.getFacing() != BlockFace.DOWN && output.getFacing() != BlockFace.UP)) {
-                                PipesUtil.addFuel(inputInventory, targetInventory, transferring);
-                            }
-                        } else {
-                            if (smartInsert || output.getFacing() == BlockFace.DOWN) {
-                                FurnaceInventory furnaceInventory = (FurnaceInventory) targetInventory;
-                                ItemStack smelting = furnaceInventory.getSmelting();
-                                if (smelting == null) {
-                                    inputInventory.removeItem(new ItemStack(transferring));
-                                    furnaceInventory.setSmelting(transferring);
-                                    transferring.setAmount(0);
-                                } else if (smelting.isSimilar(transferring)) {
-                                    ItemStack itemToSet = PipesUtil.moveToSingleSlot(inputInventory, smelting, transferring);
-                                    if (itemToSet != null) {
-                                        furnaceInventory.setSmelting(itemToSet);
-                                    }
+                        if (transferring.getType().isFuel() && (smartInsert || (output.getFacing() != BlockFace.DOWN && output.getFacing() != BlockFace.UP))) {
+                            PipesUtil.addFuel(inputInventory, targetInventory, transferring);
+                        } else if (smartInsert || output.getFacing() == BlockFace.DOWN) {
+                            FurnaceInventory furnaceInventory = (FurnaceInventory) targetInventory;
+                            ItemStack smelting = furnaceInventory.getSmelting();
+                            if (smelting == null) {
+                                inputInventory.removeItem(new ItemStack(transferring));
+                                furnaceInventory.setSmelting(transferring);
+                                transferring.setAmount(0);
+                            } else if (smelting.isSimilar(transferring)) {
+                                ItemStack itemToSet = PipesUtil.moveToSingleSlot(inputInventory, smelting, transferring);
+                                if (itemToSet != null) {
+                                    furnaceInventory.setSmelting(itemToSet);
                                 }
                             }
                         }

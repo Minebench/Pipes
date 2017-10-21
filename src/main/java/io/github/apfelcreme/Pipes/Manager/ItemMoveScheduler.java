@@ -17,6 +17,7 @@ import org.bukkit.Sound;
 import org.bukkit.SoundCategory;
 import org.bukkit.block.BlockFace;
 import org.bukkit.block.BlockState;
+import org.bukkit.block.Container;
 import org.bukkit.block.Dropper;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Item;
@@ -136,14 +137,15 @@ public class ItemMoveScheduler {
             return true;
         }
 
-        InventoryHolder inputHolder = input.getHolder();
+        Container inputHolder = input.getHolder();
         if (inputHolder == null) {
             // Could not find the input block, to not recheck this transfer we return true
             return true;
         }
 
+        Inventory inputInventory = inputHolder.getInventory();
         List<ItemStack> itemQueue = new ArrayList<>();
-        for (ItemStack itemStack : inputHolder.getInventory()) {
+        for (ItemStack itemStack : inputInventory) {
             if (itemStack != null) {
                 itemQueue.add(itemStack);
             }
@@ -159,13 +161,17 @@ public class ItemMoveScheduler {
 
         // loop through all items and try to move them
         for (ItemStack itemStack : itemQueue) {
-            transferredAll &= moveItem(inputHolder, pipe, itemStack, spread);
+            transferredAll &= moveItem(inputInventory, pipe, itemStack, spread);
         }
+
+        // Set snapshot contents to real contents so that we can call an update (for redstone)
+        inputHolder.getSnapshotInventory().setContents(inputInventory.getContents());
+        inputHolder.update();
 
         return transferredAll;
     }
 
-    private boolean moveItem(InventoryHolder inputHolder, Pipe pipe, ItemStack itemStack, boolean spread) {
+    private boolean moveItem(Inventory inputInventory, Pipe pipe, ItemStack itemStack, boolean spread) {
         Map<PipeOutput, PipeOutput.AcceptResult> outputs = new LinkedHashMap<>();
         if (spread) {
             for (PipeOutput output : pipe.getOutputs()) {
@@ -245,8 +251,6 @@ public class ItemMoveScheduler {
                 }
                 continue;
             }
-
-            Inventory inputInventory = inputHolder.getInventory();
 
             if ((boolean) output.getOption(PipeOutput.Option.DROP)) {
                 Location dropLocation = output.getTargetLocation().getLocation().add(0.5, 0.5, 0.5);
@@ -407,13 +411,10 @@ public class ItemMoveScheduler {
                 itemStack.setAmount(leftOverAmount + transferring.getAmount());
             }
 
-            ((BlockState) inputHolder).update();
-
             if (!spread && itemStack.getAmount() > 0 && acceptResult.isInFilter() && !overflowIsAllowed) {
                 return false;
             }
         }
-
 
         return itemStack.getAmount() <= 0;
     }

@@ -12,8 +12,8 @@ import org.bukkit.ChatColor;
 import org.bukkit.Nameable;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockState;
+import org.bukkit.block.Container;
 import org.bukkit.entity.Player;
-import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.ArrayList;
@@ -95,10 +95,10 @@ public abstract class AbstractPipePart {
      *
      * @return the inventory holder of pipe part
      */
-    public InventoryHolder getHolder() {
+    public Container getHolder() {
         Block block = location.getBlock();
         if (type.check(block)) {
-            return (InventoryHolder) block.getState();
+            return (Container) block.getState();
         }
         return null;
     }
@@ -174,7 +174,7 @@ public abstract class AbstractPipePart {
     }
 
     public void showGui(Player player) {
-        InventoryHolder holder = getHolder();
+        Container holder = getHolder();
         if (holder == null) {
             return;
         }

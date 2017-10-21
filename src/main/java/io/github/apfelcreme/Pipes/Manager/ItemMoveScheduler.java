@@ -100,21 +100,13 @@ public class ItemMoveScheduler {
      * starts a task
      */
     private void create() {
-        taskId = Pipes.getInstance().getServer().getScheduler().scheduleSyncRepeatingTask(Pipes.getInstance(), new Runnable() {
-            @Override
-            public void run() {
-                if (!scheduledItemTransfers.isEmpty()) {
-                    Iterator<SimpleLocation> transfers = scheduledItemTransfers.iterator();
-                    while (transfers.hasNext()) {
-                        if (execute(transfers.next())) {
-                            transfers.remove();
-                        }
-                    }
-                } else {
-                    emptyRuns++;
-                    if (emptyRuns >= 3) {
-                        kill();
-                    }
+        taskId = Pipes.getInstance().getServer().getScheduler().scheduleSyncRepeatingTask(Pipes.getInstance(), () -> {
+            if (!scheduledItemTransfers.isEmpty()) {
+                scheduledItemTransfers.removeIf(this::execute);
+            } else {
+                emptyRuns++;
+                if (emptyRuns >= 3) {
+                    kill();
                 }
             }
         }, 20L, PipesConfig.getTransferCooldown());

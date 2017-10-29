@@ -2,11 +2,10 @@ package io.github.apfelcreme.Pipes.Pipe;
 
 import io.github.apfelcreme.Pipes.PipesConfig;
 import org.bukkit.DyeColor;
-import org.bukkit.Effect;
 import org.bukkit.Location;
+import org.bukkit.Particle;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.LinkedHashSet;
 
 /**
  * Copyright (C) 2016 Lord36 aka Apfelcreme
@@ -28,14 +27,14 @@ import java.util.List;
  */
 public class Pipe {
 
-    private final List<PipeInput> inputs;
-    private final List<PipeOutput> outputs;
-    private final List<ChunkLoader> chunkLoaders;
-    private final List<SimpleLocation> pipeBlocks;
+    private final LinkedHashSet<PipeInput> inputs;
+    private final LinkedHashSet<PipeOutput> outputs;
+    private final LinkedHashSet<ChunkLoader> chunkLoaders;
+    private final LinkedHashSet<SimpleLocation> pipeBlocks;
     private final DyeColor color;
 
-    public Pipe(List<PipeInput> inputs, List<PipeOutput> outputs,
-                List<ChunkLoader> chunkLoaders, List<SimpleLocation> pipeBlocks, DyeColor color) {
+    public Pipe(LinkedHashSet<PipeInput> inputs, LinkedHashSet<PipeOutput> outputs,
+                LinkedHashSet<ChunkLoader> chunkLoaders, LinkedHashSet<SimpleLocation> pipeBlocks, DyeColor color) {
         this.inputs = inputs;
         this.outputs = outputs;
         this.chunkLoaders = chunkLoaders;
@@ -44,39 +43,39 @@ public class Pipe {
     }
 
     /**
-     * returns the list of inputs
+     * returns the set of inputs
      *
-     * @return the list of inputs
+     * @return the set of inputs
      */
-    public List<PipeInput> getInputs() {
+    public LinkedHashSet<PipeInput> getInputs() {
         return inputs;
     }
 
     /**
-     * returns the list of outputs which are connected to a sorter
+     * returns the set of outputs which are connected to a sorter
      *
-     * @return the list of outputs
+     * @return the set of outputs
      */
-    public List<PipeOutput> getOutputs() {
+    public LinkedHashSet<PipeOutput> getOutputs() {
         return outputs;
     }
 
     /**
-     * returns the list of furnaces that are connected to a pipe that allows the
+     * returns the set of furnaces that are connected to a pipe that allows the
      * server to load chunks if parts of the pipe are located in unloaded chunks
      *
-     * @return a list of chunk loaders
+     * @return a set of chunk loaders
      */
-    public List<ChunkLoader> getChunkLoaders() {
+    public LinkedHashSet<ChunkLoader> getChunkLoaders() {
         return chunkLoaders;
     }
 
     /**
-     * returns the list of glass-blocks the pipe consists of
+     * returns the set of glass-blocks the pipe consists of
      *
-     * @return the list of pipe blocks
+     * @return the set of pipe blocks
      */
-    public List<SimpleLocation> getPipeBlocks() {
+    public LinkedHashSet<SimpleLocation> getPipeBlocks() {
         return pipeBlocks;
     }
 
@@ -108,25 +107,19 @@ public class Pipe {
      * displays particles around a pipe
      */
     public void highlight() {
-        List<SimpleLocation> locations = new ArrayList<>();
-        for (SimpleLocation simpleLocation : pipeBlocks) {
-            locations.add(simpleLocation);
-        }
-        for (PipeInput input : inputs) {
-            locations.add(input.getLocation());
-        }
-        for (PipeOutput output : outputs) {
-            locations.add(output.getLocation());
-            locations.add(output.getTargetLocation());
-        }
+        LinkedHashSet<SimpleLocation> locations = new LinkedHashSet<>();
+        locations.addAll(pipeBlocks);
+        inputs.stream().map(PipeInput::getLocation).forEach(locations::add);
+        outputs.stream().map(PipeOutput::getLocation).forEach(locations::add);
+        outputs.stream().map(PipeOutput::getTargetLocation).forEach(locations::add);
+
         for (SimpleLocation simpleLocation : locations) {
             Location location = simpleLocation.getLocation();
             location.setX(location.getX() + 0.5);
             location.setY(location.getY() + 0.5);
             location.setZ(location.getZ() + 0.5);
             for (int i = 0; i < 3; i++) {
-                location.getWorld().spigot().playEffect(location, Effect.FIREWORKS_SPARK, 0, 0,
-                        0.1f, 0.1f, 0.1f, 0, 1, 50);
+                location.getWorld().spawnParticle(Particle.FIREWORKS_SPARK, location, 1, 0, 0, 0, 0);
             }
         }
     }
@@ -140,7 +133,8 @@ public class Pipe {
         return PipesConfig.getText("info.pipe.pipeData",
                 String.valueOf(inputs.size()),
                 String.valueOf(outputs.size()),
-                String.valueOf(pipeBlocks.size()));
+                String.valueOf(pipeBlocks.size()),
+                String.valueOf(chunkLoaders.size()));
     }
 
     @Override
@@ -150,10 +144,10 @@ public class Pipe {
 
         Pipe pipe = (Pipe) o;
 
-        if (!inputs.equals(pipe.inputs)) return false;
-        if (!outputs.equals(pipe.outputs)) return false;
-        if (!chunkLoaders.equals(pipe.chunkLoaders)) return false;
-        return pipeBlocks.equals(pipe.pipeBlocks);
+        return inputs.equals(pipe.inputs)
+                && outputs.equals(pipe.outputs)
+                && chunkLoaders.equals(pipe.chunkLoaders)
+                && pipeBlocks.equals(pipe.pipeBlocks);
 
     }
 

@@ -60,13 +60,21 @@ public class PipesConfig {
     }
 
     /**
-     * returns the time of the delay of pipe recalculation when e.g. a hopper transfers items into a dispenser.
-     * with this it is only checked every 10 seconds if there is a pipe
+     * returns the time that the cache stores all the locations of pipes
      *
-     * @return the delay of pipe recalculation in ms
+     * @return the delay of pipe recalculation in s
      */
     public static long getPipeCacheDuration() {
-        return plugin.getConfig().getLong("pipeCacheDuration", 10000L);
+        return plugin.getConfig().getLong("pipeCacheDuration");
+    }
+
+    /**
+     * returns the amount of locations to store in the cache
+     *
+     * @return the amount of locations to store
+     */
+    public static long getPipeCacheSize() {
+        return plugin.getConfig().getLong("pipeCacheSize");
     }
 
     /**

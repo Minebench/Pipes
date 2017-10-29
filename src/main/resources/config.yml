@@ -1,4 +1,5 @@
-pipeCacheDuration: 5000 #ms
+pipeCacheDuration: 600 #s
+pipeCacheSize: 1000 #number of cached inputs
 transferCooldown: 20 #ticks
 dispenserRecipe:
   IRON_BLOCK: 1

@@ -1,16 +1,12 @@
 package io.github.apfelcreme.Pipes.Listener;
 
-import de.themoep.inventorygui.InventoryGui;
-import io.github.apfelcreme.Pipes.Event.PipeMoveItemEvent;
 import io.github.apfelcreme.Pipes.Manager.PipeManager;
-import io.github.apfelcreme.Pipes.Pipe.AbstractPipePart;
 import io.github.apfelcreme.Pipes.Pipe.Pipe;
 import io.github.apfelcreme.Pipes.Pipe.PipeInput;
 import io.github.apfelcreme.Pipes.Pipe.SimpleLocation;
 import io.github.apfelcreme.Pipes.Pipes;
 import io.github.apfelcreme.Pipes.Manager.ItemMoveScheduler;
 import io.github.apfelcreme.Pipes.PipesItem;
-import io.github.apfelcreme.Pipes.PipesUtil;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockState;
 import org.bukkit.event.EventHandler;
@@ -18,9 +14,9 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.inventory.InventoryMoveItemEvent;
-import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.inventory.Inventory;
-import org.bukkit.scheduler.BukkitRunnable;
+
+import java.util.Set;
 
 /**
  * Copyright (C) 2016 Lord36 aka Apfelcreme
@@ -49,7 +45,7 @@ public class InventoryChangeListener implements Listener {
     }
 
     @EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = true)
-    private void onInventoryItemMove(final InventoryMoveItemEvent event) {
+    public void onInventoryItemMove(final InventoryMoveItemEvent event) {
         if (!handleInventoryAction(event.getDestination(), true)) {
             event.setCancelled(true);
         }
@@ -61,7 +57,7 @@ public class InventoryChangeListener implements Listener {
      * @param event the event
      */
     @EventHandler(priority = EventPriority.LOWEST)
-    private void onInventoryClose(InventoryCloseEvent event) {
+    public void onInventoryClose(InventoryCloseEvent event) {
         handleInventoryAction(event.getInventory(), false);
     }
 
@@ -81,19 +77,14 @@ public class InventoryChangeListener implements Listener {
         }
         final SimpleLocation dispenserLocation = new SimpleLocation(dispenserBlock.getLocation());
 
-        Pipe pipe = PipeManager.getInstance().getPipe(dispenserLocation);
-        if (pipe == null) {
+        Set<Pipe> pipes = PipeManager.getInstance().getPipesSafe(dispenserBlock);
+        if (pipes.isEmpty()) {
             return false;
         }
-        PipeInput pipeInput = pipe.getInput(dispenserLocation);
+        PipeInput pipeInput = pipes.iterator().next().getInput(dispenserLocation);
         if (pipeInput != null) {
             if (scheduled) {
-                new BukkitRunnable() {
-                    @Override
-                    public void run() {
-                        ItemMoveScheduler.getInstance().add(dispenserLocation);
-                    }
-                }.runTaskLater(plugin, 2);
+                plugin.getServer().getScheduler().runTaskLater(plugin, () -> ItemMoveScheduler.getInstance().add(dispenserLocation), 2);
             } else {
                 ItemMoveScheduler.getInstance().add(dispenserLocation);
             }

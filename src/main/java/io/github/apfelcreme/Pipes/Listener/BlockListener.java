@@ -8,12 +8,19 @@ import io.github.apfelcreme.Pipes.Exception.ChunkNotLoadedException;
 import io.github.apfelcreme.Pipes.Exception.PipeTooLongException;
 import io.github.apfelcreme.Pipes.Exception.TooManyOutputsException;
 import io.github.apfelcreme.Pipes.Manager.PipeManager;
+import io.github.apfelcreme.Pipes.Pipe.AbstractPipePart;
+import io.github.apfelcreme.Pipes.Pipe.ChunkLoader;
 import io.github.apfelcreme.Pipes.Pipe.Pipe;
+import io.github.apfelcreme.Pipes.Pipe.PipeInput;
+import io.github.apfelcreme.Pipes.Pipe.PipeOutput;
 import io.github.apfelcreme.Pipes.Pipes;
 import io.github.apfelcreme.Pipes.PipesConfig;
 import io.github.apfelcreme.Pipes.PipesItem;
 import io.github.apfelcreme.Pipes.PipesUtil;
+import org.bukkit.DyeColor;
 import org.bukkit.Material;
+import org.bukkit.block.Block;
+import org.bukkit.block.BlockFace;
 import org.bukkit.block.BlockState;
 import org.bukkit.event.Event;
 import org.bukkit.event.EventHandler;
@@ -21,13 +28,15 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockDispenseEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
-import org.bukkit.event.block.BlockRedstoneEvent;
 import org.bukkit.event.inventory.CraftItemEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryMoveItemEvent;
 import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * Copyright (C) 2016 Lord36 aka Apfelcreme
@@ -60,14 +69,14 @@ public class BlockListener implements Listener {
     }
 
     @EventHandler
-    private void onItemDispense(BlockDispenseEvent event) {
+    public void onItemDispense(BlockDispenseEvent event) {
         if (!(event instanceof PipeDispenseEvent) && PipesUtil.getPipesItem(event.getBlock()) != null) {
             event.setCancelled(true);
         }
     }
 
     @EventHandler
-    private void onItemMove(InventoryMoveItemEvent event) {
+    public void onItemMove(InventoryMoveItemEvent event) {
         if (event.getDestination().getType() != InventoryType.HOPPER // hoppers are allowed to remove items from the output
                 && event.getSource().getType() != InventoryType.HOPPER
                 && event.getSource().getHolder() instanceof BlockState
@@ -77,48 +86,122 @@ public class BlockListener implements Listener {
     }
 
     @EventHandler
-    private void onBlockBreak(BlockBreakEvent event) {
-        PipesItem pipesItem = PipesUtil.getPipesItem(event.getBlock());
-        if (pipesItem != null) {
+    public void onBlockBreak(BlockBreakEvent event) {
+        AbstractPipePart pipePart = PipeManager.getInstance().getPipePart(event.getBlock());
+        if (pipePart != null) {
             event.setCancelled(true);
-            PipeBlockBreakEvent blockBreakEvent = new PipeBlockBreakEvent(event.getBlock(), event.getPlayer(), pipesItem);
+            PipeBlockBreakEvent blockBreakEvent = new PipeBlockBreakEvent(event.getBlock(), event.getPlayer(), pipePart);
             plugin.getServer().getPluginManager().callEvent(blockBreakEvent);
             if (!blockBreakEvent.isCancelled()) {
                 if(blockBreakLogging != null) {
                     blockBreakLogging.onBlockBreak(new BlockBreakEvent(blockBreakEvent.getBlock(), event.getPlayer()));
                 }
                 event.getBlock().setType(Material.AIR);
-                event.getBlock().getWorld().dropItemNaturally(event.getBlock().getLocation(), pipesItem.toItemStack());
+                event.getBlock().getWorld().dropItemNaturally(event.getBlock().getLocation(), pipePart.getType().toItemStack());
+
+                for (Pipe pipe : PipeManager.getInstance().getPipesSafe(event.getBlock(), true)) {
+                    PipeManager.getInstance().removePart(pipe, pipePart);
+                }
+            }
+        } else if (event.getBlock().getType() == Material.STAINED_GLASS) {
+            for (Pipe pipe : PipeManager.getInstance().getPipesSafe(event.getBlock(), true)) {
+                PipeManager.getInstance().removePipe(pipe);
             }
         }
     }
 
     @EventHandler
-    private void onBlockPlace(BlockPlaceEvent event) {
-        if (PipesUtil.getPipesItem(event.getBlock()) != null) {
-            if (event.getBlock().getType() == PipesItem.CHUNK_LOADER.getMaterial()
-                    && !event.getPlayer().hasPermission("Pipes.placeChunkLoader")) {
-                Pipes.sendMessage(event.getPlayer(), PipesConfig.getText("error.noPermission"));
-                event.setCancelled(true);
-                return;
-            }
+    public void onBlockPlace(BlockPlaceEvent event) {
+        try {
+            AbstractPipePart pipePart = PipeManager.getInstance().getPipePart(event.getBlock());
+            if (pipePart != null) {
+                if (event.getBlock().getType() == PipesItem.CHUNK_LOADER.getMaterial()
+                        && !event.getPlayer().hasPermission("Pipes.placeChunkLoader")) {
+                    Pipes.sendMessage(event.getPlayer(), PipesConfig.getText("error.noPermission"));
+                    event.setCancelled(true);
+                    return;
+                }
 
-            try {
-                Pipe pipe = PipeManager.isPipe(event.getBlock());
-                if (pipe != null) {
+
+                Set<Pipe> pipes;
+                if (pipePart instanceof PipeInput) {
+                    Block block = event.getBlock().getRelative(((PipeInput) pipePart).getFacing());
+                    if (block.getType() == Material.STAINED_GLASS) {
+                        pipes = PipeManager.getInstance().getPipesSafe(((PipeInput) pipePart).getTargetLocation(), true);
+                        if (!pipes.isEmpty()) {
+                            PipeManager.getInstance().addPart(pipes.iterator().next(), pipePart);
+                        }
+                    }
+                } else if (pipePart instanceof PipeOutput) {
+                    for (BlockFace face : PipesUtil.BLOCK_FACES) {
+                        if (face != ((PipeOutput) pipePart).getFacing()) {
+                            Block block = event.getBlock().getRelative(face);
+                            if (block.getType() == Material.STAINED_GLASS) {
+                                for (Pipe pipe : PipeManager.getInstance().getPipes(block, true)) {
+                                    PipeManager.getInstance().addPart(pipe, pipePart);
+                                }
+                            }
+                        }
+                    }
+                } else if (pipePart instanceof ChunkLoader) {
+                    for (BlockFace face : PipesUtil.BLOCK_FACES) {
+                        for (Pipe pipe : PipeManager.getInstance().getPipesSafe(pipePart.getLocation().getRelative(face), true)) {
+                            PipeManager.getInstance().addPart(pipe, pipePart);
+                        }
+                    }
+                }
+
+                for (Pipe pipe : PipeManager.getInstance().getPipes(event.getBlock())) {
                     Pipes.sendMessage(event.getPlayer(), PipesConfig.getText("info.pipe.pipeBuilt",
                             pipe.getString()));
                     pipe.highlight();
                 }
-            } catch (ChunkNotLoadedException e) {
-                Pipes.sendMessage(event.getPlayer(), PipesConfig.getText("error.chunkNotLoaded"));
-            } catch (TooManyOutputsException e) {
-                Pipes.sendMessage(event.getPlayer(), PipesConfig.getText("error.tooManyOutputs",
-                        String.valueOf(PipesConfig.getMaxPipeOutputs())));
-            } catch (PipeTooLongException e) {
-                Pipes.sendMessage(event.getPlayer(), PipesConfig.getText("error.pipeTooLong",
-                        String.valueOf(PipesConfig.getMaxPipeLength())));
+            } else if (event.getBlock().getType() == Material.STAINED_GLASS) {
+                byte placedColor = event.getBlock().getData();
+
+                Set<Pipe> found = new HashSet<>();
+                for (BlockFace face : PipesUtil.BLOCK_FACES) {
+                    Block block = event.getBlock().getRelative(face);
+                    boolean isPotentialPipe = block.getType() == Material.STAINED_GLASS && block.getData() == placedColor;
+
+                    if (!isPotentialPipe) {
+                        AbstractPipePart potentialPart = PipeManager.getInstance().getPipePart(event.getBlock());
+                        if (potentialPart != null) {
+                            if (potentialPart instanceof PipeInput) {
+                                isPotentialPipe = (((PipeInput) potentialPart).getFacing().getOppositeFace() == face);
+                            } else if (potentialPart instanceof PipeOutput) {
+                                isPotentialPipe = (((PipeOutput) potentialPart).getFacing().getOppositeFace() != face);
+                            } else {
+                                isPotentialPipe = true;
+                            }
+                        }
+                    }
+
+                    if (isPotentialPipe) {
+                        Set<Pipe> pipes = PipeManager.getInstance().getPipesSafe(block, true);
+                        if (!pipes.isEmpty()) {
+                            Pipe pipe = pipes.iterator().next();
+                            if (pipe.getColor().equals(DyeColor.getByWoolData(placedColor))) {
+                                found.add(pipe);
+                            }
+                        }
+                    }
+                }
+
+                if (found.size() == 1) {
+                    PipeManager.getInstance().addBlock(found.iterator().next(), event.getBlock());
+                } else if (found.size() > 1) {
+                    PipeManager.getInstance().mergePipes(found);
+                }
             }
+        } catch (ChunkNotLoadedException e) {
+            Pipes.sendMessage(event.getPlayer(), PipesConfig.getText("error.chunkNotLoaded"));
+        } catch (TooManyOutputsException e) {
+            Pipes.sendMessage(event.getPlayer(), PipesConfig.getText("error.tooManyOutputs",
+                    String.valueOf(PipesConfig.getMaxPipeOutputs())));
+        } catch (PipeTooLongException e) {
+            Pipes.sendMessage(event.getPlayer(), PipesConfig.getText("error.pipeTooLong",
+                    String.valueOf(PipesConfig.getMaxPipeLength())));
         }
     }
 

@@ -16,6 +16,8 @@ import org.bukkit.event.block.Action;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.EquipmentSlot;
 
+import java.util.Set;
+
 /**
  * Copyright (C) 2016 Lord36 aka Apfelcreme
  * <p>
@@ -50,11 +52,12 @@ public class PlayerRightclickListener implements Listener {
                 event.setCancelled(true);
                 try {
                     plugin.unregisterRightClick(event.getPlayer());
-                    Pipe pipe = PipeManager.isPipe(event.getClickedBlock());
-                    if (pipe != null) {
+                    Set<Pipe> pipes = PipeManager.getInstance().getPipes(event.getClickedBlock());
+                    for (Pipe pipe : pipes) {
                         Pipes.sendMessage(event.getPlayer(), pipe.getString());
                         pipe.highlight();
-                    } else {
+                    }
+                    if (pipes.isEmpty()) {
                         Pipes.sendMessage(event.getPlayer(), PipesConfig.getText("error.noPipe"));
                     }
                 } catch (ChunkNotLoadedException e) {
@@ -69,7 +72,7 @@ public class PlayerRightclickListener implements Listener {
             } else if (!event.isCancelled() && (!event.getPlayer().isSneaking() || (
                     (event.getItem() == null || !event.getItem().getType().isBlock() && !event.getItem().getType().isEdible())
                             && !event.getPlayer().hasPermission("Pipes.gui.bypass")))) {
-                AbstractPipePart pipePart = PipesUtil.getPipesPart(event.getClickedBlock());
+                AbstractPipePart pipePart = PipeManager.getInstance().getPipePart(event.getClickedBlock());
                 if (pipePart != null) {
                     event.setCancelled(true);
                     pipePart.showGui(event.getPlayer());

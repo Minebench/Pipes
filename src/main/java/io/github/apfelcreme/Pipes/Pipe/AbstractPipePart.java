@@ -250,6 +250,11 @@ public abstract class AbstractPipePart {
         return getType().toString() + getOptionsString();
     }
 
+    @Override
+    public int hashCode() {
+        return getLocation().hashCode();
+    }
+
     public interface IOption {
 
         /**

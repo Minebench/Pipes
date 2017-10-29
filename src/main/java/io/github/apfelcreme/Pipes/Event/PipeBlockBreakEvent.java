@@ -17,29 +17,27 @@ package io.github.apfelcreme.Pipes.Event;
  * this program; if not, see <http://www.gnu.org/licenses/>.
  */
 
-import io.github.apfelcreme.Pipes.PipesItem;
+import io.github.apfelcreme.Pipes.Pipe.AbstractPipePart;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Cancellable;
-import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;
-import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.player.PlayerEvent;
 
 public class PipeBlockBreakEvent extends PlayerEvent implements Cancellable {
     private static final HandlerList handlers = new HandlerList();
     private boolean cancelled;
     private final Block block;
-    private final PipesItem pipesItem;
+    private final AbstractPipePart pipePart;
 
-    public PipeBlockBreakEvent(Block block, Player player, PipesItem pipesItem) {
+    public PipeBlockBreakEvent(Block block, Player player, AbstractPipePart pipePart) {
         super(player);
         this.block = block;
-        this.pipesItem = pipesItem;
+        this.pipePart = pipePart;
     }
 
-    public PipesItem getPipesItem() {
-        return pipesItem;
+    public AbstractPipePart getPipePart() {
+        return pipePart;
     }
 
     @Override

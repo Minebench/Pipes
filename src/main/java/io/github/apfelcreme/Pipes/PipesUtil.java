@@ -1,5 +1,6 @@
 package io.github.apfelcreme.Pipes;
 
+import io.github.apfelcreme.Pipes.Manager.PipeManager;
 import io.github.apfelcreme.Pipes.Pipe.AbstractPipePart;
 import io.github.apfelcreme.Pipes.Pipe.ChunkLoader;
 import io.github.apfelcreme.Pipes.Pipe.PipeInput;
@@ -46,7 +47,15 @@ import java.util.regex.Pattern;
  */
 public class PipesUtil {
 
-    public final static Random RANDOM = new Random();
+    public static final  Random RANDOM = new Random();
+    public static final BlockFace[] BLOCK_FACES = new BlockFace[]{
+            BlockFace.NORTH,
+            BlockFace.EAST,
+            BlockFace.SOUTH,
+            BlockFace.WEST,
+            BlockFace.UP,
+            BlockFace.DOWN
+    };
 
     /**
      * returns whether a string only contains numbers
@@ -199,12 +208,27 @@ public class PipesUtil {
         }
     }
 
+    /**
+     * This is a helper method to convert a block to a PipesPart.
+     * Use {@link PipeManager#getPipePart} for cached ones.
+     *
+     * @param block The block to convert
+     * @return the pipe part or <tt>null</tt> if the block isn't one
+     * @deprecated Either use {@link #convertToPipePart(Block, PipesItem)} or {@link PipeManager#getPipePart}
+     */
+    @Deprecated
     public static AbstractPipePart getPipesPart(Block block) {
-        PipesItem type = getPipesItem(block);
-        if (type == null) {
-            return null;
-        }
+        return PipeManager.getInstance().getPipePart(block);
+    }
 
+    /**
+     * This is a helper method to convert a block to a PipesPart.
+     *
+     * @param block The block to convert
+     * @param type The type of the part
+     * @return the pipe part or <tt>null</tt> if the block isn't one
+     */
+    public static AbstractPipePart convertToPipePart(Block block, PipesItem type) {
         switch (type) {
             case PIPE_INPUT:
                 return new PipeInput(block);
@@ -213,10 +237,8 @@ public class PipesUtil {
             case CHUNK_LOADER:
                 return new ChunkLoader(block);
         }
-
         return null;
     }
-
 
     /**
      * Remove a specific material from an inventory

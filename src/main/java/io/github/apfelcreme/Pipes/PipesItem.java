@@ -33,21 +33,18 @@ import java.util.Arrays;
 import java.util.List;
 
 public enum PipesItem {
-    PIPE_INPUT("Pipe Input", Material.DISPENSER, "dispenserLore"),
-    PIPE_OUTPUT("Pipe Output", Material.DROPPER, "dropperLore"),
-    CHUNK_LOADER("Chunk Loader", Material.FURNACE, "chunkLoaderLore");
+    PIPE_INPUT(Material.DISPENSER),
+    PIPE_OUTPUT(Material.DROPPER),
+    CHUNK_LOADER(Material.FURNACE),
+    SETTINGS_BOOK(Material.WRITTEN_BOOK);
 
     private static final String IDENTIFIER = "Pipes";
 
-    private final String name;
     private final Material material;
-    private final String loreKey;
     private ItemStack item;
 
-    PipesItem(String name, Material material, String loreKey) {
-        this.name = name;
+    PipesItem(Material material) {
         this.material = material;
-        this.loreKey = loreKey;
     }
 
     public static String getIdentifier() {
@@ -55,15 +52,11 @@ public enum PipesItem {
     }
 
     public String getName() {
-        return name;
+        return PipesConfig.getText("items." + toConfigKey() + ".name");
     }
 
     public Material getMaterial() {
         return material;
-    }
-
-    public String getLoreKey() {
-        return loreKey;
     }
 
     public ItemStack toItemStack() {
@@ -72,12 +65,15 @@ public enum PipesItem {
         }
         ItemStack item = new ItemStack(this.material);
         ItemMeta meta = item.getItemMeta();
-        List<String> lore = Arrays.asList(PipesConfig.getText("info." + this.loreKey),
+        List<String> lore = Arrays.asList(PipesConfig.getText("items." + toConfigKey() + ".lore"),
                 ChatColor.BLUE + "" + ChatColor.ITALIC + PipesUtil.hideString(toString(), IDENTIFIER));
         meta.setLore(lore);
         meta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
         meta.addEnchant(Enchantment.ARROW_DAMAGE, 1, true);
-        meta.setDisplayName(ChatColor.RESET + "" + ChatColor.WHITE + PipesUtil.hideString(toString(), name));
+        meta.setDisplayName(ChatColor.RESET + "" + ChatColor.WHITE + PipesUtil.hideString(
+                toString(),
+                PipesConfig.getText("items." + toConfigKey() + ".name")
+        ));
         item.setItemMeta(meta);
         this.item = item;
         return item;
@@ -101,7 +97,7 @@ public enum PipesItem {
         List<String> lore = item.getItemMeta().getLore();
         String hidden = PipesUtil.getHiddenString(lore.get(lore.size() - 1));
 
-        return hidden != null && toString().equals(hidden) || IDENTIFIER.equals(hidden);
+        return hidden != null && (hidden.startsWith(toString()) || hidden.startsWith(IDENTIFIER));
     }
 
     /**

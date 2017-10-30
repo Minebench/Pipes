@@ -8,6 +8,7 @@ import io.github.apfelcreme.Pipes.Pipe.AbstractPipePart;
 import io.github.apfelcreme.Pipes.Pipe.Pipe;
 import io.github.apfelcreme.Pipes.Pipes;
 import io.github.apfelcreme.Pipes.PipesConfig;
+import io.github.apfelcreme.Pipes.PipesItem;
 import io.github.apfelcreme.Pipes.PipesUtil;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -36,17 +37,20 @@ import java.util.Set;
  *
  * @author Lord36 aka Apfelcreme
  */
-public class PlayerRightclickListener implements Listener {
+public class PlayerListener implements Listener {
 
     private final Pipes plugin;
 
-    public PlayerRightclickListener(Pipes plugin) {
+    public PlayerListener(Pipes plugin) {
         this.plugin = plugin;
     }
 
     @EventHandler(priority = EventPriority.HIGHEST)
-    public void onPlayerRightclick(PlayerInteractEvent event) {
-        if (event.getAction() == Action.RIGHT_CLICK_BLOCK && event.getHand() == EquipmentSlot.HAND) {
+    public void onPlayerInteract(PlayerInteractEvent event) {
+        if (event.getHand() != EquipmentSlot.HAND) {
+            return;
+        }
+        if (event.getAction() == Action.RIGHT_CLICK_BLOCK) {
             String action = plugin.getRegisterRightClick(event.getPlayer());
             if ("info".equals(action)) {
                 event.setCancelled(true);
@@ -79,6 +83,20 @@ public class PlayerRightclickListener implements Listener {
                 }
             }
 
+        } else if (event.getAction() == Action.LEFT_CLICK_BLOCK && event.getPlayer().isSneaking() && event.getPlayer().hasPermission("Pipes.applybook")) {
+            if (!PipesItem.SETTINGS_BOOK.check(event.getItem())) {
+                return;
+            }
+            AbstractPipePart part = PipeManager.getInstance().getPipePart(event.getClickedBlock());
+            if (part == null) {
+                return;
+            }
+            try {
+                part.applyBook(event.getItem());
+                Pipes.sendMessage(event.getPlayer(), PipesConfig.getText("info.settings.bookApplied"));
+            } catch (IllegalArgumentException e){
+                Pipes.sendMessage(event.getPlayer(), e.getMessage());
+            }
         }
     }
 }

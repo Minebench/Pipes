@@ -8,9 +8,11 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
 import java.io.File;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Level;
+import java.util.stream.Collectors;
 
 /**
  * Copyright (C) 2016 Lord36 aka Apfelcreme
@@ -141,6 +143,17 @@ public class PipesConfig {
         }
     }
 
+    public static ItemStack getGuiItemStack(String key) {
+        while (!itemStacks.containsKey("gui." + key) && !plugin.getConfig().contains("gui." + key)) {
+            int index = key.indexOf('.');
+            if (index == -1 || index + 1 >= key.length()) {
+                break;
+            }
+            key = key.substring(index + 1);
+        }
+        return getItemStack(key);
+    }
+
     public static ItemStack getItemStack(String key) {
         if (itemStacks.containsKey(key)) {
             return new ItemStack(itemStacks.get(key));
@@ -178,12 +191,5 @@ public class PipesConfig {
         item.setItemMeta(meta);
         itemStacks.put(key, item);
         return item;
-    }
-
-    public static ItemStack getGuiFiller() {
-        if (guiFiller == null) {
-            guiFiller = getItemStack("gui.filler");
-        }
-        return new ItemStack(guiFiller);
     }
 }

@@ -31,6 +31,13 @@ import java.util.List;
  */
 public class PipeOutput extends AbstractPipePart {
 
+    public final static String[] GUI_SETUP = {
+            "ss iii zz",
+            "ss iii zz",
+            "ss iii zz",
+            "ss  c  zz"
+    };
+
     private final BlockFace facing;
 
     public PipeOutput(Block block) {
@@ -176,6 +183,11 @@ public class PipeOutput extends AbstractPipePart {
         }
 
         return true;
+    }
+
+    @Override
+    public String[] getGuiSetup() {
+        return GUI_SETUP;
     }
 
     @Override

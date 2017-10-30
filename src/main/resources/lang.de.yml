@@ -5,24 +5,24 @@ texts:
     tooManyOutputs: '&c Die Pipe hat mehr Outputs als die maximal erlaubte Anzahl von &f{0}&c!'
     pipeTooLong: '&c Die Pipe ist länger als die maximal erlaubte Länge von &f{0}&c!'
     commandCanOnlyBeRunByAPlayer: '&c Command can only be run by a player!'
+    invalidSettingsBook: '&c Fehler beim Anwenden des Einstellungsbuches! {0}'
     noDetection: '&c Keine Detektion gefunden! Führe zunächst /pipe detect <Zeit> aus!'
     noPermission: '&c Du hast keine ausreichende Berechtigung'
     noPipe: '&c Es konnte keine Pipe gefunden werden!'
+    notABook: '&c Du musst mit einem Buch klicken!'
     notEnoughInventorySpace: '&c Du hast keinen Platz im Inventar!'
     notThatManyResults: '&c Es wurden nicht so viele Objekte gefunden!'
     unknownPipesItem: '&f {0}&c ist kein Pipes-Item!'
+    wrongBookType: '&c Dieses Einstellungsbuch ist für {0}s!'
     wrongUsage:
       get: '&c Falsche Eingabe! Probiere /pipe get <typ>'
       tp: '&c Falsche Eingabe! Probiere /pipe tp <#>'
   info:
-    chunkLoaderLore: 'ChunkLoader für eine Item-Pipe'
     detect:
       started: '&a Detektion gestartet! (&f{0}&a Sekunden)'
       finished: '&a Detektion abgeschlossen! Folgende Objekte wurden gefunden: '
       element: '&a {0}. &f{1}&a - [&f{2}&a, &f{3}&a, &f{4}&a]&f -> &a{5} &fItem-Transfers '
       noElements: '&a Es wurden keine Objekte gefunden!'
-    dispenserLore: 'Item-Input für eine Item-Pipe'
-    dropperLore: 'Item-Output für eine Item-Pipe'
     get: '&f{0}&a zu deinem Inventar hinzugefügt!'
     info:
       cooldownStarted: '&a Rechtsklicke in 10 Sekunden eine Pipe'
@@ -36,11 +36,50 @@ texts:
       pipeData: '&f In: &a{0}&f, Out: &a{1}&f, Länge: &a{2}'
     reload:
       reloaded: '&a Die Config wurde neu geladen'
+    settings:
+      bookCreated: '&a Einstellungsbuch erstellt'
+      bookUpdated: '&a Einstellungen kopiert'
+      bookApplied: '&a Einstellungen angewandt'
     tp:
       teleported: '&a Du wurdest teleportiert!'
+  items:
+    chunk-loader:
+      name: 'Chunk Loader'
+      lore: 'ChunkLoader für eine Item-Pipe'
+    pipe-input:
+      name: 'Pipe Input'
+      lore: 'Item-Input für eine Item-Pipe'
+    pipe-output:
+      name: 'Pipe Output'
+      lore: 'Item-Output für eine Item-Pipe'
+    settings-book:
+      name: '{0} Einstellungs Buch'
+      lore: |
+        Einstellungen für einen {0}:
+        {1}
   gui:
     pipe-input:
+      copy: |
+        &5INput Einstellungen Kopieren
+        &oKlicke mit einem unbeschriebenen Buch:
+        &7Pipes-Buch mit Einstellungen erstellen
+        &oRechtsklick mit einem Pipes-Buch:
+        &7Einstellungen des Buches aktualisieren
+        &oLinksklick mit einem Pipes-Buch:
+        &7Einstellungen des Buches einfügen
+    pipe-output:
+      copy: |
+        &5Output Einstellungen Kopieren
+        &oKlicke mit einem unbeschriebenen Buch:
+        &7Pipes-Buch mit Einstellungen erstellen
+        &oRechtsklick mit einem Pipes-Buch:
+        &7Einstellungen des Buches aktualisieren
+        &oLinksklick mit einem Pipes-Buch:
+        &7Einstellungen des Buches einfügen
+  options:
+    pipe-input:
       spread:
+        description: 'Verteilungsmodus'
         true: |
           &aPipe Input ist im &2Verteilungs&a Modus!
           &7Items werden gleichmäßig über alle
@@ -51,6 +90,7 @@ texts:
           &7Output transferiert. (Oder overflowen)
     pipe-output:
       whitelist:
+        description: 'Whitelist'
         true: |
           &aPipe Output ist im &2Whitelist&a Modus!
           &7Der Output akzeptiert nur Items die
@@ -60,6 +100,7 @@ texts:
           &7Der Output akzeptiert nur Items die nicht
           &7dem eingestellten Filter entsprechen!
       overflow:
+        description: 'Overflow'
         true: |
           &aOverflowing ist erlaubt!
           &7Items werden nun in andere Outputs
@@ -71,6 +112,7 @@ texts:
           &7andere Outputs transportiert
           &7wenn dies hier nicht möglich ist.
       smart-insert:
+        description: 'Intelligentes Einfügen'
         true: |
           &aIntelligentes Einfügen ist eingeschaltet!
           &7Der Output versucht Items direkt in
@@ -82,6 +124,7 @@ texts:
           &7von der Container-Seite in die er
           &7zeigt einsortieren. (Wie Trichter)
       material-filter:
+        description: 'Itemtypfilter'
         true: |
           &aDer Itemtyp wird gefiltert!
           &7Nur Items die den selben Typ wie
@@ -92,6 +135,7 @@ texts:
           &7Der Typ der Items spielt keine
           &7Rolle für den Filter.
       damage-filter:
+        description: 'Schadensfilter'
         true: |
           &aDer Schaden wird gefiltert!
           &7Nur Items die den selben Schaden
@@ -102,6 +146,7 @@ texts:
           &7Der Schaden der Items spielt
           &7keine Rolle für den Filter.
       display-filter:
+        description: 'Displayfilter'
         true: |
           &aName und Beschreibung wird gefiltert!
           &7Nur Items die den selben Namen
@@ -114,6 +159,7 @@ texts:
           &7der Items spielt keine Rolle
           &7für den Filter.
       enchantment-filter:
+        description: 'Verzauberungsfilter'
         true: |
           &aVerzauberungen werden gefiltert!
           &7Nur Items die die selben Ver-
@@ -125,6 +171,7 @@ texts:
           &7Die Verzauberungen der Items spielen
           &7keine Rolle für den Filter.
       data-filter:
+        description: 'Exakter Filter'
         true: |
           &aExakter Filter ist eingeschaltet!
           &7Die Daten (außer Verzauberungen)
@@ -137,6 +184,7 @@ texts:
           &7und die anderen Filteroptionen
           &7werden angewandt.
       target-amount:
+        description: 'Füllmengen Begrenzung'
         true: |
           &aFüllmengen-Begrenzung ist eingeschaltet!
           &7Der Zielcontainer wird maximal mit
@@ -148,6 +196,7 @@ texts:
           &7Der Zielcontainer wird ohne
           &7Begrenzung aufgefüllt.
       drop:
+        description: 'Dropp'
         true: |
           &aPipe Output droppt Items!
           &7Der Output droppt Items wie ein normaler

@@ -4,8 +4,10 @@ import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import io.github.apfelcreme.Pipes.Listener.BlockListener;
 import io.github.apfelcreme.Pipes.Listener.InventoryChangeListener;
-import io.github.apfelcreme.Pipes.Listener.PlayerRightclickListener;
+import io.github.apfelcreme.Pipes.Listener.PlayerListener;
 import io.github.apfelcreme.Pipes.Manager.ItemMoveScheduler;
+import net.md_5.bungee.api.ChatMessageType;
+import net.md_5.bungee.api.chat.TextComponent;
 import org.bukkit.Material;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -53,7 +55,7 @@ public class Pipes extends JavaPlugin {
         PipesConfig.load();
         ItemMoveScheduler.load();
         getServer().getPluginManager().registerEvents(new InventoryChangeListener(this), this);
-        getServer().getPluginManager().registerEvents(new PlayerRightclickListener(this), this);
+        getServer().getPluginManager().registerEvents(new PlayerListener(this), this);
         getServer().getPluginManager().registerEvents(new BlockListener(this), this);
         getServer().getPluginCommand("pipe").setExecutor(new PipeCommand());
 
@@ -111,6 +113,23 @@ public class Pipes extends JavaPlugin {
      */
     public static void sendMessage(CommandSender player, String message) {
         player.sendMessage(PipesConfig.getText("prefix") + message);
+    }
+    
+    /**
+     * sends a message to a player
+     *
+     * @param player  the player the message shall be sent to
+     * @param message the message
+     */
+    public static void sendActionBar(CommandSender player, String message) {
+        if (player instanceof Player) {
+            ((Player) player).spigot().sendMessage(
+                    ChatMessageType.ACTION_BAR,
+                    TextComponent.fromLegacyText(PipesConfig.getText("prefix") + message)
+            );
+        } else {
+            sendMessage(player, message);
+        }
     }
 
     /**

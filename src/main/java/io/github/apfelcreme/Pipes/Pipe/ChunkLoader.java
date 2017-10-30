@@ -25,6 +25,12 @@ import org.bukkit.inventory.InventoryHolder;
  */
 public class ChunkLoader extends AbstractPipePart {
 
+    public final static String[] GUI_SETUP = {
+            "sss i zzz",
+            "sss   zzz",
+            "sss c zzz"
+    };
+
     public ChunkLoader(Block block) {
         super(PipesItem.CHUNK_LOADER, block);
     }
@@ -35,6 +41,11 @@ public class ChunkLoader extends AbstractPipePart {
         if (holder != null) {
             player.openInventory(holder.getInventory());
         }
+    }
+
+    @Override
+    public String[] getGuiSetup() {
+        return new String[0];
     }
 
     @Override

@@ -32,6 +32,7 @@ permissions:
     description: package of all user permissions
     children:
       Pipes.info: true
+      Pipes.applybook: true
   Pipes.detect:
     description: detect all ongoing transfers for a given period of time
   Pipes.get:
@@ -46,3 +47,5 @@ permissions:
     description: reload the configs
   Pipes.tp:
     description: teleport to the location of the input of a pipe from a detection result
+  Pipes.applybook:
+    description: allows to apply settings via sneaking and left clicking a pipe part with a book

@@ -151,7 +151,7 @@ public class PipesConfig {
             }
             key = key.substring(index + 1);
         }
-        return getItemStack(key);
+        return getItemStack("gui." + key);
     }
 
     public static ItemStack getItemStack(String key) {

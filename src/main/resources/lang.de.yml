@@ -57,6 +57,8 @@ texts:
       lore: |
         Einstellungen für einen {0}:
         {1}
+        Schleiche und Linksklick mit diesem Buch
+        auf einen {0} um sie anzuwenden!
   gui:
     pipe-input:
       copy: |
@@ -184,7 +186,7 @@ texts:
           &7und die anderen Filteroptionen
           &7werden angewandt.
       target-amount:
-        description: 'Füllmengen Begrenzung'
+        description: 'Füllmengen begrenzt'
         true: |
           &aFüllmengen-Begrenzung ist eingeschaltet!
           &7Der Zielcontainer wird maximal mit

@@ -191,8 +191,9 @@ public abstract class AbstractPipePart {
                                     || click.getEvent().getCursor().getType() == Material.BOOK_AND_QUILL) {
                                 ItemStack book = saveOptions(PipesItem.SETTINGS_BOOK.toItemStack());
                                 book.setAmount(click.getEvent().getCursor().getAmount());
-                                click.getEvent().setCursor(book);
-                                ((Player) click.getEvent().getWhoClicked()).updateInventory();
+                                for (ItemStack rest : click.getEvent().getWhoClicked().getInventory().addItem(book).values()) {
+                                    click.getEvent().getWhoClicked().getWorld().dropItemNaturally(click.getEvent().getWhoClicked().getLocation(), rest);
+                                }
                                 Pipes.sendActionBar(click.getEvent().getWhoClicked(), PipesConfig.getText("info.settings.bookCreated"));
                                 
                             } else if (PipesItem.SETTINGS_BOOK.check(click.getEvent().getCursor())) {
@@ -318,6 +319,7 @@ public abstract class AbstractPipePart {
         List<String> lore = meta.getLore();
         String hidden = PipesUtil.getHiddenString(lore.get(lore.size() - 1));
         applyOptions(hidden);
+        saveOptions();
     }
     
     /**
@@ -378,10 +380,12 @@ public abstract class AbstractPipePart {
         
         meta.setAuthor(PipesItem.getIdentifier());
         
+        List<String> pages = new ArrayList<>();
         if (getOptions().length > 1) {
-            meta.addPage(optionsPage.toArray(new String[optionsPage.size()]));
+            pages.addAll(optionsPage);
         }
-        meta.addPage(descriptionPages.toArray(new String[descriptionPages.size()]));
+        pages.addAll(descriptionPages);
+        meta.setPages(pages);
         
         book.setItemMeta(meta);
         return book;
@@ -462,13 +466,6 @@ public abstract class AbstractPipePart {
         default GuiStateElement getElement(AbstractPipePart pipePart) {
             Object value = pipePart.getOption(this);
             List<GuiStateElement.State> states = new ArrayList<>();
-            int index = 0;
-            for (int i = 0; i < getPossibleValues().length; i++) {
-                if (getPossibleValues()[i].getValue().equals(value)) {
-                    index = i;
-                    break;
-                }
-            }
             for (Value v : getPossibleValues()) {
                 ItemStack icon = PipesConfig.getGuiItemStack(pipePart.getType().toConfigKey() + "." + toConfigKey().toLowerCase() + "." + v.getValue().toString());
 
@@ -479,7 +476,11 @@ public abstract class AbstractPipePart {
                         PipesConfig.getText("options." + pipePart.getType().toConfigKey() + "." + toConfigKey().toLowerCase() + "." + v.getValue().toString())
                 ));
             }
-            return new GuiStateElement(toString().charAt(0), index, states.toArray(new GuiStateElement.State[states.size()]));
+            return new GuiStateElement(
+                    toString().charAt(0),
+                    () -> pipePart.getOption(this).toString(),
+                    states.toArray(new GuiStateElement.State[states.size()])
+            );
         }
 
         /**

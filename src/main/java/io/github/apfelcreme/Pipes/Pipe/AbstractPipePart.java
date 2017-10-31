@@ -361,11 +361,12 @@ public abstract class AbstractPipePart {
             );
         }
         
-        List<String> lore = Arrays.asList(
+        List<String> lore = new ArrayList<>();
+        lore.addAll(Arrays.asList(
                 PipesConfig.getText("items." + PipesItem.SETTINGS_BOOK.toConfigKey() + ".lore",
                         getType().getName(), optionsLore.stream().collect(Collectors.joining("\n"))
                 ).split("\n")
-        );
+        ));
         lore.add(ChatColor.BLUE + "" + ChatColor.ITALIC + PipesUtil.hideString(
                 PipesItem.SETTINGS_BOOK.toString() + "," + getType().toString() + getOptionsString(),
                 PipesItem.getIdentifier()

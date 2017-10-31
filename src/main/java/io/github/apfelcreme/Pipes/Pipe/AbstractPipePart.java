@@ -187,12 +187,15 @@ public abstract class AbstractPipePart {
                             if (click.getEvent().getCursor() == null) {
                                 Pipes.sendActionBar(click.getEvent().getWhoClicked(), PipesConfig.getText("error.notABook"));
                                 
-                            } else if (click.getEvent().getCursor().getType() == Material.BOOK) {
-                                click.getEvent().setCursor(getSettingsBook());
+                            } else if (click.getEvent().getCursor().getType() == Material.BOOK
+                                    || click.getEvent().getCursor().getType() == Material.BOOK_AND_QUILL) {
+                                ItemStack book = saveOptions(PipesItem.SETTINGS_BOOK.toItemStack());
+                                book.setAmount(click.getEvent().getCursor().getAmount());
+                                click.getEvent().setCursor(book);
                                 ((Player) click.getEvent().getWhoClicked()).updateInventory();
                                 Pipes.sendActionBar(click.getEvent().getWhoClicked(), PipesConfig.getText("info.settings.bookCreated"));
                                 
-                            } else if (PipesItem.SETTINGS_BOOK.check(click.getEvent().getCurrentItem())) {
+                            } else if (PipesItem.SETTINGS_BOOK.check(click.getEvent().getCursor())) {
                                 if (click.getType() == ClickType.LEFT || click.getType() == ClickType.SHIFT_LEFT) {
                                     try {
                                         applyBook(click.getEvent().getCursor());
@@ -240,15 +243,6 @@ public abstract class AbstractPipePart {
     }
     
     /**
-     * Get the settings book storing this part's options
-     * @return the settings book
-     */
-    private ItemStack getSettingsBook() {
-        ItemStack book = PipesItem.SETTINGS_BOOK.toItemStack();
-        return saveOptions(book);
-    }
-    
-    /**
      * Get the setup of the GUI with the character 'i' for the block's inventory, 's' and 'z' for settings, 'c' for the copy book
      * @return  The setup for the GUI
      */
@@ -289,8 +283,7 @@ public abstract class AbstractPipePart {
                 if (parts.length > 0) {
                     if (!isBook && parts[0].equals(PipesItem.SETTINGS_BOOK.toString())) {
                         isBook = true;
-                    }
-                    if (isBook && !parts[0].equals(getType().toString())) {
+                    } else if (isBook && !parts[0].equals(getType().toString())) {
                         throw new IllegalArgumentException(PipesConfig.getText("error.wrongBookType",
                                 PipesConfig.getText("items." + parts[0] + ".name")));
                     }
@@ -343,37 +336,47 @@ public abstract class AbstractPipePart {
                 PipesConfig.getText("items." + PipesItem.SETTINGS_BOOK.toConfigKey() + ".name", getType().getName())
         ));
         
-        List<String> optionsValues = new ArrayList<>();
+        List<String> optionsLore = new ArrayList<>();
+        List<String> optionsPage = new ArrayList<>();
         List<String> descriptionPages = new ArrayList<>();
         for (IOption option : getOptions()) {
             String shortDesc = ChatColor.RESET + PipesConfig.getText("options." + getType().toConfigKey() + "." + option.toConfigKey() + ".description");
-            shortDesc += ": ";
+            String valueStr = "";
             Object value = getOption(option);
             if (value instanceof Boolean) {
-                shortDesc += (Boolean) value ? ChatColor.GREEN : ChatColor.RED;
+                valueStr += (Boolean) value ? ChatColor.GREEN : ChatColor.RED;
             }
-            shortDesc += value.toString();
-            optionsValues.add(shortDesc);
+            valueStr += value.toString();
+            
+            optionsLore.add(shortDesc + ": " + valueStr);
+            String optionEntry = shortDesc + ":\n" + valueStr;
+            if (optionsPage.isEmpty() || optionsPage.get(optionsPage.size() - 1).length() + ("\n\n" + optionEntry).length() > 255) {
+                optionsPage.add(optionEntry);
+            } else {
+                optionsPage.set(optionsPage.size() - 1, optionsPage.get(optionsPage.size() - 1) + "\n\n" + optionEntry);
+            }
             descriptionPages.add(
-                    shortDesc + "\n\n"
+                    optionEntry + "\n\n"
                             + PipesConfig.getText("options." + getType().toConfigKey() + "." + option.toConfigKey().toLowerCase() + "." + value.toString())
             );
         }
         
         List<String> lore = Arrays.asList(
                 PipesConfig.getText("items." + PipesItem.SETTINGS_BOOK.toConfigKey() + ".lore",
-                        getType().getName(), optionsValues.stream().collect(Collectors.joining("\n"))
-                ),
-                ChatColor.BLUE + "" + ChatColor.ITALIC + PipesUtil.hideString(
-                        PipesItem.SETTINGS_BOOK.toString() + "," + getType().toString() + getOptionsString(),
-                        PipesItem.getIdentifier()
-                )
+                        getType().getName(), optionsLore.stream().collect(Collectors.joining("\n"))
+                ).split("\n")
         );
+        lore.add(ChatColor.BLUE + "" + ChatColor.ITALIC + PipesUtil.hideString(
+                PipesItem.SETTINGS_BOOK.toString() + "," + getType().toString() + getOptionsString(),
+                PipesItem.getIdentifier()
+        ));
         meta.setLore(lore);
         
         meta.setAuthor(PipesItem.getIdentifier());
         
-        meta.addPage(optionsValues.stream().collect(Collectors.joining("\n\n")));
+        if (getOptions().length > 1) {
+            meta.addPage(optionsPage.toArray(new String[optionsPage.size()]));
+        }
         meta.addPage(descriptionPages.toArray(new String[descriptionPages.size()]));
         
         book.setItemMeta(meta);

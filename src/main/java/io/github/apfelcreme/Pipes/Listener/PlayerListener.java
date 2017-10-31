@@ -91,6 +91,7 @@ public class PlayerListener implements Listener {
             if (part == null) {
                 return;
             }
+            event.setCancelled(true);
             try {
                 part.applyBook(event.getItem());
                 Pipes.sendMessage(event.getPlayer(), PipesConfig.getText("info.settings.bookApplied"));

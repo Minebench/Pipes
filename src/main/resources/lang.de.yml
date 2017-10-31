@@ -9,7 +9,7 @@ texts:
     noDetection: '&c Keine Detektion gefunden! Führe zunächst /pipe detect <Zeit> aus!'
     noPermission: '&c Du hast keine ausreichende Berechtigung'
     noPipe: '&c Es konnte keine Pipe gefunden werden!'
-    notABook: '&c Du musst mit einem Buch klicken!'
+    notABook: '&c Du musst mit einem unbeschriebenen Buch klicken!'
     notEnoughInventorySpace: '&c Du hast keinen Platz im Inventar!'
     notThatManyResults: '&c Es wurden nicht so viele Objekte gefunden!'
     unknownPipesItem: '&f {0}&c ist kein Pipes-Item!'
@@ -60,21 +60,21 @@ texts:
   gui:
     pipe-input:
       copy: |
-        &5INput Einstellungen Kopieren
-        &oKlicke mit einem unbeschriebenen Buch:
+        &5Input Einstellungen Kopieren
+        &f&oKlicke mit einem unbeschriebenen Buch:
         &7Pipes-Buch mit Einstellungen erstellen
-        &oRechtsklick mit einem Pipes-Buch:
+        &f&oRechtsklick mit einem Pipes-Buch:
         &7Einstellungen des Buches aktualisieren
-        &oLinksklick mit einem Pipes-Buch:
+        &f&oLinksklick mit einem Pipes-Buch:
         &7Einstellungen des Buches einfügen
     pipe-output:
       copy: |
         &5Output Einstellungen Kopieren
-        &oKlicke mit einem unbeschriebenen Buch:
+        &f&oKlicke mit einem unbeschriebenen Buch:
         &7Pipes-Buch mit Einstellungen erstellen
-        &oRechtsklick mit einem Pipes-Buch:
+        &f&oRechtsklick mit einem Pipes-Buch:
         &7Einstellungen des Buches aktualisieren
-        &oLinksklick mit einem Pipes-Buch:
+        &f&oLinksklick mit einem Pipes-Buch:
         &7Einstellungen des Buches einfügen
   options:
     pipe-input:

@@ -61,7 +61,7 @@ public enum PipesItem {
 
     public ItemStack toItemStack() {
         if (item != null) {
-            return item;
+            return new ItemStack(item);
         }
         ItemStack item = new ItemStack(this.material);
         ItemMeta meta = item.getItemMeta();
@@ -76,7 +76,7 @@ public enum PipesItem {
         ));
         item.setItemMeta(meta);
         this.item = item;
-        return item;
+        return new ItemStack(item);
     }
 
     public boolean check(Block block) {

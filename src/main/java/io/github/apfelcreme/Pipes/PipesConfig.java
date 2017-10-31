@@ -172,7 +172,7 @@ public class PipesConfig {
             try {
                 Material mat = Material.valueOf(parts[0].toUpperCase());
                 byte data = 0;
-                if (parts.length > 0) {
+                if (parts.length > 1) {
                     data = Byte.parseByte(parts[1]);
                 }
                 ItemStack item = new ItemStack(mat, 1, data);

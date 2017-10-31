@@ -199,13 +199,14 @@ public abstract class AbstractPipePart {
                                 if (click.getType() == ClickType.LEFT || click.getType() == ClickType.SHIFT_LEFT) {
                                     try {
                                         applyBook(click.getEvent().getCursor());
+                                        click.getGui().draw();
                                         Pipes.sendMessage(click.getEvent().getWhoClicked(), PipesConfig.getText("info.settings.bookApplied"));
                                     } catch (IllegalArgumentException e){
                                         Pipes.sendMessage(click.getEvent().getWhoClicked(), e.getMessage());
                                     }
                                     
                                 } else if (click.getType() == ClickType.RIGHT || click.getType() == ClickType.SHIFT_RIGHT) {
-                                    click.getEvent().setCursor(saveOptions(click.getEvent().getCurrentItem()));
+                                    click.getEvent().setCursor(saveOptions(click.getEvent().getCursor()));
                                     ((Player) click.getEvent().getWhoClicked()).updateInventory();
                                     Pipes.sendActionBar(click.getEvent().getWhoClicked(), PipesConfig.getText("info.settings.bookUpdated"));
                                     
@@ -350,7 +351,9 @@ public abstract class AbstractPipePart {
             
             optionsLore.add(shortDesc + ": " + valueStr);
             String optionEntry = shortDesc + ":\n" + valueStr;
-            if (optionsPage.isEmpty() || optionsPage.get(optionsPage.size() - 1).length() + ("\n\n" + optionEntry).length() > 255) {
+            if (optionsPage.isEmpty()
+                    || optionsPage.get(optionsPage.size() -1).split("\n").length > 13
+                    || optionsPage.get(optionsPage.size() - 1).length() + ("\n\n" + optionEntry).length() > 255) {
                 optionsPage.add(optionEntry);
             } else {
                 optionsPage.set(optionsPage.size() - 1, optionsPage.get(optionsPage.size() - 1) + "\n\n" + optionEntry);

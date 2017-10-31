@@ -196,7 +196,7 @@ texts:
           &7Der Zielcontainer wird ohne
           &7Begrenzung aufgefüllt.
       drop:
-        description: 'Dropp'
+        description: 'Droppt Items'
         true: |
           &aPipe Output droppt Items!
           &7Der Output droppt Items wie ein normaler

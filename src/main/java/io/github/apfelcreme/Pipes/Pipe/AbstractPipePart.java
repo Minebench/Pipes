@@ -286,8 +286,15 @@ public abstract class AbstractPipePart {
                     if (!isBook && parts[0].equals(PipesItem.SETTINGS_BOOK.toString())) {
                         isBook = true;
                     } else if (isBook && !parts[0].equals(getType().toString())) {
+                        PipesItem storedItem;
+                        try {
+                            storedItem = PipesItem.valueOf(parts[0]);
+                        } catch (IllegalArgumentException e) {
+                            throw new IllegalArgumentException(PipesConfig.getText("error.unknownPipesItem",
+                                    parts[0]));
+                        }
                         throw new IllegalArgumentException(PipesConfig.getText("error.wrongBookType",
-                                PipesConfig.getText("items." + parts[0] + ".name")));
+                                PipesConfig.getText("items." + storedItem.toConfigKey() + ".name")));
                     }
                 }
                 continue;

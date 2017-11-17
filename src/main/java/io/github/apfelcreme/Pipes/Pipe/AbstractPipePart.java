@@ -348,7 +348,8 @@ public abstract class AbstractPipePart {
         
         List<String> optionsLore = new ArrayList<>();
         List<BaseComponent[]> pages = new ArrayList<>();
-        List<BookUtil.PageBuilder> optionsPage = Arrays.asList(new BookUtil.PageBuilder());
+        List<BookUtil.PageBuilder> optionsPage = new ArrayList();
+        optionsPage.add(new BookUtil.PageBuilder());
         
         for (IOption option : getOptions()) {
             String shortDesc = ChatColor.RESET + PipesConfig.getText("options." + getType().toConfigKey() + "." + option.toConfigKey() + ".description");

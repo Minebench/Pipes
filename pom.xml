@@ -69,6 +69,10 @@
                             <pattern>de.themoep</pattern>
                             <shadedPattern>io.github.apfelcreme.Pipes.libs</shadedPattern>
                         </relocation>
+                        <relocation>
+                            <pattern>xyz.upperlevel.spigot.book</pattern>
+                            <shadedPattern>io.github.apfelcreme.Pipes.libs.ulbookapi</shadedPattern>
+                        </relocation>
                     </relocations>
                 </configuration>
                 <executions>
@@ -116,6 +120,12 @@
             <groupId>de.themoep</groupId>
             <artifactId>inventorygui</artifactId>
             <version>1.1-SNAPSHOT</version>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>xyz.upperlevel.spigot.book</groupId>
+            <artifactId>spigot-book-api</artifactId>
+            <version>1.2</version>
             <scope>compile</scope>
         </dependency>
     </dependencies>

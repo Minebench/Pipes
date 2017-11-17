@@ -9,6 +9,8 @@ import io.github.apfelcreme.Pipes.Pipes;
 import io.github.apfelcreme.Pipes.PipesConfig;
 import io.github.apfelcreme.Pipes.PipesItem;
 import io.github.apfelcreme.Pipes.PipesUtil;
+import net.md_5.bungee.api.chat.BaseComponent;
+import net.md_5.bungee.api.chat.TextComponent;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.Nameable;
@@ -20,6 +22,7 @@ import org.bukkit.event.inventory.ClickType;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.BookMeta;
 import org.bukkit.inventory.meta.ItemMeta;
+import xyz.upperlevel.spigot.book.BookUtil;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -189,7 +192,7 @@ public abstract class AbstractPipePart {
                                 
                             } else if (click.getEvent().getCursor().getType() == Material.BOOK
                                     || click.getEvent().getCursor().getType() == Material.BOOK_AND_QUILL) {
-                                ItemStack book = saveOptions(PipesItem.SETTINGS_BOOK.toItemStack());
+                                ItemStack book = saveOptionsToBook();
                                 book.setAmount(click.getEvent().getCursor().getAmount());
                                 for (ItemStack rest : click.getEvent().getWhoClicked().getInventory().addItem(book).values()) {
                                     click.getEvent().getWhoClicked().getWorld().dropItemNaturally(click.getEvent().getWhoClicked().getLocation(), rest);
@@ -207,7 +210,7 @@ public abstract class AbstractPipePart {
                                     }
                                     
                                 } else if (click.getType() == ClickType.RIGHT || click.getType() == ClickType.SHIFT_RIGHT) {
-                                    click.getEvent().setCursor(saveOptions(click.getEvent().getCursor()));
+                                    click.getEvent().getView().setCursor(saveOptionsToBook());
                                     ((Player) click.getEvent().getWhoClicked()).updateInventory();
                                     Pipes.sendActionBar(click.getEvent().getWhoClicked(), PipesConfig.getText("info.settings.bookUpdated"));
                                     
@@ -331,24 +334,22 @@ public abstract class AbstractPipePart {
     
     /**
      * Save the options of this part to a book
-     * @param book the book to save it in
      * @return The changed item stack
      * @throws IllegalArgumentException if the item passed is not a book
      */
-    private ItemStack saveOptions(ItemStack book) {
-        if (!(book.getItemMeta() instanceof BookMeta)) {
-            throw new IllegalArgumentException("ItemStack needs to be a book!");
-        }
-        BookMeta meta = (BookMeta) book.getItemMeta();
-        
-        meta.setDisplayName(ChatColor.RESET + "" + ChatColor.WHITE + PipesUtil.hideString(
-                toString(),
-                PipesConfig.getText("items." + PipesItem.SETTINGS_BOOK.toConfigKey() + ".name", getType().getName())
-        ));
+    private ItemStack saveOptionsToBook() {
+    
+        BookUtil.BookBuilder book = BookUtil.writtenBook()
+                .author(PipesItem.getIdentifier())
+                .title(ChatColor.RESET + "" + ChatColor.WHITE + PipesUtil.hideString(
+                        toString(),
+                        PipesConfig.getText("items." + PipesItem.SETTINGS_BOOK.toConfigKey() + ".name", getType().getName())
+                ));
         
         List<String> optionsLore = new ArrayList<>();
-        List<String> optionsPage = new ArrayList<>();
-        List<String> descriptionPages = new ArrayList<>();
+        List<BaseComponent[]> pages = new ArrayList<>();
+        List<BookUtil.PageBuilder> optionsPage = Arrays.asList(new BookUtil.PageBuilder());
+        
         for (IOption option : getOptions()) {
             String shortDesc = ChatColor.RESET + PipesConfig.getText("options." + getType().toConfigKey() + "." + option.toConfigKey() + ".description");
             String valueStr = "";
@@ -359,19 +360,26 @@ public abstract class AbstractPipePart {
             valueStr += value.toString();
             
             optionsLore.add(shortDesc + ": " + valueStr);
-            String optionEntry = shortDesc + ":\n" + valueStr;
-            if (optionsPage.isEmpty()
-                    || optionsPage.get(optionsPage.size() -1).split("\n").length > 13
-                    || optionsPage.get(optionsPage.size() - 1).length() + ("\n\n" + optionEntry).length() > 255) {
-                optionsPage.add(optionEntry);
-            } else {
-                optionsPage.set(optionsPage.size() - 1, optionsPage.get(optionsPage.size() - 1) + "\n\n" + optionEntry);
+            BaseComponent optionEntry = BookUtil.TextBuilder.of(shortDesc + ":\n" + valueStr)
+                    .onHover(BookUtil.HoverAction.showText(
+                            shortDesc + ": " + valueStr + "\n\n" + PipesConfig.getText("options." + getType().toConfigKey() + "." + option.toConfigKey().toLowerCase() + "." + value.toString())
+                    ))
+                    .build();
+                    
+            BookUtil.PageBuilder pageBuilder = optionsPage.get(optionsPage.size() - 1);
+            
+            if (TextComponent.toPlainText(pageBuilder.build()).split("\n").length > 13
+                    || TextComponent.toPlainText(pageBuilder.build()).length() + ("\n\n" + optionEntry).length() > 255) {
+                pages.add(pageBuilder.build());
+                optionsPage.add(pageBuilder = new BookUtil.PageBuilder());
             }
-            descriptionPages.add(
-                    optionEntry + "\n\n"
-                            + PipesConfig.getText("options." + getType().toConfigKey() + "." + option.toConfigKey().toLowerCase() + "." + value.toString())
-            );
+            
+            pageBuilder.add(optionEntry);
         }
+    
+        book.pages(pages);
+        
+        ItemStack bookItem = book.build();
         
         List<String> lore = new ArrayList<>();
         lore.addAll(Arrays.asList(
@@ -383,19 +391,13 @@ public abstract class AbstractPipePart {
                 PipesItem.SETTINGS_BOOK.toString() + "," + getType().toString() + getOptionsString(),
                 PipesItem.getIdentifier()
         ));
+        
+        BookMeta meta = (BookMeta) bookItem.getItemMeta();
+        meta.setDisplayName(meta.getTitle());
         meta.setLore(lore);
+        bookItem.setItemMeta(meta);
         
-        meta.setAuthor(PipesItem.getIdentifier());
-        
-        List<String> pages = new ArrayList<>();
-        if (getOptions().length > 1) {
-            pages.addAll(optionsPage);
-        }
-        pages.addAll(descriptionPages);
-        meta.setPages(pages);
-        
-        book.setItemMeta(meta);
-        return book;
+        return bookItem;
     }
 
     @Override

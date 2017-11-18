@@ -368,9 +368,10 @@ public abstract class AbstractPipePart {
                     .build();
                     
             BookUtil.PageBuilder pageBuilder = optionsPage.get(optionsPage.size() - 1);
+            pageBuilder.newLine();
             
-            if (TextComponent.toPlainText(pageBuilder.build()).split("\n").length > 13
-                    || TextComponent.toPlainText(pageBuilder.build()).length() + ("\n\n" + optionEntry).length() > 255) {
+            String pageStr = TextComponent.toPlainText(pageBuilder.build()) + TextComponent.toPlainText(optionEntry);
+            if (pageStr.length() > 255 || pageStr.split("\n").length > 13) {
                 pages.add(pageBuilder.build());
                 optionsPage.add(pageBuilder = new BookUtil.PageBuilder());
             }

@@ -352,18 +352,18 @@ public abstract class AbstractPipePart {
         optionsPage.add(new BookUtil.PageBuilder());
         
         for (IOption option : getOptions()) {
-            String shortDesc = ChatColor.RESET + PipesConfig.getText("options." + getType().toConfigKey() + "." + option.toConfigKey() + ".description");
-            String valueStr = "";
+            String shortDesc = PipesConfig.getText("options." + getType().toConfigKey() + "." + option.toConfigKey() + ".description");
             Object value = getOption(option);
             if (value instanceof Boolean) {
-                valueStr += (Boolean) value ? ChatColor.GREEN : ChatColor.RED;
+                shortDesc = ((Boolean) value ? ChatColor.GREEN : ChatColor.RED) + shortDesc;
+            } else {
+                shortDesc += ": " + value.toString();
             }
-            valueStr += value.toString();
             
-            optionsLore.add(shortDesc + ": " + valueStr);
-            BaseComponent optionEntry = BookUtil.TextBuilder.of(shortDesc + ":\n" + valueStr)
+            optionsLore.add(shortDesc);
+            BaseComponent optionEntry = BookUtil.TextBuilder.of(shortDesc)
                     .onHover(BookUtil.HoverAction.showText(
-                            shortDesc + ": " + valueStr + "\n\n" + PipesConfig.getText("options." + getType().toConfigKey() + "." + option.toConfigKey().toLowerCase() + "." + value.toString())
+                            PipesConfig.getText("options." + getType().toConfigKey() + "." + option.toConfigKey().toLowerCase() + "." + value.toString())
                     ))
                     .build();
                     
@@ -378,7 +378,11 @@ public abstract class AbstractPipePart {
             
             pageBuilder.add(optionEntry);
         }
-    
+        
+        if (!optionsPage.isEmpty()) {
+            pages.add(optionsPage.get(optionsPage.size() - 1).build());
+        }
+        
         book.pages(pages);
         
         ItemStack bookItem = book.build();

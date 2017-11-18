@@ -355,28 +355,31 @@ public abstract class AbstractPipePart {
             String shortDesc = PipesConfig.getText("options." + getType().toConfigKey() + "." + option.toConfigKey() + ".description");
             Object value = getOption(option);
             if (value instanceof Boolean) {
-                shortDesc = ((Boolean) value ? ChatColor.GREEN : ChatColor.RED) + shortDesc;
+                optionsLore.add(((Boolean) value ? ChatColor.GREEN : ChatColor.RED) + shortDesc);
             } else {
-                shortDesc += ": " + value.toString();
+                shortDesc = ChatColor.RESET + shortDesc + ": " + ChatColor.BLUE + value.toString();
+                optionsLore.add(shortDesc);
             }
-            
-            optionsLore.add(shortDesc);
-            BaseComponent optionEntry = BookUtil.TextBuilder.of(shortDesc)
-                    .onHover(BookUtil.HoverAction.showText(
+    
+            BookUtil.TextBuilder optionEntry = BookUtil.TextBuilder.of(shortDesc);
+            if (value instanceof Boolean) {
+                    optionEntry.color(((Boolean) value ? ChatColor.DARK_GREEN : ChatColor.DARK_RED));
+            }
+            optionEntry.onHover(BookUtil.HoverAction.showText(
                             PipesConfig.getText("options." + getType().toConfigKey() + "." + option.toConfigKey().toLowerCase() + "." + value.toString())
                     ))
                     .build();
-                    
+            
             BookUtil.PageBuilder pageBuilder = optionsPage.get(optionsPage.size() - 1);
             pageBuilder.newLine();
             
-            String pageStr = TextComponent.toPlainText(pageBuilder.build()) + TextComponent.toPlainText(optionEntry);
+            String pageStr = TextComponent.toPlainText(pageBuilder.build()) + TextComponent.toPlainText(optionEntry.build());
             if (pageStr.length() > 255 || pageStr.split("\n").length > 13) {
                 pages.add(pageBuilder.build());
                 optionsPage.add(pageBuilder = new BookUtil.PageBuilder());
             }
             
-            pageBuilder.add(optionEntry);
+            pageBuilder.add(optionEntry.build());
         }
         
         if (!optionsPage.isEmpty()) {

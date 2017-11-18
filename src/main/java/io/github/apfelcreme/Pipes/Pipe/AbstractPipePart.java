@@ -10,6 +10,7 @@ import io.github.apfelcreme.Pipes.PipesConfig;
 import io.github.apfelcreme.Pipes.PipesItem;
 import io.github.apfelcreme.Pipes.PipesUtil;
 import net.md_5.bungee.api.chat.BaseComponent;
+import net.md_5.bungee.api.chat.ComponentBuilder;
 import net.md_5.bungee.api.chat.TextComponent;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
@@ -377,6 +378,8 @@ public abstract class AbstractPipePart {
             if (pageStr.length() > 255 || pageStr.split("\n").length > 13) {
                 pages.add(pageBuilder.build());
                 optionsPage.add(pageBuilder = new BookUtil.PageBuilder());
+            } else if (!pageStr.isEmpty()) {
+                pageBuilder.add(new ComponentBuilder(",").reset().create());
             }
             
             pageBuilder.add(optionEntry.build());

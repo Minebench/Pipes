@@ -9,10 +9,11 @@ import io.github.apfelcreme.Pipes.Pipes;
 import io.github.apfelcreme.Pipes.PipesConfig;
 import io.github.apfelcreme.Pipes.PipesItem;
 import io.github.apfelcreme.Pipes.PipesUtil;
+import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.ComponentBuilder;
+import net.md_5.bungee.api.chat.HoverEvent;
 import net.md_5.bungee.api.chat.TextComponent;
-import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.Nameable;
 import org.bukkit.block.Block;
@@ -23,7 +24,6 @@ import org.bukkit.event.inventory.ClickType;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.BookMeta;
 import org.bukkit.inventory.meta.ItemMeta;
-import xyz.upperlevel.spigot.book.BookUtil;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -340,17 +340,18 @@ public abstract class AbstractPipePart {
      */
     private ItemStack saveOptionsToBook() {
     
-        BookUtil.BookBuilder book = BookUtil.writtenBook()
-                .author(PipesItem.getIdentifier())
-                .title(ChatColor.RESET + "" + ChatColor.WHITE + PipesUtil.hideString(
-                        toString(),
-                        PipesConfig.getText("items." + PipesItem.SETTINGS_BOOK.toConfigKey() + ".name", getType().getName())
-                ));
+        ItemStack bookItem = new ItemStack(Material.WRITTEN_BOOK);
+        BookMeta meta = (BookMeta) bookItem.getItemMeta();
+        meta.setAuthor(PipesItem.getIdentifier());
+        meta.setTitle(ChatColor.RESET + "" + ChatColor.WHITE + PipesUtil.hideString(
+                toString(),
+                PipesConfig.getText("items." + PipesItem.SETTINGS_BOOK.toConfigKey() + ".name", getType().getName())
+        ));
         
         List<String> optionsLore = new ArrayList<>();
         List<BaseComponent[]> pages = new ArrayList<>();
-        List<BookUtil.PageBuilder> optionsPage = new ArrayList();
-        optionsPage.add(new BookUtil.PageBuilder());
+        List<ComponentBuilder> optionsPage = new ArrayList();
+        optionsPage.add(new ComponentBuilder(""));
         
         for (IOption option : getOptions()) {
             String shortDesc = PipesConfig.getText("options." + getType().toConfigKey() + "." + option.toConfigKey() + ".description");
@@ -362,36 +363,36 @@ public abstract class AbstractPipePart {
                 optionsLore.add(shortDesc);
             }
     
-            BookUtil.TextBuilder optionEntry = BookUtil.TextBuilder.of(shortDesc);
-            if (value instanceof Boolean) {
-                    optionEntry.color(((Boolean) value ? ChatColor.DARK_GREEN : ChatColor.DARK_RED));
+            BaseComponent[] optionEntry = TextComponent.fromLegacyText(shortDesc);
+            for (BaseComponent c : optionEntry) {
+                if (value instanceof Boolean) {
+                        c.setColor(((Boolean) value ? ChatColor.DARK_GREEN : ChatColor.DARK_RED));
+                }
+                c.setHoverEvent(new HoverEvent(
+                        HoverEvent.Action.SHOW_TEXT,
+                        TextComponent.fromLegacyText(PipesConfig.getText("options." + getType().toConfigKey() + "." + option.toConfigKey().toLowerCase() + "." + value.toString()))
+                ));
             }
-            optionEntry.onHover(BookUtil.HoverAction.showText(
-                            PipesConfig.getText("options." + getType().toConfigKey() + "." + option.toConfigKey().toLowerCase() + "." + value.toString())
-                    ))
-                    .build();
+    
+            ComponentBuilder pageBuilder = optionsPage.get(optionsPage.size() - 1);
+            pageBuilder.append("\n");
             
-            BookUtil.PageBuilder pageBuilder = optionsPage.get(optionsPage.size() - 1);
-            pageBuilder.newLine();
-            
-            String pageStr = TextComponent.toPlainText(pageBuilder.build()) + TextComponent.toPlainText(optionEntry.build());
+            String pageStr = TextComponent.toPlainText(pageBuilder.create()) + TextComponent.toPlainText(optionEntry);
             if (pageStr.length() > 255 || pageStr.split("\n").length > 13) {
-                pages.add(pageBuilder.build());
-                optionsPage.add(pageBuilder = new BookUtil.PageBuilder());
+                pages.add(pageBuilder.create());
+                optionsPage.add(pageBuilder = new ComponentBuilder(""));
             } else if (!pageStr.isEmpty()) {
-                pageBuilder.add(new ComponentBuilder(",").reset().create());
+                pageBuilder.append(new ComponentBuilder(",").reset().create());
             }
             
-            pageBuilder.add(optionEntry.build());
+            pageBuilder.append(optionEntry);
         }
         
         if (!optionsPage.isEmpty()) {
-            pages.add(optionsPage.get(optionsPage.size() - 1).build());
+            pages.add(optionsPage.get(optionsPage.size() - 1).create());
         }
         
-        book.pages(pages);
-        
-        ItemStack bookItem = book.build();
+        meta.spigot().setPages(pages);
         
         List<String> lore = new ArrayList<>();
         lore.addAll(Arrays.asList(
@@ -404,7 +405,6 @@ public abstract class AbstractPipePart {
                 PipesItem.getIdentifier()
         ));
         
-        BookMeta meta = (BookMeta) bookItem.getItemMeta();
         meta.setDisplayName(meta.getTitle());
         meta.setLore(lore);
         bookItem.setItemMeta(meta);

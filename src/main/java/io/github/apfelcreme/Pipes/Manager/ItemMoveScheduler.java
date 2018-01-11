@@ -180,6 +180,10 @@ public class ItemMoveScheduler {
                 outputs.put(output, null);
             }
         }
+        
+        if (outputs.isEmpty()) {
+            return false;
+        }
 
         // Calculate amount that should be spread over the outputs (when in spread mode)
         int spreadAmount = itemStack.getAmount() / outputs.size();

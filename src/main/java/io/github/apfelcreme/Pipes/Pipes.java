@@ -9,6 +9,7 @@ import io.github.apfelcreme.Pipes.Manager.ItemMoveScheduler;
 import net.md_5.bungee.api.ChatMessageType;
 import net.md_5.bungee.api.chat.TextComponent;
 import org.bukkit.Material;
+import org.bukkit.NamespacedKey;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ShapelessRecipe;
@@ -60,19 +61,25 @@ public class Pipes extends JavaPlugin {
         getServer().getPluginCommand("pipe").setExecutor(new PipeCommand());
 
         //create the custom recipes
-        ShapelessRecipe dispenserRecipe = new ShapelessRecipe(PipesItem.PIPE_INPUT.toItemStack());
+        ShapelessRecipe dispenserRecipe = new ShapelessRecipe(
+                new NamespacedKey(this, PipesItem.PIPE_INPUT.toString()),
+                PipesItem.PIPE_INPUT.toItemStack());
         for (Map.Entry<Material, Integer> material : PipesConfig.getRecipeMaterials("dispenserRecipe").entrySet()) {
             dispenserRecipe.addIngredient(material.getValue(), material.getKey());
         }
         getServer().addRecipe(dispenserRecipe);
 
-        ShapelessRecipe dropperRecipe = new ShapelessRecipe(PipesItem.PIPE_OUTPUT.toItemStack());
+        ShapelessRecipe dropperRecipe = new ShapelessRecipe(
+                new NamespacedKey(this, PipesItem.PIPE_OUTPUT.toString()),
+                PipesItem.PIPE_OUTPUT.toItemStack());
         for (Map.Entry<Material, Integer> material : PipesConfig.getRecipeMaterials("dropperRecipe").entrySet()) {
             dropperRecipe.addIngredient(material.getValue(), material.getKey());
         }
         getServer().addRecipe(dropperRecipe);
 
-        ShapelessRecipe chunkLoaderRecipe = new ShapelessRecipe(PipesItem.CHUNK_LOADER.toItemStack());
+        ShapelessRecipe chunkLoaderRecipe = new ShapelessRecipe(
+                new NamespacedKey(this, PipesItem.CHUNK_LOADER.toString()),
+                PipesItem.CHUNK_LOADER.toItemStack());
         for (Map.Entry<Material, Integer> material : PipesConfig.getRecipeMaterials("chunkLoaderRecipe").entrySet()) {
             chunkLoaderRecipe.addIngredient(material.getValue(), material.getKey());
         }

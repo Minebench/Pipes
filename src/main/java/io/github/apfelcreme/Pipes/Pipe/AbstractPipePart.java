@@ -195,9 +195,8 @@ public abstract class AbstractPipePart {
                                     || click.getEvent().getCursor().getType() == Material.BOOK_AND_QUILL) {
                                 ItemStack book = saveOptionsToBook();
                                 book.setAmount(click.getEvent().getCursor().getAmount());
-                                for (ItemStack rest : click.getEvent().getWhoClicked().getInventory().addItem(book).values()) {
-                                    click.getEvent().getWhoClicked().getWorld().dropItemNaturally(click.getEvent().getWhoClicked().getLocation(), rest);
-                                }
+                                click.getEvent().getView().setCursor(book);
+                                ((Player) click.getEvent().getWhoClicked()).updateInventory();
                                 Pipes.sendActionBar(click.getEvent().getWhoClicked(), PipesConfig.getText("info.settings.bookCreated"));
                                 
                             } else if (PipesItem.SETTINGS_BOOK.check(click.getEvent().getCursor())) {
@@ -211,7 +210,9 @@ public abstract class AbstractPipePart {
                                     }
                                     
                                 } else if (click.getType() == ClickType.RIGHT || click.getType() == ClickType.SHIFT_RIGHT) {
-                                    click.getEvent().getView().setCursor(saveOptionsToBook());
+                                    ItemStack book = saveOptionsToBook();
+                                    book.setAmount(click.getEvent().getCursor().getAmount());
+                                    click.getEvent().getView().setCursor(book);
                                     ((Player) click.getEvent().getWhoClicked()).updateInventory();
                                     Pipes.sendActionBar(click.getEvent().getWhoClicked(), PipesConfig.getText("info.settings.bookUpdated"));
                                     
@@ -343,7 +344,7 @@ public abstract class AbstractPipePart {
         ItemStack bookItem = new ItemStack(Material.WRITTEN_BOOK);
         BookMeta meta = (BookMeta) bookItem.getItemMeta();
         meta.setAuthor(PipesItem.getIdentifier());
-        meta.setTitle(ChatColor.RESET + "" + ChatColor.WHITE + PipesUtil.hideString(
+        meta.setDisplayName(ChatColor.RESET + "" + ChatColor.WHITE + PipesUtil.hideString(
                 toString(),
                 PipesConfig.getText("items." + PipesItem.SETTINGS_BOOK.toConfigKey() + ".name", getType().getName())
         ));
@@ -381,8 +382,6 @@ public abstract class AbstractPipePart {
             if (pageStr.length() > 255 || pageStr.split("\n").length > 13) {
                 pages.add(pageBuilder.create());
                 optionsPage.add(pageBuilder = new ComponentBuilder(""));
-            } else if (!pageStr.isEmpty()) {
-                pageBuilder.append(new ComponentBuilder(",").reset().create());
             }
             
             pageBuilder.append(optionEntry);
@@ -405,7 +404,6 @@ public abstract class AbstractPipePart {
                 PipesItem.getIdentifier()
         ));
         
-        meta.setDisplayName(meta.getTitle());
         meta.setLore(lore);
         bookItem.setItemMeta(meta);
         

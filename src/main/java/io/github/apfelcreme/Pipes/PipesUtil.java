@@ -105,11 +105,8 @@ public class PipesUtil {
      * @return The string with the hidden string appended
      */
     public static String hideString(String hidden, String string) {
-        for (int i = string.length() - 1; i >= 0; i--) {
-            if (string.length() - i > 2)
-                break;
-            if (string.charAt(i) == ChatColor.COLOR_CHAR)
-                string = string.substring(0, i);
+        while (string.length() > 1 && string.charAt(string.length() - 2) == ChatColor.COLOR_CHAR) {
+            string = string.substring(0, string.length() - 2);
         }
         // Add hidden string
         char[] chars = new char[hidden.length() * 2];
@@ -130,22 +127,12 @@ public class PipesUtil {
         }
         // Only the color chars at the end of the string is it
         StringBuilder builder = new StringBuilder();
-        char[] chars = string.toCharArray();
-        for (int i = 0; i < chars.length; i++) {
-            char c = chars[i];
-            if (c == ChatColor.COLOR_CHAR)
-                continue;
-            if (i + 1 < chars.length) {
-                if (chars[i + 1] == ChatColor.COLOR_CHAR && i > 1 && chars[i - 1] == ChatColor.COLOR_CHAR)
-                    builder.append(c);
-                else if (builder.length() > 0)
-                    builder = new StringBuilder();
-            } else if (i > 0 && chars[i - 1] == ChatColor.COLOR_CHAR)
-                builder.append(c);
+        for (int i = string.length() - 1; i > 0 && string.charAt(i - 1) == ChatColor.COLOR_CHAR; i -= 2) {
+            builder.append(string.charAt(i));
         }
         if (builder.length() == 0)
             return null;
-        return builder.toString();
+        return builder.reverse().toString();
     }
 
     public static PipesItem getPipesItem(ItemStack item) {

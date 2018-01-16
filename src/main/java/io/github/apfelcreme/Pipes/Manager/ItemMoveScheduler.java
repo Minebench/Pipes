@@ -160,7 +160,12 @@ public class ItemMoveScheduler {
         }
 
         // Set snapshot contents to real contents so that we can call an update (for redstone)
-        inputHolder.getSnapshotInventory().setContents(inputInventory.getContents());
+        if (transferredAll) {
+            inputHolder.getSnapshotInventory().setContents(inputInventory.getContents());
+        } else {
+            inputHolder.getSnapshotInventory().clear();
+            inputHolder.getSnapshotInventory().addItem(inputInventory.getContents());
+        }
         inputHolder.update();
 
         return transferredAll;

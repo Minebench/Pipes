@@ -159,12 +159,16 @@ public class ItemMoveScheduler {
             transferredAll &= moveItem(inputInventory, pipe, itemStack, spread);
         }
 
-        // Set snapshot contents to real contents so that we can call an update (for redstone)
+        // Set snapshot contents to real contents so that we can call an update (for redstone) and merge leftovers
         if (transferredAll) {
             inputHolder.getSnapshotInventory().setContents(inputInventory.getContents());
         } else {
             inputHolder.getSnapshotInventory().clear();
-            inputHolder.getSnapshotInventory().addItem(inputInventory.getContents());
+            for (ItemStack item : inputInventory) {
+                if (item != null) {
+                    inputHolder.getSnapshotInventory().addItem(item);
+                }
+            }
         }
         inputHolder.update();
 

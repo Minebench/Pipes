@@ -38,6 +38,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -223,17 +224,17 @@ public class BlockListener implements Listener {
             return;
         }
         
-        Set<Block> update = new HashSet<>();
+        Set<Block> update = new LinkedHashSet<>();
         for (Block moved : blocks) {
             if (moved.getType() == Material.STAINED_GLASS) {
                 update.add(moved);
                 for (BlockFace face : PipesUtil.BLOCK_FACES) {
                     Block u = moved.getRelative(face);
-                    if (u.getType() == Material.STAINED_GLASS || PipeManager.getInstance().getPipePart(u) != null) {
+                    if (!update.contains(u) && u.getType() == Material.STAINED_GLASS || PipeManager.getInstance().getPipePart(u) != null) {
                         update.add(u);
                     }
                     Block ud = u.getRelative(direction);
-                    if (ud.getType() == Material.STAINED_GLASS || PipeManager.getInstance().getPipePart(ud) != null) {
+                    if (!update.contains(ud) && ud.getType() == Material.STAINED_GLASS || PipeManager.getInstance().getPipePart(ud) != null) {
                         update.add(ud);
                     }
                 }

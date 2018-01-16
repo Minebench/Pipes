@@ -27,6 +27,8 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockDispenseEvent;
+import org.bukkit.event.block.BlockPistonExtendEvent;
+import org.bukkit.event.block.BlockPistonRetractEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.inventory.CraftItemEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
@@ -36,6 +38,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -68,14 +71,14 @@ public class BlockListener implements Listener {
         }
     }
 
-    @EventHandler
+    @EventHandler(ignoreCancelled = true)
     public void onItemDispense(BlockDispenseEvent event) {
         if (!(event instanceof PipeDispenseEvent) && PipesUtil.getPipesItem(event.getBlock()) != null) {
             event.setCancelled(true);
         }
     }
 
-    @EventHandler
+    @EventHandler(ignoreCancelled = true)
     public void onItemMove(InventoryMoveItemEvent event) {
         if (event.getDestination().getType() != InventoryType.HOPPER // hoppers are allowed to remove items from the output
                 && event.getSource().getType() != InventoryType.HOPPER
@@ -85,7 +88,7 @@ public class BlockListener implements Listener {
         }
     }
 
-    @EventHandler
+    @EventHandler(ignoreCancelled = true)
     public void onBlockBreak(BlockBreakEvent event) {
         AbstractPipePart pipePart = PipeManager.getInstance().getPipePart(event.getBlock());
         if (pipePart != null) {
@@ -110,7 +113,7 @@ public class BlockListener implements Listener {
         }
     }
 
-    @EventHandler
+    @EventHandler(ignoreCancelled = true)
     public void onBlockPlace(BlockPlaceEvent event) {
         try {
             AbstractPipePart pipePart = PipeManager.getInstance().getPipePart(event.getBlock());
@@ -204,8 +207,46 @@ public class BlockListener implements Listener {
                     String.valueOf(PipesConfig.getMaxPipeLength())));
         }
     }
-
-    @EventHandler
+    
+    @EventHandler(ignoreCancelled = true)
+    public void onPistonExtend(BlockPistonExtendEvent event) {
+        handlePistonEvent(event.getDirection(), event.getBlocks());
+    }
+    
+    @EventHandler(ignoreCancelled = true)
+    public void onPistonRetract(BlockPistonRetractEvent event) {
+        handlePistonEvent(event.getDirection(), event.getBlocks());
+    }
+    
+    private void handlePistonEvent(BlockFace direction, List<Block> blocks) {
+        if (!PipesConfig.isPistonCheckEnabled()) {
+            return;
+        }
+        
+        Set<Block> update = new HashSet<>();
+        for (Block moved : blocks) {
+            if (moved.getType() == Material.STAINED_GLASS) {
+                update.add(moved);
+                for (BlockFace face : PipesUtil.BLOCK_FACES) {
+                    Block u = moved.getRelative(face);
+                    if (u.getType() == Material.STAINED_GLASS || PipeManager.getInstance().getPipePart(u) != null) {
+                        update.add(u);
+                    }
+                    Block ud = u.getRelative(direction);
+                    if (ud.getType() == Material.STAINED_GLASS || PipeManager.getInstance().getPipePart(ud) != null) {
+                        update.add(ud);
+                    }
+                }
+            }
+        }
+        for (Block u : update) {
+            for (Pipe pipe : PipeManager.getInstance().getPipesSafe(u, true)) {
+                PipeManager.getInstance().removePipe(pipe);
+            }
+        }
+    }
+    
+    @EventHandler(ignoreCancelled = true)
     public void onItemCraft(CraftItemEvent event) {
         if (PipesUtil.getPipesItem(event.getCurrentItem()) == PipesItem.CHUNK_LOADER) {
             if (!event.getWhoClicked().hasPermission("Pipes.placeChunkLoader")) {

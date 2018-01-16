@@ -10,6 +10,7 @@ import org.bukkit.Material;
 import org.bukkit.Nameable;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
+import org.bukkit.block.BlockState;
 import org.bukkit.block.Dispenser;
 import org.bukkit.block.Dropper;
 import org.bukkit.inventory.BrewerInventory;
@@ -158,7 +159,8 @@ public class PipesUtil {
     }
 
     public static PipesItem getPipesItem(Block block) {
-        if (!(block.getState() instanceof InventoryHolder)) {
+        BlockState state = block.getState();
+        if (!(state instanceof InventoryHolder)) {
             return null;
         }
 
@@ -168,7 +170,7 @@ public class PipesUtil {
             return null;
         }
 
-        String hidden = getHiddenString(((Nameable) block.getState()).getCustomName());
+        String hidden = getHiddenString(((Nameable) state).getCustomName());
         if (hidden == null) {
             return null;
         }

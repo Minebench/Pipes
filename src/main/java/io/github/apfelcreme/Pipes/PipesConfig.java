@@ -8,11 +8,9 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
 import java.io.File;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Level;
-import java.util.stream.Collectors;
 
 /**
  * Copyright (C) 2016 Lord36 aka Apfelcreme
@@ -40,9 +38,10 @@ public class PipesConfig {
     private static long transferCooldown;
     private static int maxPipeOutputs;
     private static int maxPipeLength;
+    private static boolean pistonUpdateCheck;
     private static ItemStack guiFiller;
     private static Map<String, ItemStack> itemStacks;
-
+    
     /**
      * loads the config
      */
@@ -57,6 +56,7 @@ public class PipesConfig {
         transferCooldown = plugin.getConfig().getLong("transferCooldown");
         maxPipeOutputs = plugin.getConfig().getInt("maxPipeOutputs");
         maxPipeLength = plugin.getConfig().getInt("maxPipeLength");
+        pistonUpdateCheck = plugin.getConfig().getBoolean("pistonUpdateCheck");
         languageConfig = YamlConfiguration.loadConfiguration(new File(plugin.getDataFolder(), "lang.de.yml"));
         itemStacks = new HashMap<>();
     }
@@ -104,6 +104,15 @@ public class PipesConfig {
      */
     public static int getMaxPipeLength() {
         return maxPipeLength;
+    }
+    
+    /**
+     * returns whether or not piston checking is enabled
+     *
+     * @return whether or not piston checking is enabled
+     */
+    public static boolean isPistonCheckEnabled() {
+        return pistonUpdateCheck;
     }
 
 

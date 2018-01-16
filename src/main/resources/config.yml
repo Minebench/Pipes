@@ -1,6 +1,7 @@
 pipeCacheDuration: 600 #s
 pipeCacheSize: 1000 #number of cached inputs
 transferCooldown: 20 #ticks
+pistonUpdateCheck: true
 dispenserRecipe:
   IRON_BLOCK: 1
   DISPENSER: 1

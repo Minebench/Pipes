@@ -27,12 +27,16 @@ import org.bukkit.util.Vector;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.util.logging.Level;
+import java.util.stream.Collectors;
 
 /**
  * Copyright (C) 2016 Lord36 aka Apfelcreme
@@ -159,14 +163,12 @@ public class ItemMoveScheduler {
             transferredAll &= moveItem(inputInventory, pipe, itemStack, spread);
         }
 
-        // Set snapshot contents to real contents so that we can call an update (for redstone) and merge leftovers
-        if (transferredAll) {
-            inputHolder.getSnapshotInventory().setContents(inputInventory.getContents());
-        } else {
-            inputHolder.getSnapshotInventory().clear();
-            for (ItemStack item : inputInventory) {
-                if (item != null) {
-                    inputHolder.getSnapshotInventory().addItem(item);
+        if (!transferredAll && (boolean) input.getOption(PipeInput.Option.MERGE)) {
+            List<ItemStack> inputContents = Arrays.stream(inputInventory.getContents()).filter(Objects::nonNull).collect(Collectors.toList());
+            if (inputContents.size() > 1) {
+                inputInventory.clear();
+                for (ItemStack item : inputContents) {
+                    inputInventory.addItem(item);
                 }
             }
         }
@@ -209,10 +211,7 @@ public class ItemMoveScheduler {
 
             PipeOutput output = entry.getKey();
             InventoryHolder targetHolder = output.getTargetHolder();
-            Inventory targetInventory = null;
-            if (targetHolder != null) {
-                targetInventory = targetHolder.getInventory();
-            }
+            Inventory targetInventory = targetHolder != null ? targetHolder.getInventory() : null;
 
             ItemStack transferring = itemStack;
             PipeOutput.AcceptResult acceptResult = spread ? entry.getValue() : output.accepts(transferring);

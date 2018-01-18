@@ -159,7 +159,7 @@ public class PipesUtil {
     }
 
     public static PipesItem getPipesItem(Block block) {
-        BlockState state = block.getState();
+        BlockState state = block.getState(false);
         if (!(state instanceof InventoryHolder)) {
             return null;
         }

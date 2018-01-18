@@ -35,7 +35,7 @@ public class PipeInput extends AbstractPipePart {
 
     public PipeInput(Block block) {
         super(PipesItem.PIPE_INPUT, block);
-        this.facing = ((Directional) block.getState().getData()).getFacing();
+        this.facing = ((Directional) block.getState(false).getData()).getFacing();
     }
 
     public SimpleLocation getTargetLocation() {
@@ -77,7 +77,11 @@ public class PipeInput extends AbstractPipePart {
         /**
          * Whether or not to spread the items equally over all outputs
          */
-        SPREAD(Value.FALSE, Value.TRUE);
+        SPREAD(Value.FALSE, Value.TRUE),
+        /**
+         * Whether to merge item stacks in the input after a transfer attempt or not
+         */
+        MERGE(Value.TRUE, Value.FALSE);
 
         private final Value defaultValue;
         private final Class<?> valueType;

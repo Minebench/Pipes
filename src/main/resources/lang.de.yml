@@ -90,6 +90,15 @@ texts:
           &cPipe Input ist im &4Einzel&c Modus!
           &7Items werden in den ersten passenden
           &7Output transferiert. (Oder overflowen)
+      merge:
+        description: 'Verbindungsmodus'
+        true: |
+          &aPipe Input verbindet Items in Stacks!
+          &7Alle einzelne Items die sich im Input befinden
+          &7werden versucht in einen Stack zu verbinden.
+        false: |
+          &cPipe Input verbindet Items nicht!
+          &7Items werden nicht zu Stacks verbunden.
     pipe-output:
       whitelist:
         description: 'Whitelist'

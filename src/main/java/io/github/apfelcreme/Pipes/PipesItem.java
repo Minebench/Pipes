@@ -23,6 +23,7 @@ import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.Nameable;
 import org.bukkit.block.Block;
+import org.bukkit.block.BlockState;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemFlag;
@@ -78,13 +79,18 @@ public enum PipesItem {
         this.item = item;
         return new ItemStack(item);
     }
-
+    
+    @Deprecated
     public boolean check(Block block) {
-        if (block == null || block.getType() != this.material || !(block.getState() instanceof InventoryHolder)) {
+        return block != null && check(block.getState(false));
+    }
+    
+    public boolean check(BlockState blockState) {
+        if (blockState == null || blockState.getType() != this.material || !(blockState instanceof InventoryHolder)) {
             return false;
         }
 
-        String hidden = PipesUtil.getHiddenString(((Nameable) block.getState()).getCustomName());
+        String hidden = PipesUtil.getHiddenString(((Nameable) blockState).getCustomName());
 
         return hidden != null && toString().equals(hidden.split(",")[0]) || IDENTIFIER.equals(hidden);
     }

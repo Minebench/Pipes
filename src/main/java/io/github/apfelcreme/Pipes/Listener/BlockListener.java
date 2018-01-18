@@ -84,7 +84,7 @@ public class BlockListener implements Listener {
         if (event.getDestination().getType() != InventoryType.HOPPER // hoppers are allowed to remove items from the output
                 && event.getSource().getType() != InventoryType.HOPPER
                 && event.getSource().getHolder() instanceof BlockState
-                && PipesItem.PIPE_OUTPUT.check(((BlockState) event.getSource().getHolder()).getBlock())) {
+                && PipesItem.PIPE_OUTPUT.check((BlockState) event.getSource().getHolder())) {
             event.setCancelled(true);
         }
     }
@@ -125,13 +125,11 @@ public class BlockListener implements Listener {
                     event.setCancelled(true);
                     return;
                 }
-
-
-                Set<Pipe> pipes;
+                
                 if (pipePart instanceof PipeInput) {
                     Block block = event.getBlock().getRelative(((PipeInput) pipePart).getFacing());
                     if (block.getType() == Material.STAINED_GLASS) {
-                        pipes = PipeManager.getInstance().getPipesSafe(((PipeInput) pipePart).getTargetLocation(), true);
+                        Set<Pipe> pipes = PipeManager.getInstance().getPipesSafe(((PipeInput) pipePart).getTargetLocation(), true);
                         if (!pipes.isEmpty()) {
                             PipeManager.getInstance().addPart(pipes.iterator().next(), pipePart);
                         }

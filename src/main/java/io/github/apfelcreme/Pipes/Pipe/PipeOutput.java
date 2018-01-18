@@ -3,6 +3,7 @@ package io.github.apfelcreme.Pipes.Pipe;
 import io.github.apfelcreme.Pipes.PipesItem;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
+import org.bukkit.block.BlockState;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -42,7 +43,7 @@ public class PipeOutput extends AbstractPipePart {
 
     public PipeOutput(Block block) {
         super(PipesItem.PIPE_OUTPUT, block);
-        this.facing = ((Directional) block.getState().getData()).getFacing();
+        this.facing = ((Directional) block.getState(false).getData()).getFacing();
     }
 
     /**
@@ -52,8 +53,9 @@ public class PipeOutput extends AbstractPipePart {
      */
     public InventoryHolder getTargetHolder() {
         Block block = getTargetLocation().getBlock();
-        if (block != null && block.getState() instanceof InventoryHolder) {
-            return (InventoryHolder) block.getState();
+        BlockState state = block != null ? block.getState(false) : null;
+        if (state != null && state instanceof InventoryHolder) {
+            return (InventoryHolder) state;
         }
         return null;
     }
@@ -91,7 +93,8 @@ public class PipeOutput extends AbstractPipePart {
      */
     public AcceptResult accepts(ItemStack itemStack) {
         Block block = getLocation().getBlock();
-        if (block == null || !(block.getState() instanceof InventoryHolder)) {
+        BlockState state = block != null ? block.getState(false) : null;
+        if (state == null || !(state instanceof InventoryHolder)) {
             return new AcceptResult(ResultType.DENY_INVALID, null);
         }
         if ((boolean) getOption(PipeOutput.Option.OVERFLOW) && block.isBlockPowered()) {
@@ -101,7 +104,7 @@ public class PipeOutput extends AbstractPipePart {
         ItemStack filter = null;
         boolean isEmpty = true;
         boolean isWhitelist = (boolean) getOption(Option.WHITELIST);
-        for (ItemStack filterItem : ((InventoryHolder) block.getState()).getInventory().getContents()) {
+        for (ItemStack filterItem : ((InventoryHolder) state).getInventory().getContents()) {
             isEmpty &= filterItem == null;
             if (matchesFilter(filterItem, itemStack)) {
                 if (isWhitelist) {

@@ -58,8 +58,9 @@ public abstract class AbstractPipePart {
     protected AbstractPipePart(PipesItem type, Block block) {
         this.type = type;
         this.location = new SimpleLocation(block.getLocation());
-        if (block.getState() instanceof Nameable) {
-            String hidden = PipesUtil.getHiddenString(((Nameable) block.getState()).getCustomName());
+        BlockState state = block.getState(false);
+        if (state instanceof Nameable) {
+            String hidden = PipesUtil.getHiddenString(((Nameable) state).getCustomName());
             if (hidden != null) {
                 try {
                     applyOptions(hidden);
@@ -94,9 +95,9 @@ public abstract class AbstractPipePart {
      * @return the inventory holder of pipe part
      */
     public Container getHolder() {
-        Block block = location.getBlock();
-        if (type.check(block)) {
-            return (Container) block.getState();
+        BlockState state = location.getBlock().getState(false);
+        if (type.check(state)) {
+            return (Container) state;
         }
         return null;
     }
@@ -152,7 +153,7 @@ public abstract class AbstractPipePart {
      * Save the options to the block. This is done by hiding strings with color codes
      */
     protected void saveOptions() {
-        BlockState state = getLocation().getBlock().getState();
+        BlockState state = getLocation().getBlock().getState(false);
         if (state.getType() == getType().getMaterial() && state instanceof Nameable) {
             ((Nameable) state).setCustomName(ChatColor.RESET + "" + ChatColor.WHITE + PipesUtil.hideString(toString(), getType().getName()));
             state.update();

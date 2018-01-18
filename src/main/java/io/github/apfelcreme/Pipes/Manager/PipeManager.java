@@ -510,7 +510,7 @@ public class PipeManager {
                                 outputs.add(pipeOutput);
                                 found.add(block);
                                 Block relativeToOutput = pipeOutput.getTargetLocation().getBlock();
-                                if (relativeToOutput.getState() instanceof InventoryHolder) {
+                                if (relativeToOutput.getState(false) instanceof InventoryHolder) {
                                     found.add(relativeToOutput);
                                 }
                                 break;
@@ -559,11 +559,11 @@ public class PipeManager {
      *
      * @param state a block state
      * @return true or false
-     * @deprecated Use {@link PipesItem#check(Block)}
+     * @deprecated Use {@link PipesItem#check(BlockState)}
      */
     @Deprecated
     public static boolean isPipeInput(BlockState state) {
-        return PipesItem.PIPE_INPUT.check(state.getBlock());
+        return PipesItem.PIPE_INPUT.check(state);
     }
 
     /**
@@ -571,11 +571,11 @@ public class PipeManager {
      *
      * @param holder a block state
      * @return true or false
-     * @deprecated Use {@link PipesItem#check(Block)}
+     * @deprecated Use {@link PipesItem#check(BlockState)}
      */
     @Deprecated
     public static boolean isPipeOutput(BlockState holder) {
-        return PipesItem.PIPE_OUTPUT.check(holder.getBlock());
+        return PipesItem.PIPE_OUTPUT.check(holder);
     }
 
     /**
@@ -583,11 +583,11 @@ public class PipeManager {
      *
      * @param holder a block state
      * @return true or false
-     * @deprecated Use {@link PipesItem#check(Block)}
+     * @deprecated Use {@link PipesItem#check(BlockState)}
      */
     @Deprecated
     public static boolean isChunkLoader(BlockState holder) {
-        return PipesItem.CHUNK_LOADER.check(holder.getBlock());
+        return PipesItem.CHUNK_LOADER.check(holder);
     }
 
     /**
@@ -595,7 +595,7 @@ public class PipeManager {
      *
      * @param location a block location
      * @return true or false
-     * @deprecated Use {@link PipesItem#check(Block)}
+     * @deprecated Use {@link PipesItem#check(BlockState)}
      */
     @Deprecated
     public static boolean isPipeInput(SimpleLocation location) {
@@ -607,7 +607,7 @@ public class PipeManager {
      *
      * @param location a block location
      * @return true or false
-     * @deprecated Use {@link PipesItem#check(Block)}
+     * @deprecated Use {@link PipesItem#check(BlockState)}
      */
     @Deprecated
     public static boolean isPipeOutput(SimpleLocation location) {
@@ -619,7 +619,7 @@ public class PipeManager {
      *
      * @param location a block location
      * @return true or false
-     * @deprecated Use {@link PipesItem#check(Block)}
+     * @deprecated Use {@link PipesItem#check(BlockState)}
      */
     @Deprecated
     public static boolean isChunkLoader(SimpleLocation location) {

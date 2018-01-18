@@ -71,13 +71,13 @@ public class InventoryChangeListener implements Listener {
         if (!(inventory.getHolder() instanceof BlockState)) {
             return true;
         }
-        Block dispenserBlock = ((BlockState) inventory.getHolder()).getBlock();
-        if (!PipesItem.PIPE_INPUT.check(dispenserBlock)) {
+        BlockState dispenser = (BlockState) inventory.getHolder();
+        if (!PipesItem.PIPE_INPUT.check(dispenser)) {
             return true;
         }
-        final SimpleLocation dispenserLocation = new SimpleLocation(dispenserBlock.getLocation());
+        SimpleLocation dispenserLocation = new SimpleLocation(dispenser.getLocation());
 
-        Set<Pipe> pipes = PipeManager.getInstance().getPipesSafe(dispenserBlock);
+        Set<Pipe> pipes = PipeManager.getInstance().getPipesSafe(dispenserLocation);
         if (pipes.isEmpty()) {
             return false;
         }

@@ -4,6 +4,7 @@ import io.github.apfelcreme.Pipes.PipesConfig;
 import org.bukkit.DyeColor;
 import org.bukkit.Location;
 import org.bukkit.Particle;
+import org.bukkit.entity.Player;
 
 import java.util.LinkedHashSet;
 
@@ -105,8 +106,9 @@ public class Pipe {
 
     /**
      * displays particles around a pipe
+     * @param players The player to show the pipe to, none to show it to everyone
      */
-    public void highlight() {
+    public void highlight(Player... players) {
         LinkedHashSet<SimpleLocation> locations = new LinkedHashSet<>();
         locations.addAll(pipeBlocks);
         inputs.stream().map(PipeInput::getLocation).forEach(locations::add);
@@ -119,7 +121,13 @@ public class Pipe {
             location.setY(location.getY() + 0.5);
             location.setZ(location.getZ() + 0.5);
             for (int i = 0; i < 3; i++) {
-                location.getWorld().spawnParticle(Particle.FIREWORKS_SPARK, location, 1, 0, 0, 0, 0);
+                if (players.length == 0) {
+                    location.getWorld().spawnParticle(Particle.FIREWORKS_SPARK, location, 1, 0, 0, 0, 0);
+                } else {
+                    for (Player p : players) {
+                        p.spawnParticle(Particle.FIREWORKS_SPARK, location, 1, 0, 0, 0, 0);
+                    }
+                }
             }
         }
     }

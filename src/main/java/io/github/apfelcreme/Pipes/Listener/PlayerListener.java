@@ -59,7 +59,7 @@ public class PlayerListener implements Listener {
                     Set<Pipe> pipes = PipeManager.getInstance().getPipes(event.getClickedBlock());
                     for (Pipe pipe : pipes) {
                         Pipes.sendMessage(event.getPlayer(), pipe.getString());
-                        pipe.highlight();
+                        pipe.highlight(event.getPlayer());
                     }
                     if (pipes.isEmpty()) {
                         Pipes.sendMessage(event.getPlayer(), PipesConfig.getText("error.noPipe"));

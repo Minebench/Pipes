@@ -9,7 +9,6 @@ import io.github.apfelcreme.Pipes.Pipe.PipeOutput;
 import io.github.apfelcreme.Pipes.Pipe.SimpleLocation;
 import io.github.apfelcreme.Pipes.Pipes;
 import io.github.apfelcreme.Pipes.PipesConfig;
-import io.github.apfelcreme.Pipes.PipesItem;
 import io.github.apfelcreme.Pipes.PipesUtil;
 import org.bukkit.Effect;
 import org.bukkit.Location;
@@ -33,7 +32,6 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.stream.Collectors;
@@ -179,18 +177,16 @@ public class ItemMoveScheduler {
 
     private boolean moveItem(Inventory inputInventory, Pipe pipe, ItemStack itemStack, boolean spread) {
         Map<PipeOutput, PipeOutput.AcceptResult> outputs = new LinkedHashMap<>();
-        if (spread) {
-            for (PipeOutput output : pipe.getOutputs()) {
-                PipeOutput.AcceptResult acceptResult = output.accepts(itemStack);
-                if (acceptResult.getType() == PipeOutput.ResultType.ACCEPT) {
-                    outputs.put(output, acceptResult);
-                }
-            }
-        } else {
-            for (PipeOutput output : pipe.getOutputs()) {
-                outputs.put(output, null);
+        for (PipeOutput output : pipe.getOutputs()) {
+            PipeOutput.AcceptResult acceptResult = output.accepts(itemStack);
+            if (!spread || acceptResult.getType() == PipeOutput.ResultType.ACCEPT) {
+                outputs.put(output, acceptResult);
             }
         }
+    
+        outputs = outputs.entrySet().stream()
+                .sorted((e1, e2) -> e1.getValue().isInFilter() ? (e2.getValue().isInFilter() ? 0 : -1) : 1)
+                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (oldValue, newValue) -> oldValue, LinkedHashMap::new));
         
         if (outputs.isEmpty()) {
             return false;
@@ -214,7 +210,7 @@ public class ItemMoveScheduler {
             Inventory targetInventory = targetHolder != null ? targetHolder.getInventory() : null;
 
             ItemStack transferring = itemStack;
-            PipeOutput.AcceptResult acceptResult = spread ? entry.getValue() : output.accepts(transferring);
+            PipeOutput.AcceptResult acceptResult = entry.getValue();
 
             // Set the spread amount
             if (spread && spreadAmount < transferring.getAmount()) {

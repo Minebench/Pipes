@@ -19,5 +19,6 @@ maxPipeOutputs: 64
 gui:
   true: "WOOL:5"
   false: "WOOL:14"
+  input: "WOOL:4"
   filler: "STAINED_GLASS_PANE:15"
   copy: "BOOK_AND_QUILL"

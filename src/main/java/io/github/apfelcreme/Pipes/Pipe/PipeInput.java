@@ -26,9 +26,9 @@ import org.bukkit.material.Directional;
 public class PipeInput extends AbstractPipePart {
 
     public final static String[] GUI_SETUP = {
-            "sssiii   ",
-            "sssiii c ",
-            "sssiii   "
+            "ss iii   ",
+            "ss iii c ",
+            "ss iii   "
     };
 
     private final BlockFace facing;

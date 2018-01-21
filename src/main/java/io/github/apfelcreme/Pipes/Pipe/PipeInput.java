@@ -26,9 +26,9 @@ import org.bukkit.material.Directional;
 public class PipeInput extends AbstractPipePart {
 
     public final static String[] GUI_SETUP = {
-            "ss iii   ",
-            "ss iii c ",
-            "ss iii   "
+            "sssiii   ",
+            "sssiii c ",
+            "sssiii   "
     };
 
     private final BlockFace facing;
@@ -78,6 +78,13 @@ public class PipeInput extends AbstractPipePart {
          * Whether or not to spread the items equally over all outputs
          */
         SPREAD(Value.FALSE, Value.TRUE),
+        /**
+         * Whether or not this transfers from this input can overflow into other available outputs
+         * <p><strong>Possible Values:</strong>
+         * <li><tt>true</tt> if the items should end up in the overflow</li>
+         * <li><tt>false</tt> if this output should force items to end up in the filtered output even 'though the target is full</li></p>
+         */
+        OVERFLOW(Value.FALSE, Value.TRUE),
         /**
          * Whether to merge item stacks in the input after a transfer attempt or not
          */

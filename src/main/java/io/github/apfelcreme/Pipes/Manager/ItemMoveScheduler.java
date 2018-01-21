@@ -155,10 +155,11 @@ public class ItemMoveScheduler {
 
         boolean transferredAll = true;
         boolean spread = (boolean) input.getOption(PipeInput.Option.SPREAD);
+        boolean overflow = (boolean) input.getOption(PipeInput.Option.OVERFLOW);
 
         // loop through all items and try to move them
         for (ItemStack itemStack : itemQueue) {
-            transferredAll &= moveItem(inputInventory, pipe, itemStack, spread);
+            transferredAll &= moveItem(input, inputInventory, pipe, itemStack, spread, overflow);
         }
 
         if (!transferredAll && (boolean) input.getOption(PipeInput.Option.MERGE)) {
@@ -175,10 +176,10 @@ public class ItemMoveScheduler {
         return transferredAll;
     }
 
-    private boolean moveItem(Inventory inputInventory, Pipe pipe, ItemStack itemStack, boolean spread) {
+    private boolean moveItem(PipeInput input, Inventory inputInventory, Pipe pipe, ItemStack itemStack, boolean spread, boolean overflow) {
         Map<PipeOutput, PipeOutput.AcceptResult> outputs = new LinkedHashMap<>();
         for (PipeOutput output : pipe.getOutputs()) {
-            PipeOutput.AcceptResult acceptResult = output.accepts(itemStack);
+            PipeOutput.AcceptResult acceptResult = output.accepts(input, itemStack);
             if (!spread || acceptResult.getType() == PipeOutput.ResultType.ACCEPT) {
                 outputs.put(output, acceptResult);
             }
@@ -247,9 +248,10 @@ public class ItemMoveScheduler {
             // Calculate the amount not transferred
             int leftOverAmount = transferring == itemStack ? 0 : itemStack.getAmount() - transferring.getAmount();
 
-            boolean overflowIsAllowed = (boolean) output.getOption(PipeOutput.Option.OVERFLOW);
+            PipeOutput.Option.Overflow outputOverflow = (PipeOutput.Option.Overflow) output.getOption(PipeOutput.Option.OVERFLOW);
             if (acceptResult.getType() != PipeOutput.ResultType.ACCEPT) {
-                if (!overflowIsAllowed && !spread && acceptResult.isInFilter()) {
+                if (!spread && acceptResult.isInFilter() &&
+                        (outputOverflow == PipeOutput.Option.Overflow.FALSE || (!overflow && outputOverflow == PipeOutput.Option.Overflow.INPUT))) {
                     return false;
                 }
                 continue;
@@ -410,7 +412,8 @@ public class ItemMoveScheduler {
                 itemStack.setAmount(leftOverAmount + transferring.getAmount());
             }
 
-            if (!spread && itemStack.getAmount() > 0 && acceptResult.isInFilter() && !overflowIsAllowed) {
+            if (!spread && itemStack.getAmount() > 0 && acceptResult.isInFilter() &&
+                    (outputOverflow == PipeOutput.Option.Overflow.FALSE || (!overflow && outputOverflow == PipeOutput.Option.Overflow.INPUT))) {
                 return false;
             }
         }

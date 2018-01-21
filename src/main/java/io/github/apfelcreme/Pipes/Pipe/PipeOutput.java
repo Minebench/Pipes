@@ -88,16 +88,20 @@ public class PipeOutput extends AbstractPipePart {
 
     /**
      * Check whether or not this output can accept that item stack
+     *
+     * @param input     The input that tries to move the item
      * @param itemStack The item to check
      * @return  A result that represents why or why not the item is accepted by this output
      */
-    public AcceptResult accepts(ItemStack itemStack) {
+    public AcceptResult accepts(PipeInput input, ItemStack itemStack) {
         Block block = getLocation().getBlock();
         BlockState state = block != null ? block.getState(false) : null;
         if (state == null || !(state instanceof InventoryHolder)) {
             return new AcceptResult(ResultType.DENY_INVALID, null);
         }
-        if ((boolean) getOption(PipeOutput.Option.OVERFLOW) && block.isBlockPowered()) {
+        Option.Overflow outputOverflow = (Option.Overflow) getOption(Option.OVERFLOW);
+        if ((outputOverflow == Option.Overflow.TRUE || outputOverflow == Option.Overflow.INPUT && (boolean) input.getOption(PipeInput.Option.OVERFLOW))
+                && block.isBlockPowered()) {
             return new AcceptResult(ResultType.DENY_REDSTONE, null);
         }
 
@@ -146,7 +150,7 @@ public class PipeOutput extends AbstractPipePart {
         }
 
         if ((boolean) getOption(Option.MATERIAL_FILTER)) {
-            if (!filter.getData().equals(item.getData())) {
+            if (filter.getType() != item.getType()) {
                 return false;
             }
         }
@@ -258,10 +262,11 @@ public class PipeOutput extends AbstractPipePart {
         /**
          * Whether or not this output can overflow into other available outputs
          * <p><strong>Possible Values:</strong>
-         * <li><tt>true</tt> if the items should end up in the overflow</li>
-         * <li><tt>false</tt> if this output should force items to end up here even 'though the target is full</li></p>
+         * <li><tt>input</tt> if the input settings should decide the overflow rules</li>
+         * <li><tt>enabled</tt> if the items should end up in the overflow</li>
+         * <li><tt>disabled</tt> if this output should force items to end up here even 'though the target is full</li></p>
          */
-        OVERFLOW(GuiPosition.LEFT, Value.FALSE, Value.TRUE),
+        OVERFLOW(GuiPosition.LEFT, new Value<>(Overflow.INPUT), new Value<>(Overflow.TRUE), new Value<>(Overflow.FALSE)),
         /**
          * Whether or not to try to insert into the appropriate slots depending on the item type (like fuel)
          * <p><strong>Possible Values:</strong>
@@ -297,6 +302,12 @@ public class PipeOutput extends AbstractPipePart {
          * Whether or not to drop the item instead of adding to an inventory
          */
         DROP(GuiPosition.LEFT, Value.FALSE, Value.TRUE);
+    
+        public enum Overflow {
+            INPUT,
+            FALSE,
+            TRUE
+        }
 
         private final Value defaultValue;
         private final Class<?> valueType;

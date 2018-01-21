@@ -25,6 +25,9 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.BookMeta;
 import org.bukkit.inventory.meta.ItemMeta;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -307,8 +310,33 @@ public abstract class AbstractPipePart {
             }
             try {
                 IOption option = getAvailableOption(parts[0].toUpperCase());
-                setOption(option, new Value<>(Boolean.parseBoolean(parts[1])), false);
-            } catch (IllegalArgumentException e) {
+                Value value;
+                if (option.getValueType() == Boolean.class) {
+                    value = new Value<>(Boolean.parseBoolean(parts[1]));
+                } else if (option.getValueType().isEnum()) {
+                    Enum<?> e = (Enum) option.getDefaultValue().getValue();
+                    value = new Value<>(e.valueOf(e.getDeclaringClass(), parts[1].toUpperCase()));
+                } else if (option.getValueType() == String.class) {
+                    value = new Value<>(parts[1]);
+                } else {
+                    // If all fails try to get a static method that can get the value
+                    Method get = null;
+                    for (String method : new String[]{"valueOf", "fromString", "parse"}) {
+                        try {
+                            get = option.getValueType().getMethod(method, String.class);
+                            if (Modifier.isStatic(get.getModifiers())) {
+                                break;
+                            }
+                        } catch (NoSuchMethodException ignored) { }
+                    }
+                    if (get == null) {
+                        throw new IllegalArgumentException("Values of type " + option.getValueType() + " are not supported!");
+                    }
+                    value = new Value<>(get.invoke(null, parts[1]));
+                }
+                setOption(option, value, false);
+            } catch (IllegalArgumentException | IllegalAccessException | InvocationTargetException e) {
+                e.printStackTrace();
                 throw new IllegalArgumentException(PipesConfig.getText("error.invalidSettingsBook",
                         "Invalid option" + parts[0] + "=" + parts[1]));
             }
@@ -372,7 +400,7 @@ public abstract class AbstractPipePart {
                 }
                 c.setHoverEvent(new HoverEvent(
                         HoverEvent.Action.SHOW_TEXT,
-                        TextComponent.fromLegacyText(PipesConfig.getText("options." + getType().toConfigKey() + "." + option.toConfigKey().toLowerCase() + "." + value.toString()))
+                        TextComponent.fromLegacyText(PipesConfig.getText("options." + getType().toConfigKey() + "." + option.toConfigKey().toLowerCase() + "." + value.toString().toLowerCase()))
                 ));
             }
     
@@ -487,13 +515,13 @@ public abstract class AbstractPipePart {
             Object value = pipePart.getOption(this);
             List<GuiStateElement.State> states = new ArrayList<>();
             for (Value v : getPossibleValues()) {
-                ItemStack icon = PipesConfig.getGuiItemStack(pipePart.getType().toConfigKey() + "." + toConfigKey().toLowerCase() + "." + v.getValue().toString());
+                ItemStack icon = PipesConfig.getGuiItemStack(pipePart.getType().toConfigKey() + "." + toConfigKey().toLowerCase() + "." + v.getValue().toString().toLowerCase());
 
                 states.add(new GuiStateElement.State(
                         change -> pipePart.setOption(this, v),
                         v.getValue().toString(),
                         icon,
-                        PipesConfig.getText("options." + pipePart.getType().toConfigKey() + "." + toConfigKey().toLowerCase() + "." + v.getValue().toString())
+                        PipesConfig.getText("options." + pipePart.getType().toConfigKey() + "." + toConfigKey().toLowerCase() + "." + v.getValue().toString().toLowerCase())
                 ));
             }
             return new GuiStateElement(

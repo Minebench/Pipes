@@ -90,6 +90,18 @@ texts:
           &cPipe Input ist im &4Einzel&c Modus!
           &7Items werden in den ersten passenden
           &7Output transferiert. (Oder overflowen)
+      overflow:
+        description: 'Overflow'
+        true: |
+          &aOverflowing ist erlaubt!
+          &7Items werden nun in andere Outputs
+          &7(auch ungefilterte) transportiert
+          &7wenn dies nicht möglich ist.
+        false: |
+          &cOverflowing ist nicht erlaubt!
+          &7Items werden nicht in mögliche
+          &7andere Outputs transportiert
+          &7wenn dies nicht möglich ist.
       merge:
         description: 'Verbindungsmodus'
         true: |
@@ -112,6 +124,9 @@ texts:
           &7dem eingestellten Filter entsprechen!
       overflow:
         description: 'Overflow'
+        input: |
+          &6Overflowing ist abhängig vom Input!
+          &7Abhängig von der Einstellung am Input.
         true: |
           &aOverflowing ist erlaubt!
           &7Items werden nun in andere Outputs

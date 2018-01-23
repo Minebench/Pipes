@@ -178,23 +178,27 @@ public class ItemMoveScheduler {
 
     private boolean moveItem(PipeInput input, Inventory inputInventory, Pipe pipe, ItemStack itemStack, boolean spread, boolean overflow) {
         Map<PipeOutput, PipeOutput.AcceptResult> outputs = new LinkedHashMap<>();
+        int filterCount = 0;
         for (PipeOutput output : pipe.getOutputs()) {
             PipeOutput.AcceptResult acceptResult = output.accepts(input, itemStack);
             if (!spread || acceptResult.getType() == PipeOutput.ResultType.ACCEPT) {
                 outputs.put(output, acceptResult);
+                if (acceptResult.isInFilter()) {
+                    filterCount++;
+                }
             }
         }
-    
-        outputs = outputs.entrySet().stream()
-                .sorted((e1, e2) -> e1.getValue().isInFilter() ? e2.getValue().isInFilter() ? 0 : -1 : e2.getValue().isInFilter() ? 1 : 0)
-                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (oldValue, newValue) -> oldValue, LinkedHashMap::new));
         
         if (outputs.isEmpty()) {
             return false;
         }
+        
+        outputs = outputs.entrySet().stream()
+                .sorted((e1, e2) -> e1.getValue().isInFilter() ? e2.getValue().isInFilter() ? 0 : -1 : e2.getValue().isInFilter() ? 1 : 0)
+                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (oldValue, newValue) -> oldValue, LinkedHashMap::new));
 
         // Calculate amount that should be spread over the outputs (when in spread mode)
-        int spreadAmount = itemStack.getAmount() / outputs.size();
+        int spreadAmount = itemStack.getAmount() / (filterCount > 0 ? filterCount : outputs.size());
         if (spread && spreadAmount == 0) { // not enough items to spread over all outputs, return
             return false;
         }

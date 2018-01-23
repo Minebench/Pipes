@@ -186,7 +186,7 @@ public class ItemMoveScheduler {
         }
     
         outputs = outputs.entrySet().stream()
-                .sorted((e1, e2) -> e1.getValue().isInFilter() ? (e2.getValue().isInFilter() ? 0 : -1) : 1)
+                .sorted((e1, e2) -> e1.getValue().isInFilter() ? e2.getValue().isInFilter() ? 0 : -1 : e2.getValue().isInFilter() ? 1 : 0)
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (oldValue, newValue) -> oldValue, LinkedHashMap::new));
         
         if (outputs.isEmpty()) {

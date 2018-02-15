@@ -389,7 +389,7 @@ public abstract class AbstractPipePart {
             if (value instanceof Boolean) {
                 optionsLore.add(((Boolean) value ? ChatColor.GREEN : ChatColor.RED) + shortDesc);
             } else {
-                shortDesc = ChatColor.RESET + shortDesc + ": " + ChatColor.BLUE + value.toString();
+                shortDesc = ChatColor.DARK_PURPLE + shortDesc + ": " + ChatColor.BLUE + value.toString();
                 optionsLore.add(shortDesc);
             }
     

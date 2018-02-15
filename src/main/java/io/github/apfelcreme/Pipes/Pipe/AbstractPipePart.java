@@ -170,7 +170,7 @@ public abstract class AbstractPipePart {
     protected String getOptionsString() {
         StringBuilder s = new StringBuilder();
         for (Map.Entry<IOption, Value> option : options.entrySet()) {
-            s.append(',').append(option.getKey()).append('=').append(option.getValue().getValue());
+            s.append(',').append(option.getKey().name()).append('=').append(option.getValue().getValue());
         }
         return s.toString();
     }
@@ -429,7 +429,7 @@ public abstract class AbstractPipePart {
                 ).split("\n")
         ));
         lore.add(ChatColor.BLUE + "" + ChatColor.ITALIC + PipesUtil.hideString(
-                PipesItem.SETTINGS_BOOK.toString() + "," + getType().toString() + getOptionsString(),
+                PipesItem.SETTINGS_BOOK.toString() + "," + toString(),
                 PipesItem.getIdentifier()
         ));
         

@@ -211,6 +211,10 @@ public class ItemMoveScheduler {
             }
 
             PipeOutput output = entry.getKey();
+            // Don't allow looping back into input
+            if (output.getTargetLocation().equals(input.getTargetLocation())) {
+                continue;
+            }
             InventoryHolder targetHolder = output.getTargetHolder();
             Inventory targetInventory = targetHolder != null ? targetHolder.getInventory() : null;
 

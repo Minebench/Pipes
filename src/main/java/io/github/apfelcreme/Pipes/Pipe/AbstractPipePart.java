@@ -2,9 +2,9 @@ package io.github.apfelcreme.Pipes.Pipe;
 
 import de.themoep.inventorygui.GuiElementGroup;
 import de.themoep.inventorygui.GuiStateElement;
-import de.themoep.inventorygui.GuiStaticElement;
 import de.themoep.inventorygui.GuiStorageElement;
 import de.themoep.inventorygui.InventoryGui;
+import de.themoep.inventorygui.StaticGuiElement;
 import io.github.apfelcreme.Pipes.Pipes;
 import io.github.apfelcreme.Pipes.PipesConfig;
 import io.github.apfelcreme.Pipes.PipesItem;
@@ -189,7 +189,7 @@ public abstract class AbstractPipePart {
             gui.setFiller(PipesConfig.getGuiItemStack(getType().toConfigKey() + ".filler"));
 
             if (getOptions().length > 0) {
-                gui.addElement(new GuiStaticElement('c',
+                gui.addElement(new StaticGuiElement('c',
                         PipesConfig.getGuiItemStack(getType().toConfigKey() + ".copy"),
                         click -> {
                             if (click.getEvent().getCursor() == null) {

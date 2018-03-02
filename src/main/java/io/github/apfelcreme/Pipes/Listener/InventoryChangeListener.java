@@ -1,5 +1,6 @@
 package io.github.apfelcreme.Pipes.Listener;
 
+import de.themoep.inventorygui.InventoryGui;
 import io.github.apfelcreme.Pipes.Manager.PipeManager;
 import io.github.apfelcreme.Pipes.Pipe.Pipe;
 import io.github.apfelcreme.Pipes.Pipe.PipeInput;
@@ -15,6 +16,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.inventory.InventoryMoveItemEvent;
 import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.InventoryHolder;
 
 import java.util.Set;
 
@@ -68,10 +70,15 @@ public class InventoryChangeListener implements Listener {
      * @return <tt>Wether or not something went wrong</tt>
      */
     private boolean handleInventoryAction(Inventory inventory, boolean scheduled) {
-        if (!(inventory.getHolder() instanceof BlockState)) {
+        InventoryHolder holder = inventory.getHolder();
+        if (holder instanceof InventoryGui.Holder) {
+            holder = ((InventoryGui.Holder) holder).getGui().getOwner();
+        }
+        
+        if (holder == null || !(holder instanceof BlockState)) {
             return true;
         }
-        BlockState dispenser = (BlockState) inventory.getHolder();
+        BlockState dispenser = (BlockState) holder;
         if (!PipesItem.PIPE_INPUT.check(dispenser)) {
             return true;
         }

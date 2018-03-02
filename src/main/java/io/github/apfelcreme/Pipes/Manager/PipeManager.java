@@ -513,6 +513,11 @@ public class PipeManager {
                                 if (relativeToOutput.getState(false) instanceof InventoryHolder) {
                                     found.add(relativeToOutput);
                                 }
+                                for (BlockFace face : PipesUtil.BLOCK_FACES) {
+                                    if (face != pipeOutput.getFacing()) {
+                                        queue.add(location.getRelative(face));
+                                    }
+                                }
                                 break;
                             case CHUNK_LOADER:
                                 chunkLoaders.add((ChunkLoader) pipesPart);

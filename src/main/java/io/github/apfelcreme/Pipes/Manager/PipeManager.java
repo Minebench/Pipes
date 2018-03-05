@@ -508,15 +508,19 @@ public class PipeManager {
                                     throw new TooManyOutputsException(location);
                                 }
                                 outputs.add(pipeOutput);
+                                if (found.isEmpty()) {
+                                    for (BlockFace face : PipesUtil.BLOCK_FACES) {
+                                        if (face != pipeOutput.getFacing()
+                                                && block.getRelative(face).getType() == Material.STAINED_GLASS) {
+                                            queue.add(location.getRelative(face));
+                                            break;
+                                        }
+                                    }
+                                }
                                 found.add(block);
                                 Block relativeToOutput = pipeOutput.getTargetLocation().getBlock();
                                 if (relativeToOutput.getState(false) instanceof InventoryHolder) {
                                     found.add(relativeToOutput);
-                                }
-                                for (BlockFace face : PipesUtil.BLOCK_FACES) {
-                                    if (face != pipeOutput.getFacing()) {
-                                        queue.add(location.getRelative(face));
-                                    }
                                 }
                                 break;
                             case CHUNK_LOADER:

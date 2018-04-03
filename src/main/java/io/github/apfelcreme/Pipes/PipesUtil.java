@@ -463,7 +463,7 @@ public class PipesUtil {
      * @return              <tt>true</tt> if the potion can be brewed with the ingredient; <tt>false</tt> if not
      */
     public static boolean potionAcceptsIngredient(ItemStack itemStack, ItemStack ingredient) throws IllegalArgumentException {
-        if (itemStack.getType() != Material.POTION || itemStack.getType() != Material.SPLASH_POTION || itemStack.getType() != Material.LINGERING_POTION) {
+        if (itemStack.getType() != Material.POTION && itemStack.getType() != Material.SPLASH_POTION && itemStack.getType() != Material.LINGERING_POTION) {
             throw new IllegalArgumentException("Input itemstack is not a potion but " + itemStack.getType());
         }
         if (ingredient == null || ingredient.getAmount() <= 0) {

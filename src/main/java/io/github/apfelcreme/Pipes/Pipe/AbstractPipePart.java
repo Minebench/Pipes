@@ -247,8 +247,8 @@ public abstract class AbstractPipePart {
                     optionsGroupRight.addElement(option.getElement(this));
                 }
             }
-            optionsGroupLeft.addElement(gui.getFiller());
-            optionsGroupRight.addElement(gui.getFiller());
+            optionsGroupLeft.setFiller(gui.getFiller());
+            optionsGroupRight.setFiller(gui.getFiller());
         }
         gui.show(player);
     }

@@ -28,6 +28,7 @@ import org.bukkit.inventory.InventoryHolder;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
@@ -38,6 +39,8 @@ import java.util.Queue;
 import java.util.Set;
 import java.util.WeakHashMap;
 import java.util.concurrent.TimeUnit;
+
+import static io.github.apfelcreme.Pipes.PipesUtil.STAINED_GLASS;
 
 /**
  * Copyright (C) 2016 Lord36 aka Apfelcreme
@@ -402,12 +405,12 @@ public class PipeManager {
      * @return the merged Pipe or <tt>null</tt> if they couldn't be merged
      */
     public Pipe mergePipes(Set<Pipe> pipes) throws TooManyOutputsException, PipeTooLongException {
-        DyeColor color = null;
+        Material type = null;
         for (Pipe pipe : pipes) {
-            if (color == null) {
-                color = pipe.getColor();
+            if (type == null) {
+                type = pipe.getType();
             }
-            if (!pipe.getColor().equals(color)) {
+            if (pipe.getType() != type) {
                 return null;
             }
         }
@@ -433,7 +436,7 @@ public class PipeManager {
             throw new TooManyOutputsException(outputs.iterator().next().getLocation());
         }
 
-        Pipe pipe = new Pipe(inputs, outputs, chunkLoaders, blocks, color);
+        Pipe pipe = new Pipe(inputs, outputs, chunkLoaders, blocks, type);
 
         addPipe(pipe);
         return pipe;
@@ -455,7 +458,7 @@ public class PipeManager {
         LinkedHashSet<ChunkLoader> chunkLoaders = new LinkedHashSet<>();
         LinkedHashSet<SimpleLocation> pipeBlocks = new LinkedHashSet<>();
 
-        byte color = -1;
+        Material type = null;
 
         World world = startingPoint.getWorld();
 
@@ -473,12 +476,11 @@ public class PipeManager {
             }
             Block block = world.getBlockAt(location.getX(), location.getY(), location.getZ());
             if (!found.contains(block)) {
-                if (block.getType() == Material.STAINED_GLASS) {
-                    byte blockColor = block.getData();
-                    if (color == -1) {
-                        color = blockColor;
+                if (STAINED_GLASS.contains(block.getType())) {
+                    if (type == null) {
+                        type = block.getType();
                     }
-                    if (blockColor == color) {
+                    if (block.getType() == type) {
                         if (PipesConfig.getMaxPipeLength() > 0 && pipeBlocks.size() >= PipesConfig.getMaxPipeLength()) {
                             throw new PipeTooLongException(location);
                         }
@@ -495,8 +497,7 @@ public class PipeManager {
                             case PIPE_INPUT:
                                 PipeInput pipeInput = (PipeInput) pipesPart;
                                 Block relativeBlock = block.getRelative(pipeInput.getFacing());
-                                if (relativeBlock.getType() == Material.STAINED_GLASS
-                                        && (color == -1 || relativeBlock.getData() == color)) {
+                                if (relativeBlock.getType() == type) {
                                     inputs.add(pipeInput);
                                     found.add(block);
                                     queue.add(pipeInput.getTargetLocation());
@@ -510,10 +511,12 @@ public class PipeManager {
                                 outputs.add(pipeOutput);
                                 if (found.isEmpty()) {
                                     for (BlockFace face : PipesUtil.BLOCK_FACES) {
-                                        if (face != pipeOutput.getFacing()
-                                                && block.getRelative(face).getType() == Material.STAINED_GLASS) {
-                                            queue.add(location.getRelative(face));
-                                            break;
+                                        if (face != pipeOutput.getFacing()) {
+                                            Material relative = block.getRelative(face).getType();
+                                            if (relative == type || (type == null & STAINED_GLASS.contains(relative))) {
+                                                queue.add(location.getRelative(face));
+                                                break;
+                                            }
                                         }
                                     }
                                 }
@@ -533,7 +536,7 @@ public class PipeManager {
             }
         }
         if ((outputs.size() > 0) && (inputs.size() > 0) && pipeBlocks.size() > 0) {
-            return new Pipe(inputs, outputs, chunkLoaders, pipeBlocks, DyeColor.getByWoolData(color));
+            return new Pipe(inputs, outputs, chunkLoaders, pipeBlocks, type);
         }
         return null;
     }

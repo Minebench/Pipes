@@ -23,9 +23,12 @@ import org.bukkit.material.DirectionalContainer;
 import org.bukkit.potion.PotionType;
 
 import java.util.Collection;
+import java.util.Collections;
+import java.util.EnumSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
+import java.util.Set;
 import java.util.regex.Pattern;
 
 /**
@@ -57,6 +60,29 @@ public class PipesUtil {
             BlockFace.UP,
             BlockFace.DOWN
     };
+
+    public static final Set<Material> STAINED_GLASS = EnumSet.noneOf(Material.class);
+
+    static {
+        Collections.addAll(STAINED_GLASS,
+                Material.BLACK_STAINED_GLASS,
+                Material.BLUE_STAINED_GLASS,
+                Material.LIGHT_GRAY_STAINED_GLASS,
+                Material.BROWN_STAINED_GLASS,
+                Material.CYAN_STAINED_GLASS,
+                Material.GRAY_STAINED_GLASS,
+                Material.GREEN_STAINED_GLASS,
+                Material.LIGHT_BLUE_STAINED_GLASS,
+                Material.MAGENTA_STAINED_GLASS,
+                Material.LIME_STAINED_GLASS,
+                Material.ORANGE_STAINED_GLASS,
+                Material.PINK_STAINED_GLASS,
+                Material.PURPLE_STAINED_GLASS,
+                Material.RED_STAINED_GLASS,
+                Material.WHITE_STAINED_GLASS,
+                Material.YELLOW_STAINED_GLASS
+        );
+    }
 
     /**
      * returns whether a string only contains numbers
@@ -469,10 +495,10 @@ public class PipesUtil {
         if (ingredient == null || ingredient.getAmount() <= 0) {
             return false;
         }
-        if (ingredient.getType() == Material.SULPHUR && itemStack.getType() == Material.POTION) {
+        if (ingredient.getType() == Material.GUNPOWDER && itemStack.getType() == Material.POTION) {
             return true;
         }
-        if (ingredient.getType() == Material.DRAGONS_BREATH && itemStack.getType() == Material.SPLASH_POTION) {
+        if (ingredient.getType() == Material.DRAGON_BREATH && itemStack.getType() == Material.SPLASH_POTION) {
             return true;
         }
 
@@ -488,25 +514,32 @@ public class PipesUtil {
                 return meta.getBasePotionData().isUpgraded() || meta.getBasePotionData().isExtended();
             case FERMENTED_SPIDER_EYE:
                 // List of potions that can be corrupted
-                return !(type != PotionType.WATER
-                        && type != PotionType.POISON
-                        && type != PotionType.INSTANT_HEAL
-                        && type != PotionType.SPEED
-                        && type != PotionType.JUMP
-                        && type != PotionType.NIGHT_VISION);
-            case RAW_FISH:
-                // Check if ingredient is pufferfish
-                if (ingredient.getData().getData() != 3) {
-                    return false;
+                switch (type) {
+                    case WATER:
+                    case POISON:
+                    case INSTANT_HEAL:
+                    case SPEED:
+                    case JUMP:
+                    case NIGHT_VISION:
+                    case SLOW_FALLING:
+                    case TURTLE_MASTER:
+                        return false;
+                    default:
+                        return true;
                 }
+            case COD:
+            case SALMON:
+            case TROPICAL_FISH:
             case GOLDEN_CARROT:
             case MAGMA_CREAM:
             case RABBIT_FOOT:
             case SUGAR:
-            case SPECKLED_MELON:
+            case GLISTERING_MELON_SLICE:
             case SPIDER_EYE:
             case GHAST_TEAR:
             case BLAZE_POWDER:
+            case TURTLE_HELMET:
+            case PHANTOM_MEMBRANE:
                 return type == PotionType.AWKWARD;
         }
         return false;

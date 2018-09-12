@@ -196,7 +196,7 @@ public abstract class AbstractPipePart {
                                 Pipes.sendActionBar(click.getEvent().getWhoClicked(), PipesConfig.getText("error.notABook"));
                                 
                             } else if (click.getEvent().getCursor().getType() == Material.BOOK
-                                    || click.getEvent().getCursor().getType() == Material.BOOK_AND_QUILL) {
+                                    || click.getEvent().getCursor().getType() == Material.WRITABLE_BOOK) {
                                 ItemStack book = saveOptionsToBook();
                                 book.setAmount(click.getEvent().getCursor().getAmount());
                                 click.getEvent().getView().setCursor(book);

@@ -3,6 +3,7 @@ package io.github.apfelcreme.Pipes.Pipe;
 import io.github.apfelcreme.Pipes.PipesConfig;
 import org.bukkit.DyeColor;
 import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.Particle;
 import org.bukkit.entity.Player;
 
@@ -32,15 +33,15 @@ public class Pipe {
     private final LinkedHashSet<PipeOutput> outputs;
     private final LinkedHashSet<ChunkLoader> chunkLoaders;
     private final LinkedHashSet<SimpleLocation> pipeBlocks;
-    private final DyeColor color;
+    private final Material type;
 
     public Pipe(LinkedHashSet<PipeInput> inputs, LinkedHashSet<PipeOutput> outputs,
-                LinkedHashSet<ChunkLoader> chunkLoaders, LinkedHashSet<SimpleLocation> pipeBlocks, DyeColor color) {
+                LinkedHashSet<ChunkLoader> chunkLoaders, LinkedHashSet<SimpleLocation> pipeBlocks, Material type) {
         this.inputs = inputs;
         this.outputs = outputs;
         this.chunkLoaders = chunkLoaders;
         this.pipeBlocks = pipeBlocks;
-        this.color = color;
+        this.type = type;
     }
 
     /**
@@ -96,12 +97,12 @@ public class Pipe {
     }
 
     /**
-     * Get the color of this pipe
+     * Get the type of this pipe
      *
-     * @return The color of the stained glass blocks this pipe consists of
+     * @return The type of the blocks this pipe consists of
      */
-    public DyeColor getColor() {
-        return color;
+    public Material getType() {
+        return type;
     }
 
     /**
@@ -165,7 +166,7 @@ public class Pipe {
         result = 31 * result + outputs.hashCode();
         result = 31 * result + chunkLoaders.hashCode();
         result = 31 * result + pipeBlocks.hashCode();
-        result = 31 * result + color.hashCode();
+        result = 31 * result + type.hashCode();
         return result;
     }
 }

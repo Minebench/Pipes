@@ -37,7 +37,7 @@
             </activation>
             <properties>
                 <buildNumber>${env.BUILD_NUMBER}</buildNumber>
-                <buildDescription>(build #${env.BUILD_NUMBER})</buildDescription>
+                <buildDescription>(build ${env.BUILD_NUMBER})</buildDescription>
             </properties>
         </profile>
     </profiles>
@@ -85,12 +85,8 @@
 
     <repositories>
         <repository>
-            <id>spigot-repo</id>
-            <url>https://hub.spigotmc.org/nexus/content/repositories/snapshots/</url>
-        </repository>
-        <repository>
-            <id>md_5-snapshots</id>
-            <url>http://repo.md-5.net/content/repositories/snapshots</url>
+            <id>paper-repo</id>
+            <url>https://destroystokyo.com/repo/repository/maven-snapshots/</url>
         </repository>
         <repository>
             <id>minebench-repo</id>
@@ -102,15 +98,9 @@
         <dependency>
             <groupId>com.destroystokyo.paper</groupId>
             <artifactId>paper-api</artifactId>
-            <version>1.12.2-R0.1-SNAPSHOT</version>
+            <version>1.13.1-R0.1-SNAPSHOT</version>
             <scope>provided</scope>
             <type>jar</type>
-        </dependency>
-        <dependency>
-            <groupId>de.diddiz</groupId>
-            <artifactId>logblock</artifactId>
-            <version>1.10.0-dev-SNAPSHOT</version>
-            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>de.themoep</groupId>

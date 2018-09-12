@@ -1,7 +1,5 @@
 package io.github.apfelcreme.Pipes.Listener;
 
-import de.diddiz.LogBlock.LogBlock;
-import de.diddiz.LogBlock.listeners.BlockBreakLogging;
 import io.github.apfelcreme.Pipes.Event.PipeBlockBreakEvent;
 import io.github.apfelcreme.Pipes.Event.PipeDispenseEvent;
 import io.github.apfelcreme.Pipes.Exception.ChunkNotLoadedException;
@@ -17,7 +15,6 @@ import io.github.apfelcreme.Pipes.Pipes;
 import io.github.apfelcreme.Pipes.PipesConfig;
 import io.github.apfelcreme.Pipes.PipesItem;
 import io.github.apfelcreme.Pipes.PipesUtil;
-import org.bukkit.DyeColor;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
@@ -42,6 +39,8 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
+import static io.github.apfelcreme.Pipes.PipesUtil.STAINED_GLASS;
+
 /**
  * Copyright (C) 2016 Lord36 aka Apfelcreme
  * <p>
@@ -63,13 +62,9 @@ import java.util.Set;
 public class BlockListener implements Listener {
 
     private final Pipes plugin;
-    private BlockBreakLogging blockBreakLogging;
 
     public BlockListener(Pipes plugin) {
         this.plugin = plugin;
-        if(plugin.getServer().getPluginManager().isPluginEnabled("LogBlock")) {
-            blockBreakLogging = new BlockBreakLogging(LogBlock.getInstance());
-        }
     }
 
     @EventHandler(ignoreCancelled = true)
@@ -93,21 +88,17 @@ public class BlockListener implements Listener {
     public void onBlockBreak(BlockBreakEvent event) {
         AbstractPipePart pipePart = PipeManager.getInstance().getPipePart(event.getBlock());
         if (pipePart != null) {
-            event.setCancelled(true);
-            PipeBlockBreakEvent blockBreakEvent = new PipeBlockBreakEvent(event.getBlock(), event.getPlayer(), pipePart);
-            plugin.getServer().getPluginManager().callEvent(blockBreakEvent);
-            if (!blockBreakEvent.isCancelled()) {
-                if(blockBreakLogging != null) {
-                    blockBreakLogging.onBlockBreak(new BlockBreakEvent(blockBreakEvent.getBlock(), event.getPlayer()));
-                }
-                event.getBlock().setType(Material.AIR);
+            if (new PipeBlockBreakEvent(event.getBlock(), event.getPlayer(), pipePart).callEvent()) {
+                event.setDropItems(false);
                 event.getBlock().getWorld().dropItemNaturally(event.getBlock().getLocation(), pipePart.getType().toItemStack());
 
                 for (Pipe pipe : PipeManager.getInstance().getPipesSafe(event.getBlock(), true)) {
                     PipeManager.getInstance().removePart(pipe, pipePart);
                 }
+            } else {
+                event.setCancelled(true);
             }
-        } else if (event.getBlock().getType() == Material.STAINED_GLASS) {
+        } else if (STAINED_GLASS.contains(event.getBlock().getType())) {
             for (Pipe pipe : PipeManager.getInstance().getPipesSafe(event.getBlock(), true)) {
                 PipeManager.getInstance().removePipe(pipe);
             }
@@ -128,7 +119,7 @@ public class BlockListener implements Listener {
                 
                 if (pipePart instanceof PipeInput) {
                     Block block = event.getBlock().getRelative(((PipeInput) pipePart).getFacing());
-                    if (block.getType() == Material.STAINED_GLASS) {
+                    if (STAINED_GLASS.contains(block.getType())) {
                         Set<Pipe> pipes = PipeManager.getInstance().getPipesSafe(((PipeInput) pipePart).getTargetLocation(), true);
                         if (!pipes.isEmpty()) {
                             PipeManager.getInstance().addPart(pipes.iterator().next(), pipePart);
@@ -138,7 +129,7 @@ public class BlockListener implements Listener {
                     for (BlockFace face : PipesUtil.BLOCK_FACES) {
                         if (face != ((PipeOutput) pipePart).getFacing()) {
                             Block block = event.getBlock().getRelative(face);
-                            if (block.getType() == Material.STAINED_GLASS) {
+                            if (STAINED_GLASS.contains(block.getType())) {
                                 for (Pipe pipe : PipeManager.getInstance().getPipes(block, true)) {
                                     PipeManager.getInstance().addPart(pipe, pipePart);
                                 }
@@ -158,13 +149,13 @@ public class BlockListener implements Listener {
                             pipe.getString()));
                     pipe.highlight();
                 }
-            } else if (event.getBlock().getType() == Material.STAINED_GLASS) {
-                byte placedColor = event.getBlock().getData();
+            } else if (STAINED_GLASS.contains(event.getBlock().getType())) {
+                Material placedType = event.getBlock().getType();
 
                 Set<Pipe> found = new HashSet<>();
                 for (BlockFace face : PipesUtil.BLOCK_FACES) {
                     Block block = event.getBlock().getRelative(face);
-                    boolean isPotentialPipe = block.getType() == Material.STAINED_GLASS && block.getData() == placedColor;
+                    boolean isPotentialPipe = block.getType() == placedType;
 
                     if (!isPotentialPipe) {
                         AbstractPipePart potentialPart = PipeManager.getInstance().getPipePart(event.getBlock());
@@ -183,7 +174,7 @@ public class BlockListener implements Listener {
                         Set<Pipe> pipes = PipeManager.getInstance().getPipesSafe(block, true);
                         if (!pipes.isEmpty()) {
                             Pipe pipe = pipes.iterator().next();
-                            if (pipe.getColor().equals(DyeColor.getByWoolData(placedColor))) {
+                            if (pipe.getType() == placedType) {
                                 found.add(pipe);
                             }
                         }
@@ -224,15 +215,15 @@ public class BlockListener implements Listener {
         
         Set<Block> update = new LinkedHashSet<>();
         for (Block moved : blocks) {
-            if (moved.getType() == Material.STAINED_GLASS) {
+            if (STAINED_GLASS.contains(moved.getType())) {
                 update.add(moved);
                 for (BlockFace face : PipesUtil.BLOCK_FACES) {
                     Block u = moved.getRelative(face);
-                    if (!update.contains(u) && u.getType() == Material.STAINED_GLASS || PipeManager.getInstance().getPipePart(u) != null) {
+                    if (!update.contains(u) && STAINED_GLASS.contains(u.getType()) || PipeManager.getInstance().getPipePart(u) != null) {
                         update.add(u);
                     }
                     Block ud = u.getRelative(direction);
-                    if (!update.contains(ud) && ud.getType() == Material.STAINED_GLASS || PipeManager.getInstance().getPipePart(ud) != null) {
+                    if (!update.contains(ud) && STAINED_GLASS.contains(ud.getType()) || PipeManager.getInstance().getPipePart(ud) != null) {
                         update.add(ud);
                     }
                 }

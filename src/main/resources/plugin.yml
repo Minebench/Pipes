@@ -2,7 +2,9 @@ name: Pipes
 version: '${minecraft.plugin.version}'
 main: io.github.apfelcreme.Pipes.Pipes
 author: Lord36
+authors: [Phoenix616]
 soft-depend: [LogBlock]
+api-version: '1.13'
 commands:
    pipe:
       description: Creating and inspecting Pipes

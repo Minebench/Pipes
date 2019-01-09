@@ -1,13 +1,18 @@
 package io.github.apfelcreme.Pipes.Pipe;
 
+import com.google.common.collect.Multimap;
+import com.google.common.collect.MultimapBuilder;
+import io.github.apfelcreme.Pipes.Exception.ChunkNotLoadedException;
 import io.github.apfelcreme.Pipes.PipesConfig;
-import org.bukkit.DyeColor;
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Particle;
+import org.bukkit.World;
 import org.bukkit.entity.Player;
 
 import java.util.LinkedHashSet;
+import java.util.Map;
 
 /**
  * Copyright (C) 2016 Lord36 aka Apfelcreme
@@ -110,8 +115,7 @@ public class Pipe {
      * @param players The player to show the pipe to, none to show it to everyone
      */
     public void highlight(Player... players) {
-        LinkedHashSet<SimpleLocation> locations = new LinkedHashSet<>();
-        locations.addAll(pipeBlocks);
+        LinkedHashSet<SimpleLocation> locations = new LinkedHashSet<>(pipeBlocks);
         inputs.stream().map(PipeInput::getLocation).forEach(locations::add);
         outputs.stream().map(PipeOutput::getLocation).forEach(locations::add);
         outputs.stream().map(PipeOutput::getTargetLocation).forEach(locations::add);
@@ -168,5 +172,26 @@ public class Pipe {
         result = 31 * result + pipeBlocks.hashCode();
         result = 31 * result + type.hashCode();
         return result;
+    }
+
+    public void checkLoaded(SimpleLocation startLocation) throws ChunkNotLoadedException {
+        World world = Bukkit.getWorld(startLocation.getWorldName());
+        if (world == null) {
+            return;
+        }
+
+        Multimap<Integer, Integer> chunks = MultimapBuilder.hashKeys().hashSetValues().build();
+        LinkedHashSet<SimpleLocation> locations = new LinkedHashSet<>(pipeBlocks);
+        inputs.stream().map(PipeInput::getLocation).forEach(locations::add);
+        outputs.stream().map(PipeOutput::getLocation).forEach(locations::add);
+        outputs.stream().map(PipeOutput::getTargetLocation).forEach(locations::add);
+        for (SimpleLocation location : locations) {
+            chunks.put(location.getX() >> 4, location.getZ() >> 4);
+        }
+        for (Map.Entry<Integer, Integer> chunk : chunks.entries()) {
+            if (!world.isChunkLoaded(chunk.getKey(), chunk.getValue())) {
+                throw new ChunkNotLoadedException(startLocation);
+            }
+        }
     }
 }

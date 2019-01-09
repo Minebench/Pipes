@@ -2,6 +2,9 @@ package io.github.apfelcreme.Pipes.Manager;
 
 import io.github.apfelcreme.Pipes.Event.PipeDispenseEvent;
 import io.github.apfelcreme.Pipes.Event.PipeMoveItemEvent;
+import io.github.apfelcreme.Pipes.Exception.ChunkNotLoadedException;
+import io.github.apfelcreme.Pipes.Exception.PipeTooLongException;
+import io.github.apfelcreme.Pipes.Exception.TooManyOutputsException;
 import io.github.apfelcreme.Pipes.LoopDetection.Detection;
 import io.github.apfelcreme.Pipes.Pipe.Pipe;
 import io.github.apfelcreme.Pipes.Pipe.PipeInput;
@@ -122,7 +125,13 @@ public class ItemMoveScheduler {
             return false;
         }
 
-        Pipe pipe = PipeManager.getInstance().getPipeByInput(simpleLocation);
+        Pipe pipe;
+        try {
+            pipe = PipeManager.getInstance().getPipeByInput(simpleLocation);
+        } catch (ChunkNotLoadedException | TooManyOutputsException | PipeTooLongException e) {
+            // Is input of pipe but pipe is not valid, schedule it for next transfer
+            return false;
+        }
         if (pipe == null) {
             // No pipe at location? Remove the transfer
             return true;

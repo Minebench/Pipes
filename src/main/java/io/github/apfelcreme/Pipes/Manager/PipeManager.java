@@ -17,7 +17,6 @@ import io.github.apfelcreme.Pipes.Pipe.SimpleLocation;
 import io.github.apfelcreme.Pipes.PipesConfig;
 import io.github.apfelcreme.Pipes.PipesItem;
 import io.github.apfelcreme.Pipes.PipesUtil;
-import org.bukkit.DyeColor;
 import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.block.Block;
@@ -28,7 +27,6 @@ import org.bukkit.inventory.InventoryHolder;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
@@ -156,7 +154,7 @@ public class PipeManager {
      * @param location the location the input is at
      * @return a Pipe or <tt>null</tt>
      */
-    public Pipe getPipeByInput(SimpleLocation location) {
+    public Pipe getPipeByInput(SimpleLocation location) throws ChunkNotLoadedException, TooManyOutputsException, PipeTooLongException {
         Pipe pipe = pipeCache.getIfPresent(location);
         if (pipe == null) {
             Block block = location.getBlock();
@@ -165,13 +163,12 @@ public class PipeManager {
                 return null;
             }
 
-            try {
-                pipe = isPipe(block);
-            } catch (ChunkNotLoadedException | TooManyOutputsException | PipeTooLongException ignored) {}
-
+            pipe = isPipe(block);
             if (pipe != null) {
                 addPipe(pipe);
             }
+        } else {
+            pipe.checkLoaded(location);
         }
         return pipe;
     }

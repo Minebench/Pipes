@@ -2,7 +2,11 @@ package io.github.apfelcreme.Pipes.LoopDetection;
 
 import io.github.apfelcreme.Pipes.Pipe.SimpleLocation;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Copyright (C) 2016 Lord36 aka Apfelcreme
@@ -27,14 +31,7 @@ public class Detection {
     /**
      * a list of locations that were found
      */
-    private List<TickingLocation> tickingLocations;
-
-    /**
-     * constructor
-     */
-    public Detection() {
-        tickingLocations = new ArrayList<>();
-    }
+    private Map<SimpleLocation, TickingLocation> tickingLocations = new HashMap<>();
 
     /**
      * adds a location to the map of found locations
@@ -42,14 +39,13 @@ public class Detection {
      * @param location a location of a dispenser
      */
     public void addLocation(SimpleLocation location) {
-        for (TickingLocation tickingLocation : tickingLocations) {
-            if (tickingLocation.getLocation().equals(location)) {
-                tickingLocation.increment();
-                return;
-            }
+        TickingLocation tickingLocation = tickingLocations.get(location);
+        if (tickingLocation == null) {
+            //no location found
+            tickingLocations.put(location, new TickingLocation(location, 1));
+        } else {
+            tickingLocation.increment();
         }
-        //no location found
-        tickingLocations.add(new TickingLocation(location, 1));
     }
 
     /**
@@ -58,7 +54,7 @@ public class Detection {
      * @return the sorted result
      */
     public List<TickingLocation> getResult() {
-        List<TickingLocation> result = new ArrayList<>(tickingLocations);
+        List<TickingLocation> result = new ArrayList<>(tickingLocations.values());
         Collections.sort(result);
         return result;
     }

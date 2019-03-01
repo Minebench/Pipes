@@ -17,8 +17,8 @@ chunkLoaderRecipe:
 maxPipeLength: 128
 maxPipeOutputs: 64
 gui:
-  true: "WOOL:5"
-  false: "WOOL:14"
-  input: "WOOL:4"
-  filler: "STAINED_GLASS_PANE:15"
-  copy: "BOOK_AND_QUILL"
+  true: "LIME_WOOL"
+  false: "RED_WOOL"
+  input: "YELLOW_WOOL"
+  filler: "BLACK_STAINED_GLASS_PANE"
+  copy: "WRITABLE_BOOK"

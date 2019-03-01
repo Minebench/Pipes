@@ -1,5 +1,6 @@
 package io.github.apfelcreme.Pipes.Manager;
 
+import com.destroystokyo.paper.MaterialTags;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.RemovalCause;
@@ -37,8 +38,6 @@ import java.util.Queue;
 import java.util.Set;
 import java.util.WeakHashMap;
 import java.util.concurrent.TimeUnit;
-
-import static io.github.apfelcreme.Pipes.PipesUtil.STAINED_GLASS;
 
 /**
  * Copyright (C) 2016 Lord36 aka Apfelcreme
@@ -473,7 +472,7 @@ public class PipeManager {
             }
             Block block = world.getBlockAt(location.getX(), location.getY(), location.getZ());
             if (!found.contains(block)) {
-                if (STAINED_GLASS.contains(block.getType())) {
+                if (MaterialTags.STAINED_GLASS.isTagged(block)) {
                     if (type == null) {
                         type = block.getType();
                     }
@@ -510,7 +509,7 @@ public class PipeManager {
                                     for (BlockFace face : PipesUtil.BLOCK_FACES) {
                                         if (face != pipeOutput.getFacing()) {
                                             Material relative = block.getRelative(face).getType();
-                                            if (relative == type || (type == null & STAINED_GLASS.contains(relative))) {
+                                            if (relative == type || (type == null & MaterialTags.STAINED_GLASS.isTagged(relative))) {
                                                 queue.add(location.getRelative(face));
                                                 break;
                                             }

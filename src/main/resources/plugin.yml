@@ -2,6 +2,7 @@ name: Pipes
 version: '${minecraft.plugin.version}'
 main: io.github.apfelcreme.Pipes.Pipes
 author: Lord36
+depend: [BlockInfoStorage]
 soft-depend: [LogBlock]
 commands:
    pipe:

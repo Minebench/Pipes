@@ -144,7 +144,7 @@ public abstract class AbstractPipePart {
             BlockInfoStorage.get().setBlockInfo(
                     getLocation().getLocation(),
                     new NamespacedKey(Pipes.getInstance(), option.name()),
-                    value != null && value != option.getDefaultValue() ? value : null);
+                    value != null && value != option.getDefaultValue() ? value.getValue() : null);
         }
     }
 

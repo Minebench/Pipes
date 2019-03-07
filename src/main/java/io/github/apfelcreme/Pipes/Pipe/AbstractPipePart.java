@@ -141,10 +141,14 @@ public abstract class AbstractPipePart {
         }
         options.put(option, value);
         if (save) {
+            Object v = value != null && value != option.getDefaultValue() ? value.getValue() : null;
+            if (v instanceof Enum) {
+                v = ((Enum) v).name();
+            }
             BlockInfoStorage.get().setBlockInfo(
                     getLocation().getLocation(),
                     new NamespacedKey(Pipes.getInstance(), option.name()),
-                    value != null && value != option.getDefaultValue() ? value.getValue() : null);
+                    v);
         }
     }
 
@@ -291,7 +295,10 @@ public abstract class AbstractPipePart {
             try {
                 IOption option = getAvailableOption(optionName.toUpperCase());
                 Value value;
-                if (option.getValueType() == Boolean.class) {
+                Object object = blockInfo.get(optionName);
+                if (object.getClass() == option.getValueType()) {
+                    value = new Value(object);
+                } else if (option.getValueType() == Boolean.class) {
                     value = new Value<>(blockInfo.getBoolean(optionName));
                 } else if (option.getValueType().isEnum()) {
                     Enum<?> e = (Enum) option.getDefaultValue().getValue();

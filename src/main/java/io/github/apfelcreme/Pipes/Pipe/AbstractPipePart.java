@@ -1,5 +1,6 @@
 package io.github.apfelcreme.Pipes.Pipe;
 
+import de.minebench.blockinfostorage.BlockInfoStorage;
 import de.themoep.inventorygui.GuiElementGroup;
 import de.themoep.inventorygui.GuiStateElement;
 import de.themoep.inventorygui.GuiStorageElement;
@@ -16,9 +17,11 @@ import net.md_5.bungee.api.chat.HoverEvent;
 import net.md_5.bungee.api.chat.TextComponent;
 import org.bukkit.Material;
 import org.bukkit.Nameable;
+import org.bukkit.NamespacedKey;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockState;
 import org.bukkit.block.Container;
+import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.ClickType;
 import org.bukkit.inventory.ItemStack;
@@ -61,17 +64,7 @@ public abstract class AbstractPipePart {
     protected AbstractPipePart(PipesItem type, Block block) {
         this.type = type;
         this.location = new SimpleLocation(block.getLocation());
-        BlockState state = block.getState(false);
-        if (state instanceof Nameable) {
-            String hidden = PipesUtil.getHiddenString(((Nameable) state).getCustomName());
-            if (hidden != null) {
-                try {
-                    applyOptions(hidden);
-                } catch (IllegalArgumentException e) {
-                    Pipes.getInstance().getLogger().log(Level.WARNING, "Error while loading pipe part at " + getLocation() + "! " + e.getMessage());
-                }
-            }
-        }
+        loadOptions(block);
     }
     
     /**
@@ -139,7 +132,7 @@ public abstract class AbstractPipePart {
      * Set an option of this output.
      * @param option    The option to set
      * @param value     The value to set the option to
-     * @param save      Whether or not to save the options after setting the value
+     * @param save      Whether or not to save the option after setting the value
      * @throws IllegalArgumentException When the values type is not compatible with the option
      */
     public void setOption(IOption option, Value value, boolean save) {
@@ -148,18 +141,14 @@ public abstract class AbstractPipePart {
         }
         options.put(option, value);
         if (save) {
-            saveOptions();
-        }
-    }
-
-    /**
-     * Save the options to the block. This is done by hiding strings with color codes
-     */
-    protected void saveOptions() {
-        BlockState state = getLocation().getBlock().getState(false);
-        if (state.getType() == getType().getMaterial() && state instanceof Nameable) {
-            ((Nameable) state).setCustomName(ChatColor.RESET + "" + ChatColor.WHITE + PipesUtil.hideString(toString(), getType().getName()));
-            state.update();
+            Object v = value != null && value != option.getDefaultValue() ? value.getValue() : null;
+            if (v instanceof Enum) {
+                v = ((Enum) v).name();
+            }
+            BlockInfoStorage.get().setBlockInfo(
+                    getLocation().getLocation(),
+                    new NamespacedKey(Pipes.getInstance(), option.name()),
+                    v);
         }
     }
 
@@ -280,7 +269,67 @@ public abstract class AbstractPipePart {
         }
         throw new IllegalArgumentException("No option with the name '" + name + "' defined!");
     }
-    
+
+    /**
+     * Load the options from the storage
+     * @param block The block to load the options from
+     */
+    private void loadOptions(Block block) {
+        ConfigurationSection blockInfo = BlockInfoStorage.get().getBlockInfo(block, Pipes.getInstance());
+        if (blockInfo == null) {
+            BlockState state = block.getState(false);
+            if (state instanceof Nameable) {
+                String hidden = PipesUtil.getHiddenString(((Nameable) state).getCustomName());
+                if (hidden != null) {
+                    try {
+                        applyOptions(hidden);
+                    } catch (IllegalArgumentException e) {
+                        Pipes.getInstance().getLogger().log(Level.WARNING, "Error while loading pipe part at " + getLocation() + "! " + e.getMessage());
+                    }
+                }
+            }
+            return;
+        }
+
+        for (String optionName : blockInfo.getKeys(false)) {
+            try {
+                IOption option = getAvailableOption(optionName.toUpperCase());
+                Value value;
+                Object object = blockInfo.get(optionName);
+                if (object.getClass() == option.getValueType()) {
+                    value = new Value(object);
+                } else if (option.getValueType() == Boolean.class) {
+                    value = new Value<>(blockInfo.getBoolean(optionName));
+                } else if (option.getValueType().isEnum()) {
+                    Enum<?> e = (Enum) option.getDefaultValue().getValue();
+                    value = new Value<>(e.valueOf(e.getDeclaringClass(), blockInfo.getString(optionName).toUpperCase()));
+                } else if (option.getValueType() == String.class) {
+                    value = new Value<>(blockInfo.getString(optionName));
+                } else {
+                    // If all fails try to get a static method that can get the value
+                    Method get = null;
+                    for (String method : new String[]{"valueOf", "fromString", "parse"}) {
+                        try {
+                            get = option.getValueType().getMethod(method, String.class);
+                            if (Modifier.isStatic(get.getModifiers())) {
+                                break;
+                            }
+                        } catch (NoSuchMethodException ignored) { }
+                    }
+                    if (get == null) {
+                        throw new IllegalArgumentException("Values of type " + option.getValueType() + " are not supported!");
+                    }
+                    value = new Value<>(get.invoke(null, blockInfo.getString(optionName)));
+                }
+                setOption(option, value, false);
+            } catch (IllegalArgumentException | IllegalAccessException | InvocationTargetException e) {
+                e.printStackTrace();
+                throw new IllegalArgumentException(PipesConfig.getText("error.invalidSettingsBook",
+                        "Invalid option" + optionName + "=" + blockInfo.get(optionName)));
+            }
+        }
+    }
+
     /**
      * Apply options from a string
      * @param optionString the string that the options are encoded in
@@ -334,7 +383,7 @@ public abstract class AbstractPipePart {
                     }
                     value = new Value<>(get.invoke(null, parts[1]));
                 }
-                setOption(option, value, false);
+                setOption(option, value);
             } catch (IllegalArgumentException | IllegalAccessException | InvocationTargetException e) {
                 e.printStackTrace();
                 throw new IllegalArgumentException(PipesConfig.getText("error.invalidSettingsBook",
@@ -360,7 +409,6 @@ public abstract class AbstractPipePart {
         List<String> lore = meta.getLore();
         String hidden = PipesUtil.getHiddenString(lore.get(lore.size() - 1));
         applyOptions(hidden);
-        saveOptions();
     }
     
     /**

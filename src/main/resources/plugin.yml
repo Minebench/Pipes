@@ -4,6 +4,7 @@ main: io.github.apfelcreme.Pipes.Pipes
 author: Lord36
 authors: [Phoenix616]
 api-version: '1.13'
+depend: [BlockInfoStorage]
 commands:
    pipe:
       description: Creating and inspecting Pipes

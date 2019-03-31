@@ -49,8 +49,8 @@ public class ChunkLoader extends AbstractPipePart {
     }
 
     @Override
-    protected IOption[] getOptions() {
-        return new IOption[0];
+    protected Option<?>[] getOptions() {
+        return new Option<?>[0];
     }
 
     @Override

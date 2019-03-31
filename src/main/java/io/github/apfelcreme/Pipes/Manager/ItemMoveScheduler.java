@@ -163,15 +163,15 @@ public class ItemMoveScheduler {
         }
 
         boolean transferredAll = true;
-        boolean spread = (boolean) input.getOption(PipeInput.Option.SPREAD);
-        boolean overflow = (boolean) input.getOption(PipeInput.Option.OVERFLOW);
+        boolean spread = input.getOption(PipeInput.Options.SPREAD);
+        boolean overflow = input.getOption(PipeInput.Options.OVERFLOW);
 
         // loop through all items and try to move them
         for (ItemStack itemStack : itemQueue) {
             transferredAll &= moveItem(input, inputInventory, pipe, itemStack, spread, overflow);
         }
 
-        if (!transferredAll && (boolean) input.getOption(PipeInput.Option.MERGE)) {
+        if (!transferredAll && input.getOption(PipeInput.Options.MERGE)) {
             List<ItemStack> inputContents = Arrays.stream(inputInventory.getContents()).filter(Objects::nonNull).collect(Collectors.toList());
             if (inputContents.size() > 1) {
                 inputInventory.clear();
@@ -242,8 +242,8 @@ public class ItemMoveScheduler {
             if (targetInventory != null
                     && acceptResult.getType() == PipeOutput.ResultType.ACCEPT
                     && acceptResult.isInFilter()
-                    && (boolean) output.getOption(PipeOutput.Option.WHITELIST)
-                    && (boolean) output.getOption(PipeOutput.Option.TARGET_AMOUNT)) {
+                    && output.getOption(PipeOutput.Options.WHITELIST)
+                    && output.getOption(PipeOutput.Options.TARGET_AMOUNT)) {
                 int amountInTarget = 0;
                 for (ItemStack item : targetInventory) {
                     if (output.matchesFilter(acceptResult.getFilterItem(), item)) {
@@ -265,16 +265,16 @@ public class ItemMoveScheduler {
             // Calculate the amount not transferred
             int leftOverAmount = transferring == itemStack ? 0 : itemStack.getAmount() - transferring.getAmount();
 
-            PipeOutput.Option.Overflow outputOverflow = (PipeOutput.Option.Overflow) output.getOption(PipeOutput.Option.OVERFLOW);
+            PipeOutput.Options.Overflow outputOverflow = output.getOption(PipeOutput.Options.OVERFLOW);
             if (acceptResult.getType() != PipeOutput.ResultType.ACCEPT) {
                 if (!spread && acceptResult.isInFilter() &&
-                        (outputOverflow == PipeOutput.Option.Overflow.FALSE || (!overflow && outputOverflow == PipeOutput.Option.Overflow.INPUT))) {
+                        (outputOverflow == PipeOutput.Options.Overflow.FALSE || (!overflow && outputOverflow == PipeOutput.Options.Overflow.INPUT))) {
                     return false;
                 }
                 continue;
             }
 
-            if ((boolean) output.getOption(PipeOutput.Option.DROP)) {
+            if (output.getOption(PipeOutput.Options.DROP)) {
                 Location dropLocation = output.getTargetLocation().getLocation().add(0.5, 0.5, 0.5);
 
                 double speed = PipesUtil.RANDOM.nextDouble() * 0.1d + 0.2d;
@@ -306,7 +306,7 @@ public class ItemMoveScheduler {
                     continue;
                 }
 
-                boolean smartInsert = (boolean) output.getOption(PipeOutput.Option.SMART_INSERT);
+                boolean smartInsert = output.getOption(PipeOutput.Options.SMART_INSERT);
 
                 switch (targetInventory.getType()) {
                     /*
@@ -430,7 +430,7 @@ public class ItemMoveScheduler {
             }
 
             if (!spread && itemStack.getAmount() > 0 && acceptResult.isInFilter() &&
-                    (outputOverflow == PipeOutput.Option.Overflow.FALSE || (!overflow && outputOverflow == PipeOutput.Option.Overflow.INPUT))) {
+                    (outputOverflow == PipeOutput.Options.Overflow.FALSE || (!overflow && outputOverflow == PipeOutput.Options.Overflow.INPUT))) {
                 return false;
             }
         }

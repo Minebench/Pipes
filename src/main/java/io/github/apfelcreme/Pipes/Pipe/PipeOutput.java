@@ -10,7 +10,9 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.material.Directional;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Copyright (C) 2016 Lord36 aka Apfelcreme
@@ -99,15 +101,15 @@ public class PipeOutput extends AbstractPipePart {
         if (state == null || !(state instanceof InventoryHolder)) {
             return new AcceptResult(ResultType.DENY_INVALID, null);
         }
-        Option.Overflow outputOverflow = (Option.Overflow) getOption(Option.OVERFLOW);
-        if ((outputOverflow == Option.Overflow.TRUE || outputOverflow == Option.Overflow.INPUT && (boolean) input.getOption(PipeInput.Option.OVERFLOW))
+        Options.Overflow outputOverflow = getOption(Options.OVERFLOW);
+        if ((outputOverflow == Options.Overflow.TRUE || outputOverflow == Options.Overflow.INPUT && input.getOption(PipeInput.Options.OVERFLOW))
                 && block.isBlockPowered()) {
             return new AcceptResult(ResultType.DENY_REDSTONE, null);
         }
 
         ItemStack filter = null;
         boolean isEmpty = true;
-        boolean isWhitelist = (boolean) getOption(Option.WHITELIST);
+        boolean isWhitelist = getOption(Options.WHITELIST);
         for (ItemStack filterItem : ((InventoryHolder) state).getInventory().getContents()) {
             isEmpty &= filterItem == null;
             if (matchesFilter(filterItem, itemStack)) {
@@ -140,7 +142,7 @@ public class PipeOutput extends AbstractPipePart {
             return false;
         }
 
-        if ((boolean) getOption(Option.DATA_FILTER)) {
+        if (getOption(Options.DATA_FILTER)) {
             if (filter.hasItemMeta() != item.hasItemMeta()) {
                 return false;
             }
@@ -149,19 +151,19 @@ public class PipeOutput extends AbstractPipePart {
             }
         }
 
-        if ((boolean) getOption(Option.MATERIAL_FILTER)) {
+        if (getOption(Options.MATERIAL_FILTER)) {
             if (filter.getType() != item.getType()) {
                 return false;
             }
         }
 
-        if ((boolean) getOption(Option.DAMAGE_FILTER)) {
+        if (getOption(Options.DAMAGE_FILTER)) {
             if (filter.getDurability() != item.getDurability()) {
                 return false;
             }
         }
 
-        if ((boolean) getOption(Option.DISPLAY_FILTER)) {
+        if (getOption(Options.DISPLAY_FILTER)) {
             if (filter.hasItemMeta() != item.hasItemMeta()) {
                 return false;
             }
@@ -183,7 +185,7 @@ public class PipeOutput extends AbstractPipePart {
             }
         }
 
-        if ((boolean) getOption(Option.ENCHANTMENT_FILTER)) {
+        if (getOption(Options.ENCHANTMENT_FILTER)) {
             if (!filter.getEnchantments().equals(item.getEnchantments())) {
                 return false;
             }
@@ -198,13 +200,13 @@ public class PipeOutput extends AbstractPipePart {
     }
 
     @Override
-    protected IOption[] getOptions() {
-        return Option.values();
+    protected Option<?>[] getOptions() {
+        return Options.values();
     }
 
     @Override
-    protected IOption getAvailableOption(String name) {
-        return Option.valueOf(name);
+    protected Option<?> getAvailableOption(String name) {
+        return Options.get(name);
     }
 
     @Override
@@ -251,14 +253,18 @@ public class PipeOutput extends AbstractPipePart {
         DENY_INVALID;
     }
 
-    public enum Option implements IOption {
+    public static class Options extends OptionsList {
+
+        private static final Map<String, Option<?>> VALUES = new HashMap<>();
+
         /**
          * Whether or not this output is in whitelist mode. This changes how the filter items are used.
          * <p><strong>Possible Values:</strong>
          * <li><tt>true</tt> if this output is in whitelist mode and should only let items through that are in the inventory</li>
          * <li><tt>false</tt> if this output is in blacklist mode and should only let items through that are <strong>not</strong> in the inventory</li></p>
          */
-        WHITELIST(GuiPosition.RIGHT, Value.TRUE, Value.FALSE),
+        public static final Option<Boolean> WHITELIST = add(new Option<>("WHITELIST", Option.GuiPosition.RIGHT, Value.TRUE, Value.FALSE));
+
         /**
          * Whether or not this output can overflow into other available outputs
          * <p><strong>Possible Values:</strong>
@@ -266,96 +272,72 @@ public class PipeOutput extends AbstractPipePart {
          * <li><tt>enabled</tt> if the items should end up in the overflow</li>
          * <li><tt>disabled</tt> if this output should force items to end up here even 'though the target is full</li></p>
          */
-        OVERFLOW(GuiPosition.LEFT, new Value<>(Overflow.INPUT), new Value<>(Overflow.TRUE), new Value<>(Overflow.FALSE)),
+        public static final Option<Overflow> OVERFLOW = add(new Option<>("OVERFLOW", Option.GuiPosition.LEFT, new Value<>(Overflow.INPUT), new Value<>(Overflow.TRUE), new Value<>(Overflow.FALSE)));
+
         /**
          * Whether or not to try to insert into the appropriate slots depending on the item type (like fuel)
          * <p><strong>Possible Values:</strong>
          * <li><tt>true</tt> Detect the item type and put it in the slot that it belongs to</li>
          * <li><tt>false</tt> Use the face that the output is facing to select the slot</li></p>
          */
-        SMART_INSERT(GuiPosition.LEFT, Value.TRUE, Value.FALSE),
+        public static final Option<Boolean> SMART_INSERT = add(new Option<>("SMART_INSERT", Option.GuiPosition.LEFT, Value.TRUE, Value.FALSE));
+
         /**
          * Whether or not to respect the material of the filter item when filtering.
          */
-        MATERIAL_FILTER(GuiPosition.RIGHT, Value.TRUE, Value.FALSE),
+        public static final Option<Boolean> MATERIAL_FILTER = add(new Option<>("MATERIAL_FILTER", Option.GuiPosition.RIGHT, Value.TRUE, Value.FALSE));
+
         /**
          * Whether or not to respect tool damage values when filtering
          */
-        DAMAGE_FILTER(GuiPosition.RIGHT, Value.FALSE, Value.TRUE),
+        public static final Option<Boolean> DAMAGE_FILTER = add(new Option<>("DAMAGE_FILTER", Option.GuiPosition.RIGHT, Value.FALSE, Value.TRUE));
+
         /**
          * Whether or not to respect custom item names and lores when filtering
          */
-        DISPLAY_FILTER(GuiPosition.RIGHT, Value.FALSE, Value.TRUE),
+        public static final Option<Boolean> DISPLAY_FILTER = add(new Option<>("DISPLAY_FILTER", Option.GuiPosition.RIGHT, Value.FALSE, Value.TRUE));
+
         /**
          * Whether or to respect enchantments when filtering
          */
-        ENCHANTMENT_FILTER(GuiPosition.RIGHT, Value.FALSE, Value.TRUE),
+        public static final Option<Boolean> ENCHANTMENT_FILTER = add(new Option<>("ENCHANTMENT_FILTER", Option.GuiPosition.RIGHT, Value.FALSE, Value.TRUE));
+
         /**
          * Filter all the data of the items exactly
          */
-        DATA_FILTER(GuiPosition.RIGHT, Value.FALSE, Value.TRUE),
+        public static final Option<Boolean> DATA_FILTER = add(new Option<>("DATA_FILTER", Option.GuiPosition.RIGHT, Value.FALSE, Value.TRUE));
+
         /**
          * Whether or not to use the amount of the filter item as the amount to which the target should be filled up to
          */
-        TARGET_AMOUNT(GuiPosition.LEFT, Value.FALSE, Value.TRUE),
+        public static final Option<Boolean> TARGET_AMOUNT = add(new Option<>("TARGET_AMOUNT", Option.GuiPosition.LEFT, Value.FALSE, Value.TRUE));
+
         /**
          * Whether or not to drop the item instead of adding to an inventory
          */
-        DROP(GuiPosition.LEFT, Value.FALSE, Value.TRUE);
-    
+        public static final Option<Boolean> DROP = add(new Option<>("DROP", Option.GuiPosition.LEFT, Value.FALSE, Value.TRUE));
+
+        protected static <T> Option<T> add(Option<T> option) {
+            VALUES.put(option.name().toLowerCase(), option);
+            return option;
+        }
+
+        public static Option<?> get(String name) {
+            Option<?> option = VALUES.get(name.toLowerCase());
+            if (option == null) {
+                throw new IllegalArgumentException("No option with name " + name + " found!");
+            }
+            return option;
+        }
+
+        public static Option<?>[] values() {
+            return VALUES.values().toArray(new Option<?>[0]);
+        }
+
         public enum Overflow {
             INPUT,
             FALSE,
             TRUE
-        }
-
-        private final Value defaultValue;
-        private final Class<?> valueType;
-        private final Value[] possibleValues;
-        private final GuiPosition guiPosition;
-
-        /**
-         * An option that this pipe output can have
-         * @param defaultValue  The default value when none is set
-         * @param valueType     The class of the values that this option accepts
-         */
-        Option(GuiPosition guiPosition, Value defaultValue, Class<?> valueType) {
-            this.defaultValue = defaultValue;
-            this.valueType = valueType;
-            possibleValues = new Value[0];
-            this.guiPosition = guiPosition;
-        }
-
-        /**
-         * An option that this pipe output can have
-         * @param possibleValues    An array of possible values that this option accepts
-         * @throws IllegalArgumentException Thrown when there are less than two possible values defined
-         */
-        Option(GuiPosition guiPosition, Value... possibleValues) throws IllegalArgumentException {
-            if (possibleValues.length < 2) {
-                throw new IllegalArgumentException("An option needs to have at least two values!");
-            }
-            this.possibleValues = possibleValues;
-            defaultValue = possibleValues[0];
-            valueType = defaultValue.getValue().getClass();
-            this.guiPosition = guiPosition;
-        }
-
-        public Class<?> getValueType() {
-            return valueType;
-        }
-
-        public Value getDefaultValue() {
-            return defaultValue;
-        }
-
-        public Value[] getPossibleValues() {
-            return possibleValues;
-        }
-
-        @Override
-        public GuiPosition getGuiPosition() {
-            return guiPosition;
         }
     }
 }

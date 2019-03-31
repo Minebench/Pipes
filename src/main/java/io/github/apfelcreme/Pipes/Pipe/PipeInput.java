@@ -5,6 +5,9 @@ import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.material.Directional;
 
+import java.util.HashMap;
+import java.util.Map;
+
 /**
  * Copyright (C) 2016 Lord36 aka Apfelcreme
  * <p>
@@ -52,13 +55,13 @@ public class PipeInput extends AbstractPipePart {
     }
 
     @Override
-    protected IOption[] getOptions() {
-        return Option.values();
+    protected Option<?>[] getOptions() {
+        return Options.values();
     }
 
     @Override
-    protected IOption getAvailableOption(String name) {
-        return Option.valueOf(name);
+    protected Option<?> getAvailableOption(String name) {
+        return Options.get(name);
     }
 
     @Override
@@ -73,63 +76,41 @@ public class PipeInput extends AbstractPipePart {
         return super.toString();
     }
 
-    public enum Option implements IOption {
+    public static class Options extends OptionsList {
+
+        private static final Map<String, Option<?>> VALUES = new HashMap<>();
+
         /**
          * Whether or not to spread the items equally over all outputs
          */
-        SPREAD(Value.FALSE, Value.TRUE),
+        public static final Option<Boolean> SPREAD = add(new Option<>("SPREAD", Value.FALSE, Value.TRUE));
         /**
          * Whether or not this transfers from this input can overflow into other available outputs
          * <p><strong>Possible Values:</strong>
          * <li><tt>true</tt> if the items should end up in the overflow</li>
          * <li><tt>false</tt> if this output should force items to end up in the filtered output even 'though the target is full</li></p>
          */
-        OVERFLOW(Value.FALSE, Value.TRUE),
+        public static final Option<Boolean> OVERFLOW = add(new Option<>("OVERFLOW", Value.FALSE, Value.TRUE));
         /**
          * Whether to merge item stacks in the input after a transfer attempt or not
          */
-        MERGE(Value.TRUE, Value.FALSE);
+        public static final Option<Boolean> MERGE = add(new Option<>("MERGE", Value.TRUE, Value.FALSE));
 
-        private final Value defaultValue;
-        private final Class<?> valueType;
-        private final Value[] possibleValues;
-
-        /**
-         * An option that this pipe output can have
-         * @param defaultValue  The default value when none is set
-         * @param valueType     The class of the values that this option accepts
-         */
-        Option(Value defaultValue, Class<?> valueType) {
-            this.defaultValue = defaultValue;
-            this.valueType = valueType;
-            possibleValues = new Value[0];
+        protected static <T> Option<T> add(Option<T> option) {
+            VALUES.put(option.name().toLowerCase(), option);
+            return option;
         }
 
-        /**
-         * An option that this pipe output can have
-         * @param possibleValues    An array of possible values that this option accepts
-         * @throws IllegalArgumentException Thrown when there are less than two possible values defined
-         */
-        Option(Value... possibleValues) throws IllegalArgumentException {
-            if (possibleValues.length < 2) {
-                throw new IllegalArgumentException("An option needs to have at least two values!");
+        public static Option<?> get(String name) {
+            Option<?> option = VALUES.get(name.toLowerCase());
+            if (option == null) {
+                throw new IllegalArgumentException("No option with name " + name + " found!");
             }
-            this.possibleValues = possibleValues;
-            defaultValue = possibleValues[0];
-            valueType = defaultValue.getValue().getClass();
+            return option;
         }
 
-        public Class<?> getValueType() {
-            return valueType;
+        public static Option<?>[] values() {
+            return VALUES.values().toArray(new Option<?>[0]);
         }
-
-        public Value getDefaultValue() {
-            return defaultValue;
-        }
-
-        public Value[] getPossibleValues() {
-            return possibleValues;
-        }
-
     }
 }

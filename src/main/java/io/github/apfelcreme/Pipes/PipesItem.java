@@ -19,16 +19,20 @@ package io.github.apfelcreme.Pipes;
  * @author Max lee aka Phoenix616
  */
 
+import de.minebench.blockinfostorage.BlockInfoStorage;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.Nameable;
+import org.bukkit.NamespacedKey;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockState;
+import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.inventory.meta.tags.ItemTagType;
 
 import java.util.Arrays;
 import java.util.List;
@@ -40,6 +44,7 @@ public enum PipesItem {
     SETTINGS_BOOK(Material.WRITTEN_BOOK);
 
     private static final String IDENTIFIER = "Pipes";
+    private static final NamespacedKey TYPE_KEY = new NamespacedKey(Pipes.getInstance(), "type");
 
     private final Material material;
     private ItemStack item;
@@ -67,7 +72,7 @@ public enum PipesItem {
         ItemStack item = new ItemStack(this.material);
         ItemMeta meta = item.getItemMeta();
         List<String> lore = Arrays.asList(PipesConfig.getText("items." + toConfigKey() + ".lore"),
-                ChatColor.BLUE + "" + ChatColor.ITALIC + PipesUtil.hideString(toString(), IDENTIFIER));
+                ChatColor.BLUE + "" + ChatColor.ITALIC + IDENTIFIER);
         meta.setLore(lore);
         meta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
         meta.addEnchant(Enchantment.ARROW_DAMAGE, 1, true);
@@ -75,6 +80,7 @@ public enum PipesItem {
                 toString(),
                 PipesConfig.getText("items." + toConfigKey() + ".name")
         ));
+        meta.getCustomTagContainer().setCustomTag(TYPE_KEY, ItemTagType.STRING, toString());
         item.setItemMeta(meta);
         this.item = item;
         return new ItemStack(item);
@@ -92,12 +98,22 @@ public enum PipesItem {
 
         String hidden = PipesUtil.getHiddenString(((Nameable) blockState).getCustomName());
 
-        return hidden != null && toString().equals(hidden.split(",")[0]) || IDENTIFIER.equals(hidden);
+        if (hidden != null && toString().equals(hidden.split(",")[0]) || IDENTIFIER.equals(hidden)) {
+            return true;
+        }
+
+        return BlockInfoStorage.get().getBlockInfo(blockState.getLocation(), Pipes.getInstance()) != null;
     }
 
     public boolean check(ItemStack item) {
-        if (item == null || item.getType() != this.material || !item.hasItemMeta() || !item.getItemMeta().hasLore()) {
+        if (item == null || item.getType() != this.material || !item.hasItemMeta()) {
             return false;
+        }
+
+        ItemMeta meta = item.getItemMeta();
+
+        if (!meta.getCustomTagContainer().isEmpty() && meta.getCustomTagContainer().hasCustomTag(TYPE_KEY, ItemTagType.STRING)) {
+            return toString().equals(meta.getCustomTagContainer().getCustomTag(TYPE_KEY, ItemTagType.STRING));
         }
 
         List<String> lore = item.getItemMeta().getLore();

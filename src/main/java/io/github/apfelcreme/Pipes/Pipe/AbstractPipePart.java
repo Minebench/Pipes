@@ -60,8 +60,9 @@ import java.util.stream.Collectors;
  */
 public abstract class AbstractPipePart {
 
+    public static final NamespacedKey TYPE_KEY = new NamespacedKey(Pipes.getInstance(), "type");
     public static final NamespacedKey OPTIONS_KEY = new NamespacedKey(Pipes.getInstance(), "options");
-    public static final NamespacedKey STORED_TYPE = new NamespacedKey(Pipes.getInstance(), "stored_type");
+    public static final NamespacedKey STORED_TYPE_KEY = new NamespacedKey(Pipes.getInstance(), "stored_type");
 
     private final PipesItem type;
     private final SimpleLocation location;
@@ -313,6 +314,7 @@ public abstract class AbstractPipePart {
                 if (hidden != null) {
                     try {
                         applyOptions(hidden);
+                        BlockInfoStorage.get().setBlockInfo(state.getLocation(), TYPE_KEY, getType().name());
                     } catch (IllegalArgumentException e) {
                         Pipes.getInstance().getLogger().log(Level.WARNING, "Error while loading pipe part at " + getLocation() + "! " + e.getMessage());
                     }
@@ -322,6 +324,9 @@ public abstract class AbstractPipePart {
         }
 
         for (String optionName : blockInfo.getKeys(false)) {
+            if ("type".equalsIgnoreCase(optionName)) {
+                continue;
+            }
             try {
                 Option<?> option = getAvailableOption(optionName.toUpperCase());
                 Value value = option.parseValue(blockInfo.get(optionName));
@@ -419,11 +424,11 @@ public abstract class AbstractPipePart {
             throw new IllegalArgumentException("ItemStack does not have custom tags nor a custom lore!");
         }
 
-        if (!meta.getCustomTagContainer().hasCustomTag(STORED_TYPE, ItemTagType.STRING)) {
+        if (!meta.getCustomTagContainer().hasCustomTag(STORED_TYPE_KEY, ItemTagType.STRING)) {
             throw new IllegalArgumentException(PipesConfig.getText("error.unknownPipesItem", "null"));
         }
 
-        String storedType = meta.getCustomTagContainer().getCustomTag(STORED_TYPE, ItemTagType.STRING);
+        String storedType = meta.getCustomTagContainer().getCustomTag(STORED_TYPE_KEY, ItemTagType.STRING);
         if (storedType == null) {
             throw new IllegalArgumentException(PipesConfig.getText("error.unknownPipesItem", "null"));
         }
@@ -474,7 +479,7 @@ public abstract class AbstractPipePart {
         List<ComponentBuilder> optionsPage = new ArrayList();
         optionsPage.add(new ComponentBuilder(""));
 
-        meta.getCustomTagContainer().setCustomTag(STORED_TYPE, ItemTagType.STRING, getType().toString());
+        meta.getCustomTagContainer().setCustomTag(STORED_TYPE_KEY, ItemTagType.STRING, getType().toString());
 
         CustomItemTagContainer optionsContainer = meta.getCustomTagContainer().getAdapterContext().newTagContainer();
         for (Option<?> option : getOptions()) {

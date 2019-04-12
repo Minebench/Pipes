@@ -1,5 +1,6 @@
 package io.github.apfelcreme.Pipes;
 
+import de.minebench.blockinfostorage.BlockInfoStorage;
 import io.github.apfelcreme.Pipes.Manager.PipeManager;
 import io.github.apfelcreme.Pipes.Pipe.AbstractPipePart;
 import io.github.apfelcreme.Pipes.Pipe.ChunkLoader;
@@ -8,6 +9,7 @@ import io.github.apfelcreme.Pipes.Pipe.PipeOutput;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.Nameable;
+import org.bukkit.NamespacedKey;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.block.BlockState;
@@ -173,20 +175,28 @@ public class PipesUtil {
             return null;
         }
 
-        String hidden = getHiddenString(((Nameable) state).getCustomName());
-        if (hidden == null) {
-            return null;
+        Object stored = BlockInfoStorage.get().getBlockInfoValue(block, AbstractPipePart.TYPE_KEY);
+        String type = null;
+        if (stored instanceof String) {
+            type = (String) stored;
         }
-        hidden = hidden.split(",")[0];
-        if (hidden.isEmpty()) {
-            return null;
+
+        if (type == null) {
+            type = getHiddenString(((Nameable) state).getCustomName());
+            if (type == null) {
+                return null;
+            }
+            type = type.split(",")[0];
+            if (type.isEmpty()) {
+                return null;
+            }
         }
 
         try {
-            return PipesItem.valueOf(hidden);
+            return PipesItem.valueOf(type);
         } catch (IllegalArgumentException e) {
             // Legacy
-            if (PipesItem.getIdentifier().equals(hidden)) {
+            if (PipesItem.getIdentifier().equals(type)) {
                 switch (block.getType()) {
                     case DISPENSER:
                         return PipesItem.PIPE_INPUT;

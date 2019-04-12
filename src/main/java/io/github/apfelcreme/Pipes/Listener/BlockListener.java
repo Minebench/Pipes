@@ -1,6 +1,7 @@
 package io.github.apfelcreme.Pipes.Listener;
 
 import com.destroystokyo.paper.MaterialTags;
+import de.minebench.blockinfostorage.BlockInfoStorage;
 import io.github.apfelcreme.Pipes.Event.PipeBlockBreakEvent;
 import io.github.apfelcreme.Pipes.Event.PipeDispenseEvent;
 import io.github.apfelcreme.Pipes.Exception.ChunkNotLoadedException;
@@ -148,6 +149,8 @@ public class BlockListener implements Listener {
                             pipe.getString()));
                     pipe.highlight();
                 }
+
+                BlockInfoStorage.get().setBlockInfo(event.getBlock().getLocation(), AbstractPipePart.TYPE_KEY, pipePart.getType().name());
             } else if (MaterialTags.STAINED_GLASS.isTagged(event.getBlock())) {
                 Material placedType = event.getBlock().getType();
 

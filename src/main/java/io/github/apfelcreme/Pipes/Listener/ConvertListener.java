@@ -18,7 +18,9 @@ package io.github.apfelcreme.Pipes.Listener;
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import de.minebench.blockinfostorage.BlockInfoStorage;
 import io.github.apfelcreme.Pipes.Manager.PipeManager;
+import io.github.apfelcreme.Pipes.Pipe.AbstractPipePart;
 import io.github.apfelcreme.Pipes.Pipes;
 import org.bukkit.Chunk;
 import org.bukkit.block.BlockState;
@@ -44,7 +46,10 @@ public class ConvertListener implements Listener {
         if (!chunkIds.contains(id)) {
             chunkIds.add(id);
             for (BlockState state : event.getChunk().getTileEntities(false)) {
-                PipeManager.getInstance().getPipePart(state.getBlock());
+                AbstractPipePart part = PipeManager.getInstance().getPipePart(state.getBlock());
+                if (part != null) {
+                    BlockInfoStorage.get().setBlockInfo(state.getLocation(), AbstractPipePart.TYPE_KEY, part.getType().name());
+                }
             }
         }
     }

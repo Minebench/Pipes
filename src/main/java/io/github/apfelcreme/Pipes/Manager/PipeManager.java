@@ -447,7 +447,7 @@ public class PipeManager {
     public Pipe isPipe(Block startingPoint) throws ChunkNotLoadedException, TooManyOutputsException, PipeTooLongException {
 
         Queue<SimpleLocation> queue = new LinkedList<>();
-        List<Block> found = new ArrayList<>();
+        Set<SimpleLocation> found = new LinkedHashSet<>();
 
         LinkedHashSet<PipeInput> inputs = new LinkedHashSet<>();
         LinkedHashSet<PipeOutput> outputs = new LinkedHashSet<>();
@@ -466,12 +466,12 @@ public class PipeManager {
 
         while (!queue.isEmpty()) {
             SimpleLocation location = queue.remove();
-            if (!world.isChunkLoaded(location.getX() >> 4, location.getZ() >> 4)
-                    && (chunkLoaders.size() == 0)) {
-                throw new ChunkNotLoadedException(location);
-            }
-            Block block = world.getBlockAt(location.getX(), location.getY(), location.getZ());
-            if (!found.contains(block)) {
+            if (!found.contains(location)) {
+                if (!world.isChunkLoaded(location.getX() >> 4, location.getZ() >> 4)
+                        && (chunkLoaders.size() == 0)) {
+                    throw new ChunkNotLoadedException(location);
+                }
+                Block block = world.getBlockAt(location.getX(), location.getY(), location.getZ());
                 if (MaterialTags.STAINED_GLASS.isTagged(block)) {
                     if (type == null) {
                         type = block.getType();
@@ -481,7 +481,7 @@ public class PipeManager {
                             throw new PipeTooLongException(location);
                         }
                         pipeBlocks.add(location);
-                        found.add(block);
+                        found.add(location);
                         for (BlockFace face : PipesUtil.BLOCK_FACES) {
                             queue.add(location.getRelative(face));
                         }
@@ -493,9 +493,12 @@ public class PipeManager {
                             case PIPE_INPUT:
                                 PipeInput pipeInput = (PipeInput) pipesPart;
                                 Block relativeBlock = block.getRelative(pipeInput.getFacing());
+                                if (type == null && MaterialTags.STAINED_GLASS.isTagged(relativeBlock)) {
+                                    type = relativeBlock.getType();
+                                }
                                 if (relativeBlock.getType() == type) {
                                     inputs.add(pipeInput);
-                                    found.add(block);
+                                    found.add(location);
                                     queue.add(pipeInput.getTargetLocation());
                                 }
                                 break;
@@ -516,15 +519,15 @@ public class PipeManager {
                                         }
                                     }
                                 }
-                                found.add(block);
+                                found.add(location);
                                 Block relativeToOutput = pipeOutput.getTargetLocation().getBlock();
                                 if (relativeToOutput.getState(false) instanceof InventoryHolder) {
-                                    found.add(relativeToOutput);
+                                    found.add(new SimpleLocation(relativeToOutput.getLocation()));
                                 }
                                 break;
                             case CHUNK_LOADER:
                                 chunkLoaders.add((ChunkLoader) pipesPart);
-                                found.add(block);
+                                found.add(location);
                                 break;
                         }
                     }

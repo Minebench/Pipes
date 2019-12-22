@@ -203,7 +203,7 @@ public abstract class AbstractPipePart {
 
         InventoryGui gui = InventoryGui.get(holder);
         if (gui == null) {
-            gui = new InventoryGui(Pipes.getInstance(), holder, holder.getInventory().getTitle(), getGuiSetup());
+            gui = new InventoryGui(Pipes.getInstance(), holder, holder.getCustomName(), getGuiSetup());
 
             gui.addElement(new GuiStorageElement('i', holder.getInventory()));
             gui.setFiller(PipesConfig.getGuiItemStack(getType().toConfigKey() + ".filler"));

@@ -11,6 +11,7 @@ import org.bukkit.Particle;
 import org.bukkit.World;
 import org.bukkit.entity.Player;
 
+import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
 
@@ -34,17 +35,17 @@ import java.util.Map;
  */
 public class Pipe {
 
-    private final LinkedHashSet<PipeInput> inputs;
-    private final LinkedHashSet<PipeOutput> outputs;
-    private final LinkedHashSet<ChunkLoader> chunkLoaders;
+    private final LinkedHashMap<SimpleLocation, PipeInput> inputs;
+    private final LinkedHashMap<SimpleLocation, PipeOutput> outputs;
+    private final LinkedHashMap<SimpleLocation, ChunkLoader> chunkLoaders;
     private final LinkedHashSet<SimpleLocation> pipeBlocks;
     private final Material type;
 
     private int lastTransfer = 0;
     private int transfers = 0;
 
-    public Pipe(LinkedHashSet<PipeInput> inputs, LinkedHashSet<PipeOutput> outputs,
-                LinkedHashSet<ChunkLoader> chunkLoaders, LinkedHashSet<SimpleLocation> pipeBlocks, Material type) {
+    public Pipe(LinkedHashMap<SimpleLocation, PipeInput> inputs, LinkedHashMap<SimpleLocation, PipeOutput> outputs,
+                LinkedHashMap<SimpleLocation, ChunkLoader> chunkLoaders, LinkedHashSet<SimpleLocation> pipeBlocks, Material type) {
         this.inputs = inputs;
         this.outputs = outputs;
         this.chunkLoaders = chunkLoaders;
@@ -57,7 +58,7 @@ public class Pipe {
      *
      * @return the set of inputs
      */
-    public LinkedHashSet<PipeInput> getInputs() {
+    public LinkedHashMap<SimpleLocation, PipeInput> getInputs() {
         return inputs;
     }
 
@@ -66,7 +67,7 @@ public class Pipe {
      *
      * @return the set of outputs
      */
-    public LinkedHashSet<PipeOutput> getOutputs() {
+    public LinkedHashMap<SimpleLocation, PipeOutput> getOutputs() {
         return outputs;
     }
 
@@ -76,7 +77,7 @@ public class Pipe {
      *
      * @return a set of chunk loaders
      */
-    public LinkedHashSet<ChunkLoader> getChunkLoaders() {
+    public LinkedHashMap<SimpleLocation, ChunkLoader> getChunkLoaders() {
         return chunkLoaders;
     }
 
@@ -96,12 +97,7 @@ public class Pipe {
      * @return a pipeinput
      */
     public PipeInput getInput(SimpleLocation location) {
-        for (PipeInput pipeInput : inputs) {
-            if (pipeInput.getLocation().equals(location)) {
-                return pipeInput;
-            }
-        }
-        return null;
+        return inputs.get(location);
     }
 
     /**
@@ -155,9 +151,9 @@ public class Pipe {
      */
     public void highlight(Player... players) {
         LinkedHashSet<SimpleLocation> locations = new LinkedHashSet<>(pipeBlocks);
-        inputs.stream().map(PipeInput::getLocation).forEach(locations::add);
-        outputs.stream().map(PipeOutput::getLocation).forEach(locations::add);
-        outputs.stream().map(PipeOutput::getTargetLocation).forEach(locations::add);
+        locations.addAll(inputs.keySet());
+        locations.addAll(outputs.keySet());
+        outputs.values().stream().map(PipeOutput::getTargetLocation).forEach(locations::add);
 
         for (SimpleLocation simpleLocation : locations) {
             Location location = simpleLocation.getLocation();
@@ -221,9 +217,9 @@ public class Pipe {
 
         Multimap<Integer, Integer> chunks = MultimapBuilder.hashKeys().hashSetValues().build();
         LinkedHashSet<SimpleLocation> locations = new LinkedHashSet<>(pipeBlocks);
-        inputs.stream().map(PipeInput::getLocation).forEach(locations::add);
-        outputs.stream().map(PipeOutput::getLocation).forEach(locations::add);
-        outputs.stream().map(PipeOutput::getTargetLocation).forEach(locations::add);
+        locations.addAll(inputs.keySet());
+        locations.addAll(outputs.keySet());
+        outputs.values().stream().map(PipeOutput::getTargetLocation).forEach(locations::add);
         for (SimpleLocation location : locations) {
             chunks.put(location.getX() >> 4, location.getZ() >> 4);
         }

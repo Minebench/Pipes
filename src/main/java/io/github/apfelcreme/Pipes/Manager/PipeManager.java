@@ -25,14 +25,13 @@ import org.bukkit.block.BlockFace;
 import org.bukkit.block.BlockState;
 import org.bukkit.inventory.InventoryHolder;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
-import java.util.List;
 import java.util.Map;
 import java.util.Queue;
 import java.util.Set;
@@ -279,7 +278,7 @@ public class PipeManager {
             return;
         }
 
-        for (Iterator<PipeInput> i = pipe.getInputs().iterator(); i.hasNext();) {
+        for (Iterator<PipeInput> i = pipe.getInputs().values().iterator(); i.hasNext();) {
             PipeInput input = i.next();
             i.remove();
             pipeCache.invalidate(input.getLocation());
@@ -294,18 +293,18 @@ public class PipeManager {
         if (pipe == null) {
             return;
         }
-        for (PipeInput input : pipe.getInputs()) {
+        for (PipeInput input : pipe.getInputs().values()) {
             pipeCache.put(input.getLocation(), pipe);
             pipePartCache.put(input.getLocation(), input);
         }
         for (SimpleLocation location : pipe.getPipeBlocks()) {
             singleCache.put(location, pipe);
         }
-        for (PipeOutput output : pipe.getOutputs()) {
+        for (PipeOutput output : pipe.getOutputs().values()) {
             addToMultiCache(output.getLocation(), pipe);
             pipePartCache.put(output.getLocation(), output);
         }
-        for (ChunkLoader chunkLoader : pipe.getChunkLoaders()) {
+        for (ChunkLoader chunkLoader : pipe.getChunkLoaders().values()) {
             addToMultiCache(chunkLoader.getLocation(), pipe);
             pipePartCache.put(chunkLoader.getLocation(), chunkLoader);
         }
@@ -320,8 +319,8 @@ public class PipeManager {
      */
     public void addPart(Pipe pipe, AbstractPipePart pipePart) throws TooManyOutputsException {
         if (pipePart instanceof PipeInput) {
-            pipe.getInputs().add((PipeInput) pipePart);
-            for (PipeInput input : pipe.getInputs()) {
+            pipe.getInputs().put(pipePart.getLocation(), (PipeInput) pipePart);
+            for (PipeInput input : pipe.getInputs().values()) {
                 pipeCache.put(input.getLocation(), pipe);
             }
         } else if (pipePart instanceof PipeOutput) {
@@ -329,10 +328,10 @@ public class PipeManager {
                 removePipe(pipe);
                 throw new TooManyOutputsException(pipePart.getLocation());
             }
-            pipe.getOutputs().add((PipeOutput) pipePart);
+            pipe.getOutputs().put(pipePart.getLocation(), (PipeOutput) pipePart);
             addToMultiCache(pipePart.getLocation(), pipe);
         } else if (pipePart instanceof ChunkLoader) {
-            pipe.getChunkLoaders().add((ChunkLoader) pipePart);
+            pipe.getChunkLoaders().put(pipePart.getLocation(), (ChunkLoader) pipePart);
             addToMultiCache(pipePart.getLocation(), pipe);
         }
         pipePartCache.put(pipePart.getLocation(), pipePart);
@@ -411,16 +410,16 @@ public class PipeManager {
             }
         }
 
-        LinkedHashSet<PipeInput> inputs = new LinkedHashSet<>();
-        LinkedHashSet<PipeOutput> outputs = new LinkedHashSet<>();
-        LinkedHashSet<ChunkLoader> chunkLoaders = new LinkedHashSet<>();
+        LinkedHashMap<SimpleLocation, PipeInput> inputs = new LinkedHashMap<>();
+        LinkedHashMap<SimpleLocation, PipeOutput> outputs = new LinkedHashMap<>();
+        LinkedHashMap<SimpleLocation, ChunkLoader> chunkLoaders = new LinkedHashMap<>();
         LinkedHashSet<SimpleLocation> blocks = new LinkedHashSet<>();
 
         pipes.forEach(pipe -> {
             removePipe(pipe);
-            inputs.addAll(pipe.getInputs());
-            outputs.addAll(pipe.getOutputs());
-            chunkLoaders.addAll(pipe.getChunkLoaders());
+            inputs.putAll(pipe.getInputs());
+            outputs.putAll(pipe.getOutputs());
+            chunkLoaders.putAll(pipe.getChunkLoaders());
             blocks.addAll(pipe.getPipeBlocks());
         });
 
@@ -429,7 +428,7 @@ public class PipeManager {
         }
 
         if (PipesConfig.getMaxPipeOutputs() > 0 && outputs.size() + 1 >= PipesConfig.getMaxPipeOutputs()) {
-            throw new TooManyOutputsException(outputs.iterator().next().getLocation());
+            throw new TooManyOutputsException(outputs.keySet().iterator().next());
         }
 
         Pipe pipe = new Pipe(inputs, outputs, chunkLoaders, blocks, type);
@@ -449,9 +448,9 @@ public class PipeManager {
         Queue<SimpleLocation> queue = new LinkedList<>();
         Set<SimpleLocation> found = new LinkedHashSet<>();
 
-        LinkedHashSet<PipeInput> inputs = new LinkedHashSet<>();
-        LinkedHashSet<PipeOutput> outputs = new LinkedHashSet<>();
-        LinkedHashSet<ChunkLoader> chunkLoaders = new LinkedHashSet<>();
+        LinkedHashMap<SimpleLocation, PipeInput> inputs = new LinkedHashMap<>();
+        LinkedHashMap<SimpleLocation, PipeOutput> outputs = new LinkedHashMap<>();
+        LinkedHashMap<SimpleLocation, ChunkLoader> chunkLoaders = new LinkedHashMap<>();
         LinkedHashSet<SimpleLocation> pipeBlocks = new LinkedHashSet<>();
 
         Material type = null;
@@ -497,7 +496,7 @@ public class PipeManager {
                                     type = relativeBlock.getType();
                                 }
                                 if (relativeBlock.getType() == type) {
-                                    inputs.add(pipeInput);
+                                    inputs.put(pipeInput.getLocation(), pipeInput);
                                     found.add(location);
                                     queue.add(pipeInput.getTargetLocation());
                                 }
@@ -507,7 +506,7 @@ public class PipeManager {
                                 if (PipesConfig.getMaxPipeOutputs() > 0 && outputs.size() >= PipesConfig.getMaxPipeOutputs()) {
                                     throw new TooManyOutputsException(location);
                                 }
-                                outputs.add(pipeOutput);
+                                outputs.put(pipeOutput.getLocation(), pipeOutput);
                                 if (found.isEmpty()) {
                                     for (BlockFace face : PipesUtil.BLOCK_FACES) {
                                         if (face != pipeOutput.getFacing()) {
@@ -526,7 +525,7 @@ public class PipeManager {
                                 }
                                 break;
                             case CHUNK_LOADER:
-                                chunkLoaders.add((ChunkLoader) pipesPart);
+                                chunkLoaders.put(pipesPart.getLocation(), (ChunkLoader) pipesPart);
                                 found.add(location);
                                 break;
                         }
@@ -647,20 +646,20 @@ public class PipeManager {
             }
 
             if (pipe.getInputs().isEmpty() || notification.getCause() != RemovalCause.EXPLICIT) {
-                for (PipeInput input : pipe.getInputs()) {
+                for (PipeInput input : pipe.getInputs().values()) {
                     pipeCache.invalidate(input.getLocation());
                     pipePartCache.remove(input.getLocation(), input);
                 }
                 for (SimpleLocation location : pipe.getPipeBlocks()) {
                     singleCache.remove(location);
                 }
-                for (PipeOutput output : pipe.getOutputs()) {
+                for (PipeOutput output : pipe.getOutputs().values()) {
                     removeFromMultiCache(output.getLocation(), pipe);
                     if (multiCache.getOrDefault(output.getLocation(), Collections.emptySet()).isEmpty()) {
                         pipePartCache.remove(output.getLocation(), output);
                     }
                 }
-                for (ChunkLoader loader : pipe.getChunkLoaders()) {
+                for (ChunkLoader loader : pipe.getChunkLoaders().values()) {
                     removeFromMultiCache(loader.getLocation(), pipe);
                     if (multiCache.getOrDefault(loader.getLocation(), Collections.emptySet()).isEmpty()) {
                         pipePartCache.remove(loader.getLocation(), loader);

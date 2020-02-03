@@ -201,7 +201,7 @@ public class ItemMoveScheduler {
     private boolean moveItem(PipeInput input, Inventory inputInventory, Pipe pipe, ItemStack itemStack, boolean spread, boolean overflow) {
         Map<PipeOutput, PipeOutput.AcceptResult> outputs = new LinkedHashMap<>();
         int filterCount = 0;
-        for (PipeOutput output : pipe.getOutputs()) {
+        for (PipeOutput output : pipe.getOutputs().values()) {
             PipeOutput.AcceptResult acceptResult = output.accepts(input, itemStack);
             if (!spread || acceptResult.getType() == PipeOutput.ResultType.ACCEPT) {
                 outputs.put(output, acceptResult);

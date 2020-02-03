@@ -40,6 +40,9 @@ public class Pipe {
     private final LinkedHashSet<SimpleLocation> pipeBlocks;
     private final Material type;
 
+    private int lastTransfer = 0;
+    private int transfers = 0;
+
     public Pipe(LinkedHashSet<PipeInput> inputs, LinkedHashSet<PipeOutput> outputs,
                 LinkedHashSet<ChunkLoader> chunkLoaders, LinkedHashSet<SimpleLocation> pipeBlocks, Material type) {
         this.inputs = inputs;
@@ -108,6 +111,42 @@ public class Pipe {
      */
     public Material getType() {
         return type;
+    }
+
+    /**
+     * Get the last tick this pipe transferred something
+     *
+     * @return The tick number the last transfer happened
+     */
+    public int getLastTransfer() {
+        return lastTransfer;
+    }
+
+    /**
+     * Set the last tick this pipe transferred something
+     *
+     * @param lastTransfer The tick number the last transfer happened
+     */
+    public void setLastTransfer(int lastTransfer) {
+        this.lastTransfer = lastTransfer;
+    }
+
+    /**
+     * Get the amount of transfers in this transfer cycle
+     *
+     * @return the amount of transfers
+     */
+    public int getTransfers() {
+        return transfers;
+    }
+
+    /**
+     * Set the amount of transfers in this transfer cycle
+     *
+     * @param transfers the amount of transfers
+     */
+    public void setTransfers(int transfers) {
+        this.transfers = transfers;
     }
 
     /**

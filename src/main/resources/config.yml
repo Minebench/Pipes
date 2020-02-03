@@ -1,6 +1,7 @@
 pipeCacheDuration: 600 #s
 pipeCacheSize: 1000 #number of cached inputs
 transferCooldown: 20 #ticks
+inputToOutputRatio: 1.0 #ratio for max transfers per pipe per move task
 pistonUpdateCheck: true
 convertToBlockInfoOnChunkLoad: false
 dispenserRecipe:

@@ -36,12 +36,13 @@ public class PipesConfig {
 
     private static Pipes plugin;
     private static long transferCooldown;
+    private static double inputToOutputRatio;
     private static int maxPipeOutputs;
     private static int maxPipeLength;
     private static boolean pistonUpdateCheck;
     private static ItemStack guiFiller;
     private static Map<String, ItemStack> itemStacks;
-    
+
     /**
      * loads the config
      */
@@ -54,6 +55,7 @@ public class PipesConfig {
         plugin.saveResource("lang.de.yml", false);
         plugin.reloadConfig();
         transferCooldown = plugin.getConfig().getLong("transferCooldown");
+        inputToOutputRatio = plugin.getConfig().getDouble("inputToOutputRatio");
         maxPipeOutputs = plugin.getConfig().getInt("maxPipeOutputs");
         maxPipeLength = plugin.getConfig().getInt("maxPipeLength");
         pistonUpdateCheck = plugin.getConfig().getBoolean("pistonUpdateCheck");
@@ -86,6 +88,15 @@ public class PipesConfig {
      */
     public static long getTransferCooldown() {
         return transferCooldown;
+    }
+
+    /**
+     * returns the ratio of inputs to outputs for a pipe's transfer, 0 for unlimited
+     *
+     * @return the ratio of inputs to outputs for a pipe's transfer, 0 for unlimited
+     */
+    public static double getInputToOutputRatio() {
+        return inputToOutputRatio;
     }
 
     /**

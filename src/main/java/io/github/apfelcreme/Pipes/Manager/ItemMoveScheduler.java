@@ -13,6 +13,7 @@ import io.github.apfelcreme.Pipes.Pipe.SimpleLocation;
 import io.github.apfelcreme.Pipes.Pipes;
 import io.github.apfelcreme.Pipes.PipesConfig;
 import io.github.apfelcreme.Pipes.PipesUtil;
+import org.bukkit.Bukkit;
 import org.bukkit.Effect;
 import org.bukkit.Location;
 import org.bukkit.block.BlockFace;
@@ -137,6 +138,14 @@ public class ItemMoveScheduler {
             return true;
         }
 
+        if (pipe.getLastTransfer() != Bukkit.getCurrentTick()) {
+            // Reset transfer count if no transfer occurred this tick
+            pipe.setTransfers(0);
+        } else if (PipesConfig.getInputToOutputRatio() > 0 && pipe.getTransfers() >= pipe.getOutputs().size() * PipesConfig.getInputToOutputRatio()) {
+            // Pipe already transferred more than the max transfer? Handle next tick
+            return false;
+        }
+
         PipeInput input = pipe.getInput(simpleLocation);
         if (input == null) {
             // Could not find an input at that location, to not recheck this transfer we return true
@@ -181,6 +190,10 @@ public class ItemMoveScheduler {
             }
         }
         inputHolder.update();
+
+        // Update transfers
+        pipe.setTransfers(pipe.getTransfers() + 1);
+        pipe.setLastTransfer(Bukkit.getCurrentTick());
 
         return transferredAll;
     }

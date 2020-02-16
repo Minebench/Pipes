@@ -35,6 +35,8 @@ import org.bukkit.event.inventory.InventoryMoveItemEvent;
 import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.persistence.PersistentDataHolder;
+import org.bukkit.persistence.PersistentDataType;
 
 import java.util.HashSet;
 import java.util.LinkedHashSet;
@@ -150,7 +152,12 @@ public class BlockListener implements Listener {
                     pipe.highlight();
                 }
 
-                BlockInfoStorage.get().setBlockInfo(event.getBlock().getLocation(), AbstractPipePart.TYPE_KEY, pipePart.getType().name());
+                BlockState state = event.getBlock().getState(true);
+                if (state instanceof PersistentDataHolder) {
+                    ((PersistentDataHolder) state).getPersistentDataContainer().set(AbstractPipePart.TYPE_KEY, PersistentDataType.STRING, pipePart.getType().name());
+                } else if (Pipes.hasBlockInfoStorage()) {
+                    BlockInfoStorage.get().setBlockInfo(event.getBlock().getLocation(), AbstractPipePart.TYPE_KEY, pipePart.getType().name());
+                }
             } else if (MaterialTags.STAINED_GLASS.isTagged(event.getBlock())) {
                 Material placedType = event.getBlock().getType();
 

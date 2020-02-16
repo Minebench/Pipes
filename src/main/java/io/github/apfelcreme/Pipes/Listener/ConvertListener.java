@@ -27,6 +27,8 @@ import org.bukkit.block.BlockState;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.world.ChunkLoadEvent;
+import org.bukkit.persistence.PersistentDataHolder;
+import org.bukkit.persistence.PersistentDataType;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -48,7 +50,11 @@ public class ConvertListener implements Listener {
             for (BlockState state : event.getChunk().getTileEntities(false)) {
                 AbstractPipePart part = PipeManager.getInstance().getPipePart(state.getBlock());
                 if (part != null) {
-                    BlockInfoStorage.get().setBlockInfo(state.getLocation(), AbstractPipePart.TYPE_KEY, part.getType().name());
+                    if (state instanceof PersistentDataHolder) {
+                        ((PersistentDataHolder) state).getPersistentDataContainer().set(AbstractPipePart.TYPE_KEY, PersistentDataType.STRING, part.getType().name());
+                    } else if (Pipes.hasBlockInfoStorage()) {
+                        BlockInfoStorage.get().setBlockInfo(state.getLocation(), AbstractPipePart.TYPE_KEY, part.getType().name());
+                    }
                 }
             }
         }

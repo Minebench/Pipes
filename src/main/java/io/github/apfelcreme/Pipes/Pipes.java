@@ -39,7 +39,6 @@ import java.util.concurrent.TimeUnit;
  * @author Lord36 aka Apfelcreme
  */
 public class Pipes extends JavaPlugin {
-
     /**
      * the players who have registered a right click for /pipe info
      */
@@ -50,9 +49,15 @@ public class Pipes extends JavaPlugin {
      */
     private static Pipes instance = null;
 
+    /**
+     * if BlockInfoStorage is available
+     */
+    private static boolean blockInfoStorage = false;
+
     @Override
     public void onEnable() {
         instance = this;
+        blockInfoStorage = getServer().getPluginManager().isPluginEnabled("BlockInfoStorage");
         registeredRightClicks = CacheBuilder.newBuilder().expireAfterWrite(10, TimeUnit.SECONDS).build();
         PipesConfig.load();
         ItemMoveScheduler.load();
@@ -150,5 +155,14 @@ public class Pipes extends JavaPlugin {
      */
     public static Pipes getInstance() {
         return instance;
+    }
+
+    /**
+     * Returns whether or not BlockInfoStorage is available
+     *
+     * @return whether or not BlockInfoStorage is available
+     */
+    public static boolean hasBlockInfoStorage() {
+        return blockInfoStorage;
     }
 }

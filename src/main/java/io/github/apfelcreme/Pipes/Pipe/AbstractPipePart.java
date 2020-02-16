@@ -27,9 +27,10 @@ import org.bukkit.event.inventory.ClickType;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.BookMeta;
 import org.bukkit.inventory.meta.ItemMeta;
-import org.bukkit.inventory.meta.tags.CustomItemTagContainer;
-import org.bukkit.inventory.meta.tags.ItemTagAdapterContext;
-import org.bukkit.inventory.meta.tags.ItemTagType;
+import org.bukkit.persistence.PersistentDataAdapterContext;
+import org.bukkit.persistence.PersistentDataContainer;
+import org.bukkit.persistence.PersistentDataHolder;
+import org.bukkit.persistence.PersistentDataType;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -172,14 +173,27 @@ public abstract class AbstractPipePart {
         }
         options.put(option, value);
         if (save) {
-            Object v = value != null && value != option.getDefaultValue() ? value.getValue() : null;
-            if (v instanceof Enum) {
-                v = ((Enum) v).name();
+            Container holder = getHolder();
+            if (holder != null) {
+                if (value == null) {
+                    holder.getPersistentDataContainer().remove(new NamespacedKey(Pipes.getInstance(), option.name()));
+                } else {
+                    holder.getPersistentDataContainer().set(
+                            new NamespacedKey(Pipes.getInstance(), option.name()),
+                            option.getTagType(),
+                            value.getValue()
+                    );
+                }
+            } else if (Pipes.hasBlockInfoStorage()) {
+                Object v = value != null && value != option.getDefaultValue() ? value.getValue() : null;
+                if (v instanceof Enum) {
+                    v = ((Enum) v).name();
+                }
+                BlockInfoStorage.get().setBlockInfo(
+                        getLocation().getLocation(),
+                        new NamespacedKey(Pipes.getInstance(), option.name()),
+                        v);
             }
-            BlockInfoStorage.get().setBlockInfo(
-                    getLocation().getLocation(),
-                    new NamespacedKey(Pipes.getInstance(), option.name()),
-                    v);
         }
     }
 
@@ -306,38 +320,73 @@ public abstract class AbstractPipePart {
      * @param block The block to load the options from
      */
     private void loadOptions(Block block) {
-        ConfigurationSection blockInfo = BlockInfoStorage.get().getBlockInfo(block, Pipes.getInstance());
-        if (blockInfo == null) {
-            BlockState state = block.getState(false);
-            if (state instanceof Nameable) {
-                String hidden = PipesUtil.getHiddenString(((Nameable) state).getCustomName());
-                if (hidden != null) {
-                    try {
-                        applyOptions(hidden);
-                        BlockInfoStorage.get().setBlockInfo(state.getLocation(), TYPE_KEY, getType().name());
-                    } catch (IllegalArgumentException e) {
-                        Pipes.getInstance().getLogger().log(Level.WARNING, "Error while loading pipe part at " + getLocation() + "! " + e.getMessage());
-                    }
-                }
-            }
+        BlockState state = block.getState(false);
+        if (state instanceof PersistentDataHolder && loadOptions((PersistentDataHolder) state)) {
             return;
         }
 
-        for (String optionName : blockInfo.getKeys(false)) {
-            if ("type".equalsIgnoreCase(optionName)) {
-                continue;
-            }
-            try {
-                Option<?> option = getAvailableOption(optionName.toUpperCase());
-                Value value = option.parseValue(blockInfo.get(optionName));
-                if (value == null) continue;
-                setOption(option, value, false);
-            } catch (IllegalArgumentException | IllegalAccessException | InvocationTargetException e) {
-                e.printStackTrace();
-                throw new IllegalArgumentException(PipesConfig.getText("error.invalidSettingsBook",
-                        "Invalid option" + optionName + "=" + blockInfo.get(optionName)));
+        if (Pipes.hasBlockInfoStorage()) {
+            ConfigurationSection blockInfo = BlockInfoStorage.get().getBlockInfo(block, Pipes.getInstance());
+            if (blockInfo != null) {
+                for (String optionName : blockInfo.getKeys(false)) {
+                    if ("type".equalsIgnoreCase(optionName)) {
+                        if (state instanceof PersistentDataHolder) {
+                            ((PersistentDataHolder) state).getPersistentDataContainer().set(TYPE_KEY, PersistentDataType.STRING, getType().name());
+                        }
+                        continue;
+                    }
+                    try {
+                        Option<?> option = getAvailableOption(optionName.toUpperCase());
+                        Value value = option.parseValue(blockInfo.get(optionName));
+                        if (value == null) continue;
+                        setOption(option, value, false);
+                    } catch (IllegalArgumentException | IllegalAccessException | InvocationTargetException e) {
+                        e.printStackTrace();
+                        throw new IllegalArgumentException(PipesConfig.getText("error.invalidSettingsBook",
+                                "Invalid option" + optionName + "=" + blockInfo.get(optionName)));
+                    }
+                }
+                if (state instanceof PersistentDataHolder) {
+                    BlockInfoStorage.get().removeBlockInfo(block, Pipes.getInstance());
+                }
+                return;
             }
         }
+
+        if (state instanceof Nameable) {
+            String hidden = PipesUtil.getHiddenString(((Nameable) state).getCustomName());
+            if (hidden != null) {
+                try {
+                    applyOptions(hidden);
+                    if (state instanceof PersistentDataHolder) {
+                        ((PersistentDataHolder) state).getPersistentDataContainer().set(TYPE_KEY, PersistentDataType.STRING, getType().name());
+                    } else if (Pipes.hasBlockInfoStorage()) {
+                        BlockInfoStorage.get().setBlockInfo(state.getLocation(), TYPE_KEY, getType().name());
+                    }
+                } catch (IllegalArgumentException e) {
+                    Pipes.getInstance().getLogger().log(Level.WARNING, "Error while loading pipe part at " + getLocation() + "! " + e.getMessage());
+                }
+            }
+        }
+    }
+
+    private boolean loadOptions(PersistentDataHolder dataHolder) {
+        boolean found = false;
+        PersistentDataContainer optionsContainer = dataHolder.getPersistentDataContainer().get(OPTIONS_KEY, PersistentDataType.TAG_CONTAINER);
+        for (Option<?> option : getOptions()) {
+            NamespacedKey key = new NamespacedKey(Pipes.getInstance(), option.name);
+            if (optionsContainer != null && optionsContainer.has(key, option.getTagType())) {
+                Object object = optionsContainer.get(key, option.getTagType());
+                try {
+                    Value value = option.parseValue(object);
+                    setOption(option, value);
+                    found = true;
+                } catch (IllegalAccessException | InvocationTargetException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+        return found;
     }
 
     /**
@@ -414,7 +463,7 @@ public abstract class AbstractPipePart {
             throw new IllegalArgumentException("ItemStack needs to be a book!");
         }
 
-        if (meta.getCustomTagContainer().isEmpty() || !meta.getCustomTagContainer().hasCustomTag(OPTIONS_KEY, ItemTagType.TAG_CONTAINER)) {
+        if (!meta.getPersistentDataContainer().has(OPTIONS_KEY, PersistentDataType.TAG_CONTAINER)) {
             if (meta.hasLore()) {
                 List<String> lore = meta.getLore();
                 String hidden = PipesUtil.getHiddenString(lore.get(lore.size() - 1));
@@ -424,11 +473,11 @@ public abstract class AbstractPipePart {
             throw new IllegalArgumentException("ItemStack does not have custom tags nor a custom lore!");
         }
 
-        if (!meta.getCustomTagContainer().hasCustomTag(STORED_TYPE_KEY, ItemTagType.STRING)) {
+        if (!meta.getPersistentDataContainer().has(STORED_TYPE_KEY, PersistentDataType.STRING)) {
             throw new IllegalArgumentException(PipesConfig.getText("error.unknownPipesItem", "null"));
         }
 
-        String storedType = meta.getCustomTagContainer().getCustomTag(STORED_TYPE_KEY, ItemTagType.STRING);
+        String storedType = meta.getPersistentDataContainer().get(STORED_TYPE_KEY, PersistentDataType.STRING);
         if (storedType == null) {
             throw new IllegalArgumentException(PipesConfig.getText("error.unknownPipesItem", "null"));
         }
@@ -444,19 +493,7 @@ public abstract class AbstractPipePart {
                     PipesConfig.getText("items." + storedItem.toConfigKey() + ".name")));
         }
 
-        CustomItemTagContainer optionsContainer = meta.getCustomTagContainer().getCustomTag(OPTIONS_KEY, ItemTagType.TAG_CONTAINER);
-        for (Option<?> option : getOptions()) {
-            NamespacedKey key = new NamespacedKey(Pipes.getInstance(), option.name);
-            if (optionsContainer.hasCustomTag(key, option.getTagType())) {
-                Object object = optionsContainer.getCustomTag(key, option.getTagType());
-                try {
-                    Value value = option.parseValue(object);
-                    setOption(option, value);
-                } catch (IllegalAccessException | InvocationTargetException e) {
-                    e.printStackTrace();
-                }
-            }
-        }
+        loadOptions(meta);
     }
     
     /**
@@ -479,9 +516,9 @@ public abstract class AbstractPipePart {
         List<ComponentBuilder> optionsPage = new ArrayList();
         optionsPage.add(new ComponentBuilder(""));
 
-        meta.getCustomTagContainer().setCustomTag(STORED_TYPE_KEY, ItemTagType.STRING, getType().toString());
+        meta.getPersistentDataContainer().set(STORED_TYPE_KEY, PersistentDataType.STRING, getType().toString());
 
-        CustomItemTagContainer optionsContainer = meta.getCustomTagContainer().getAdapterContext().newTagContainer();
+        PersistentDataContainer optionsContainer = meta.getPersistentDataContainer().getAdapterContext().newPersistentDataContainer();
         for (Option<?> option : getOptions()) {
             option.store(this, optionsContainer);
 
@@ -518,7 +555,7 @@ public abstract class AbstractPipePart {
             pageBuilder.append(optionEntry);
         }
 
-        meta.getCustomTagContainer().setCustomTag(OPTIONS_KEY, ItemTagType.TAG_CONTAINER, optionsContainer);
+        meta.getPersistentDataContainer().set(OPTIONS_KEY, PersistentDataType.TAG_CONTAINER, optionsContainer);
         
         if (!optionsPage.isEmpty()) {
             pages.add(optionsPage.get(optionsPage.size() - 1).create());
@@ -543,8 +580,8 @@ public abstract class AbstractPipePart {
         return bookItem;
     }
 
-    private <T, Z> void containerSet(CustomItemTagContainer container, NamespacedKey key, ItemTagType<Z, T> type, Value<T> value) {
-        container.setCustomTag(key, type, value.getValue());
+    private <T, Z> void containerSet(PersistentDataContainer container, NamespacedKey key, PersistentDataType<Z, T> type, Value<T> value) {
+        container.set(key, type, value.getValue());
     }
 
     @Override
@@ -644,7 +681,7 @@ public abstract class AbstractPipePart {
             return possibleValues;
         }
 
-        public <Z> ItemTagType<Z, T> getTagType() {
+        public <Z> PersistentDataType<Z, T> getTagType() {
             return getDefaultValue().getTagType();
         }
 
@@ -709,12 +746,12 @@ public abstract class AbstractPipePart {
             return guiPosition;
         }
 
-        public void store(AbstractPipePart pipePart, CustomItemTagContainer container) {
+        public void store(AbstractPipePart pipePart, PersistentDataContainer container) {
             Value<T> value = pipePart.getValue(this);
             if (value == null || value.getValue() == null) {
-                container.removeCustomTag(new NamespacedKey(Pipes.getInstance(), name));
+                container.remove(new NamespacedKey(Pipes.getInstance(), name));
             } else {
-                container.setCustomTag(new NamespacedKey(Pipes.getInstance(), name()), getTagType(), value.getValue());
+                container.set(new NamespacedKey(Pipes.getInstance(), name()), getTagType(), value.getValue());
             }
         }
 
@@ -761,14 +798,24 @@ public abstract class AbstractPipePart {
     public static class Value<T> {
         public static final Value<Boolean> TRUE = new Value<>(true);
         public static final Value<Boolean> FALSE = new Value<>(false);
-        public static final ItemTagType<Byte,Boolean> BOOLEAN_TAG_TYPE = new TagType<Byte, Boolean>(Byte.class, Boolean.class) {
+        public static final PersistentDataType<Byte,Boolean> BOOLEAN_TAG_TYPE = new PersistentDataType<Byte, Boolean>() {
             @Override
-            public Byte toPrimitive(Boolean complex, ItemTagAdapterContext context) {
+            public Class<Byte> getPrimitiveType() {
+                return Byte.class;
+            }
+
+            @Override
+            public Class<Boolean> getComplexType() {
+                return Boolean.class;
+            }
+
+            @Override
+            public Byte toPrimitive(Boolean complex, PersistentDataAdapterContext context) {
                 return complex != null && complex ? (byte) 1 : (byte) 0;
             }
 
             @Override
-            public Boolean fromPrimitive(Byte primitive, ItemTagAdapterContext context) {
+            public Boolean fromPrimitive(Byte primitive, PersistentDataAdapterContext context) {
                 return primitive != null && primitive == 1;
             }
         };
@@ -787,30 +834,30 @@ public abstract class AbstractPipePart {
             return "Value<" + value.getClass().getSimpleName() + ">{value=" + value.toString() + "}";
         }
 
-        public <Z> ItemTagType<Z, T> getTagType() {
+        public <Z> PersistentDataType<Z, T> getTagType() {
             if (getValue() instanceof Boolean) {
-                return (ItemTagType<Z, T>) Value.BOOLEAN_TAG_TYPE;
+                return (PersistentDataType<Z, T>) Value.BOOLEAN_TAG_TYPE;
             } else if (getValue() instanceof Byte) {
-                return (ItemTagType<Z, T>) ItemTagType.BYTE;
+                return (PersistentDataType<Z, T>) PersistentDataType.BYTE;
             } else if (getValue() instanceof Short) {
-                return (ItemTagType<Z, T>) ItemTagType.SHORT;
+                return (PersistentDataType<Z, T>) PersistentDataType.SHORT;
             } else if (getValue() instanceof Long) {
-                return (ItemTagType<Z, T>) ItemTagType.LONG;
+                return (PersistentDataType<Z, T>) PersistentDataType.LONG;
             } else if (getValue() instanceof Integer) {
-                return (ItemTagType<Z, T>) ItemTagType.INTEGER;
+                return (PersistentDataType<Z, T>) PersistentDataType.INTEGER;
             } else if (getValue() instanceof Float) {
-                return (ItemTagType<Z, T>) ItemTagType.FLOAT;
+                return (PersistentDataType<Z, T>) PersistentDataType.FLOAT;
             } else if (getValue() instanceof Double) {
-                return (ItemTagType<Z, T>) ItemTagType.DOUBLE;
+                return (PersistentDataType<Z, T>) PersistentDataType.DOUBLE;
             } else if (getValue() instanceof String) {
-                return (ItemTagType<Z, T>) ItemTagType.STRING;
+                return (PersistentDataType<Z, T>) PersistentDataType.STRING;
             } else if (getValue() instanceof Enum) {
-                return (ItemTagType<Z, T>) new EnumTagType((Class<? extends Enum>) getValue().getClass());
+                return (PersistentDataType<Z, T>) new EnumTagType((Class<? extends Enum>) getValue().getClass());
             }
             throw new IllegalArgumentException(getValue().getClass() + " types are not supported!");
         }
 
-        public abstract static class TagType<P, X> implements ItemTagType<P, X> {
+        public abstract static class TagType<P, X> implements PersistentDataType<P, X> {
             private final Class<P> primitiveType;
             private final Class<X> complexType;
 
@@ -837,12 +884,12 @@ public abstract class AbstractPipePart {
             }
 
             @Override
-            public String toPrimitive(Enum complex, ItemTagAdapterContext context) {
+            public String toPrimitive(Enum complex, PersistentDataAdapterContext context) {
                 return complex.name();
             }
 
             @Override
-            public Enum fromPrimitive(String primitive, ItemTagAdapterContext context) {
+            public Enum fromPrimitive(String primitive, PersistentDataAdapterContext context) {
                 try {
                     return Enum.valueOf(getComplexType(), primitive.toUpperCase());
                 } catch (IllegalArgumentException e) {

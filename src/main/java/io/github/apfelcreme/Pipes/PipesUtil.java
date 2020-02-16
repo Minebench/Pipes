@@ -9,7 +9,6 @@ import io.github.apfelcreme.Pipes.Pipe.PipeOutput;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.Nameable;
-import org.bukkit.NamespacedKey;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.block.BlockState;
@@ -22,15 +21,14 @@ import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.PotionMeta;
 import org.bukkit.material.DirectionalContainer;
+import org.bukkit.persistence.PersistentDataHolder;
+import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.potion.PotionType;
 
 import java.util.Collection;
-import java.util.Collections;
-import java.util.EnumSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
-import java.util.Set;
 import java.util.regex.Pattern;
 
 /**
@@ -175,7 +173,12 @@ public class PipesUtil {
             return null;
         }
 
-        Object stored = BlockInfoStorage.get().getBlockInfoValue(block, AbstractPipePart.TYPE_KEY);
+        Object stored = null;
+        if (state instanceof PersistentDataHolder && ((PersistentDataHolder) state).getPersistentDataContainer().has(AbstractPipePart.TYPE_KEY, PersistentDataType.STRING)) {
+            stored = ((PersistentDataHolder) state).getPersistentDataContainer().get(AbstractPipePart.TYPE_KEY, PersistentDataType.STRING);
+        } else if (Pipes.hasBlockInfoStorage()) {
+            stored = BlockInfoStorage.get().getBlockInfoValue(block, AbstractPipePart.TYPE_KEY);
+        }
         String type = null;
         if (stored instanceof String) {
             type = (String) stored;

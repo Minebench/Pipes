@@ -26,13 +26,13 @@ import org.bukkit.Nameable;
 import org.bukkit.NamespacedKey;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockState;
-import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
-import org.bukkit.inventory.meta.tags.ItemTagType;
+import org.bukkit.persistence.PersistentDataHolder;
+import org.bukkit.persistence.PersistentDataType;
 
 import java.util.Arrays;
 import java.util.List;
@@ -80,7 +80,7 @@ public enum PipesItem {
                 toString(),
                 PipesConfig.getText("items." + toConfigKey() + ".name")
         ));
-        meta.getCustomTagContainer().setCustomTag(TYPE_KEY, ItemTagType.STRING, toString());
+        meta.getPersistentDataContainer().set(TYPE_KEY, PersistentDataType.STRING, toString());
         item.setItemMeta(meta);
         this.item = item;
         return new ItemStack(item);
@@ -96,13 +96,21 @@ public enum PipesItem {
             return false;
         }
 
+        if (blockState instanceof PersistentDataHolder && ((PersistentDataHolder) blockState).getPersistentDataContainer().has(TYPE_KEY, PersistentDataType.STRING)) {
+            return true;
+        }
+
+        if (Pipes.hasBlockInfoStorage()) {
+            return BlockInfoStorage.get().getBlockInfo(blockState.getLocation(), Pipes.getInstance()) != null;
+        }
+
         String hidden = PipesUtil.getHiddenString(((Nameable) blockState).getCustomName());
 
         if (hidden != null && toString().equals(hidden.split(",")[0]) || IDENTIFIER.equals(hidden)) {
             return true;
         }
 
-        return BlockInfoStorage.get().getBlockInfo(blockState.getLocation(), Pipes.getInstance()) != null;
+        return false;
     }
 
     public boolean check(ItemStack item) {
@@ -112,8 +120,8 @@ public enum PipesItem {
 
         ItemMeta meta = item.getItemMeta();
 
-        if (!meta.getCustomTagContainer().isEmpty() && meta.getCustomTagContainer().hasCustomTag(TYPE_KEY, ItemTagType.STRING)) {
-            return toString().equals(meta.getCustomTagContainer().getCustomTag(TYPE_KEY, ItemTagType.STRING));
+        if (meta.getPersistentDataContainer().has(TYPE_KEY, PersistentDataType.STRING)) {
+            return toString().equals(meta.getPersistentDataContainer().get(TYPE_KEY, PersistentDataType.STRING));
         }
 
         List<String> lore = item.getItemMeta().getLore();

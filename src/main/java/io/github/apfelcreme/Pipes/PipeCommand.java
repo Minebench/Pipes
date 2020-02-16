@@ -5,7 +5,7 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 
-/**
+/*
  * Copyright (C) 2016 Lord36 aka Apfelcreme
  * <p>
  * This program is free software;

@@ -6,7 +6,7 @@ import io.github.apfelcreme.Pipes.PipesItem;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
-/**
+/*
  * Copyright (C) 2017 Max Lee (https://github.com/Phoenix616)
  * <p>
  * This program is free software;

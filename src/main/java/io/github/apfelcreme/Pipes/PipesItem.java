@@ -1,6 +1,6 @@
 package io.github.apfelcreme.Pipes;
 
-/**
+/*
  * Copyright (C) 2016 Max lLe aka Phoenix616
  * <p>
  * This program is free software;

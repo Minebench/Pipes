@@ -20,7 +20,7 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
-/**
+/*
  * Copyright (C) 2016 Lord36 aka Apfelcreme
  * <p>
  * This program is free software;
@@ -102,6 +102,8 @@ public class Pipes extends JavaPlugin {
 
     /**
      * Register a right click action
+     * @param player    the player to register the action for
+     * @param action    the action to register
      */
     public void registerRightClick(Player player, String action) {
         registeredRightClicks.put(player.getUniqueId(), action);
@@ -109,13 +111,16 @@ public class Pipes extends JavaPlugin {
 
     /**
      * Get a registered a right click action
+     * @param player    the player to get the registered action
+     * @return the registered action
      */
-    public String getRegisterRightClick(Player player) {
+    public String getRegisteredRightClick(Player player) {
         return registeredRightClicks.getIfPresent(player.getUniqueId());
     }
 
     /**
      * Unregister a right click action
+     * @param player    the player to unregister the action for
      */
     public void unregisterRightClick(Player player) {
         registeredRightClicks.invalidate(player.getUniqueId());

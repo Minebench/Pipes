@@ -31,7 +31,7 @@ import java.util.Map;
 import java.util.Random;
 import java.util.regex.Pattern;
 
-/**
+/*
  * Copyright (C) 2016 Lord36 aka Apfelcreme
  * <p>
  * This program is free software;
@@ -123,6 +123,7 @@ public class PipesUtil {
 
     /**
      * Returns a hidden string in the itemstack which is hidden using the last lore line
+     * @param string The string to search in for a hidden string
      * @return The hidden string or <tt>null</tt> if there is none or the input is null
      */
     public static String getHiddenString(String string) {
@@ -139,6 +140,11 @@ public class PipesUtil {
         return builder.reverse().toString();
     }
 
+    /**
+     * Get the {@link PipesItem} from an ItemStack
+     * @param item  the ItemStack
+     * @return the PipesItem or null if none found
+     */
     public static PipesItem getPipesItem(ItemStack item) {
         if (item == null || !item.hasItemMeta() || !item.getItemMeta().hasLore() || item.getItemMeta().getLore().isEmpty()) {
             return null;
@@ -161,6 +167,11 @@ public class PipesUtil {
         }
     }
 
+    /**
+     * Get the {@link PipesItem} from a Block
+     * @param block  the Block
+     * @return the PipesItem or null if none found
+     */
     public static PipesItem getPipesItem(Block block) {
         BlockState state = block.getState(false);
         if (!(state instanceof InventoryHolder)) {
@@ -305,9 +316,9 @@ public class PipesUtil {
 
     /**
      * Check if two ItemStacks are similar ignoring amounts and meta
-     * @param a
-     * @param b
-     * @return
+     * @param a First item stack
+     * @param b Second item stack
+     * @return Whether or not they are similar
      */
     public static boolean isSimilarFuzzy(ItemStack a, ItemStack b) {
         if (a == null || b == null)
@@ -371,6 +382,7 @@ public class PipesUtil {
     /**
      * Get the fuel of an inventory (currently either of type BREWING or FURNACE)
      * @param inventory The inventory that accepts fuel
+     * @return The fuel ItemStack
      */
     public static ItemStack getFuel(Inventory inventory) {
         switch (inventory.getType()) {

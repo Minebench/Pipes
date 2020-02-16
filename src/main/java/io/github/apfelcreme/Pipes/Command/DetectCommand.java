@@ -11,7 +11,7 @@ import org.bukkit.command.CommandSender;
 import java.text.DecimalFormat;
 import java.util.List;
 
-/**
+/*
  * Copyright (C) 2016 Lord36 aka Apfelcreme
  * <p>
  * This program is free software;

@@ -2,7 +2,7 @@ package io.github.apfelcreme.Pipes.Exception;
 
 import io.github.apfelcreme.Pipes.Pipe.SimpleLocation;
 
-/**
+/*
  * Copyright (C) 2016 Lord36 aka Apfelcreme
  * <p>
  * This program is free software;

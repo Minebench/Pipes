@@ -20,7 +20,7 @@ import org.bukkit.inventory.InventoryHolder;
 
 import java.util.Set;
 
-/**
+/*
  * Copyright (C) 2016 Lord36 aka Apfelcreme
  * <p>
  * This program is free software;

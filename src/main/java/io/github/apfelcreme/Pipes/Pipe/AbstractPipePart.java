@@ -43,7 +43,7 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.stream.Collectors;
 
-/**
+/*
  * Copyright (C) 2017 Phoenix616 aka Max Lee
  * <p>
  * This program is free software;
@@ -108,6 +108,7 @@ public abstract class AbstractPipePart {
 
     /**
      * Get a certain option value of this pipe part
+     * @param <T>       The type of the value
      * @param option    The option to get
      * @return          The value of the option or <tt>null</tt> if it wasn't set and there is no default one
      */
@@ -117,6 +118,7 @@ public abstract class AbstractPipePart {
 
     /**
      * Get a certain option value of this  pipe part
+     * @param <T>           The type of the value
      * @param option        The option to get
      * @param defaultValue  The default value to return if the value wasn't found
      * @return              The value of the option or <tt>null</tt> if it wasn't set
@@ -133,6 +135,7 @@ public abstract class AbstractPipePart {
 
     /**
      * Get a certain option of this pipe part
+     * @param <T>       The type of the value
      * @param option    The option to get
      * @return          The value of the option or <tt>null</tt> if it wasn't set and there is no default one
      */
@@ -142,6 +145,7 @@ public abstract class AbstractPipePart {
 
     /**
      * Get a certain option of this  pipe part
+     * @param <T>           The type of the value
      * @param option        The option to get
      * @param defaultValue  The default value to return if the value wasn't found
      * @return              The value of the option or <tt>null</tt> if it wasn't set
@@ -152,6 +156,7 @@ public abstract class AbstractPipePart {
 
     /**
      * Set an option of this output. This also saves the options to the block
+     * @param <T>       The type of the value
      * @param option    The option to set
      * @param value     The value to set the option to
      * @throws IllegalArgumentException When the values type is not compatible with the option
@@ -162,6 +167,7 @@ public abstract class AbstractPipePart {
 
     /**
      * Set an option of this output.
+     * @param <T>       The type of the value
      * @param option    The option to set
      * @param value     The value to set the option to
      * @param save      Whether or not to save the option after setting the value
@@ -209,6 +215,11 @@ public abstract class AbstractPipePart {
         return s.toString();
     }
 
+    /**
+     * Show the parts GUI if it has one
+     *
+     * @param player    The player to show the GUI to
+     */
     public void showGui(Player player) {
         Container holder = getHolder();
         if (holder == null) {
@@ -303,6 +314,7 @@ public abstract class AbstractPipePart {
      * Returns the enum constant of this type with the specified name.
      * The string must match exactly an identifier used to declare an enum constant in this type.
      * (Extraneous whitespace characters are not permitted.)
+     * @param name  The name of the option to get
      * @return  the enum constant with the specified name
      * @throws IllegalArgumentException if this enum type has no constant with the specified name
      */
@@ -340,7 +352,7 @@ public abstract class AbstractPipePart {
                         Value value = option.parseValue(blockInfo.get(optionName));
                         if (value == null) continue;
                         setOption(option, value, false);
-                    } catch (IllegalArgumentException | IllegalAccessException | InvocationTargetException e) {
+                    } catch (IllegalArgumentException e) {
                         e.printStackTrace();
                         throw new IllegalArgumentException(PipesConfig.getText("error.invalidSettingsBook",
                                 "Invalid option" + optionName + "=" + blockInfo.get(optionName)));
@@ -381,7 +393,7 @@ public abstract class AbstractPipePart {
                     Value value = option.parseValue(object);
                     setOption(option, value);
                     found = true;
-                } catch (IllegalAccessException | InvocationTargetException e) {
+                } catch (IllegalArgumentException e) {
                     e.printStackTrace();
                 }
             }
@@ -681,6 +693,11 @@ public abstract class AbstractPipePart {
             return possibleValues;
         }
 
+        /**
+         * Get the persistent data type of the option
+         * @param <Z>   The primitive value for NBT
+         * @return      The persistent data type
+         */
         public <Z> PersistentDataType<Z, T> getTagType() {
             return getDefaultValue().getTagType();
         }
@@ -746,6 +763,11 @@ public abstract class AbstractPipePart {
             return guiPosition;
         }
 
+        /**
+         * Store the value of an option of a certain PipePart to a PersistentDataContiner
+         * @param pipePart  The PipePart to store the option value from
+         * @param container The container to store the option value to
+         */
         public void store(AbstractPipePart pipePart, PersistentDataContainer container) {
             Value<T> value = pipePart.getValue(this);
             if (value == null || value.getValue() == null) {
@@ -755,7 +777,13 @@ public abstract class AbstractPipePart {
             }
         }
 
-        public Value<T> parseValue(Object object) throws IllegalAccessException, InvocationTargetException {
+        /**
+         * Parse the value for this option from an object
+         * @param object    The object to parse the value from
+         * @return  The parsed Value
+         * @throws IllegalArgumentException thrown if the object can't be parsed
+         */
+        public Value<T> parseValue(Object object) throws IllegalArgumentException {
             Value<T> value;
             if (object == null) {
                 return null;
@@ -782,7 +810,11 @@ public abstract class AbstractPipePart {
                 if (get == null) {
                     throw new IllegalArgumentException("Values of type " + getValueType() + " are not supported!");
                 }
-                value = new Value<>((T) get.invoke(null, object.toString()));
+                try {
+                    value = new Value<>((T) get.invoke(null, object.toString()));
+                } catch (IllegalAccessException | InvocationTargetException e) {
+                    throw new IllegalArgumentException(object + " cannot be parsed as a value of " + this + ". " + e.getMessage());
+                }
             }
             return value;
         }
@@ -826,6 +858,10 @@ public abstract class AbstractPipePart {
             this.value = value;
         }
 
+        /**
+         * Get the actual value that this object holds
+         * @return the actual value
+         */
         public T getValue() {
             return value;
         }
@@ -834,6 +870,11 @@ public abstract class AbstractPipePart {
             return "Value<" + value.getClass().getSimpleName() + ">{value=" + value.toString() + "}";
         }
 
+        /**
+         * Get the persistent data type of the value
+         * @param <Z>   The primitive value for NBT
+         * @return      The persistent data type
+         */
         public <Z> PersistentDataType<Z, T> getTagType() {
             if (getValue() instanceof Boolean) {
                 return (PersistentDataType<Z, T>) Value.BOOLEAN_TAG_TYPE;

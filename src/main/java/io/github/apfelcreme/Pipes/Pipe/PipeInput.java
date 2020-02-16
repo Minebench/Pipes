@@ -8,7 +8,7 @@ import org.bukkit.material.Directional;
 import java.util.HashMap;
 import java.util.Map;
 
-/**
+/*
  * Copyright (C) 2016 Lord36 aka Apfelcreme
  * <p>
  * This program is free software;
@@ -86,9 +86,11 @@ public class PipeInput extends AbstractPipePart {
         public static final Option<Boolean> SPREAD = add(new Option<>("SPREAD", Value.FALSE, Value.TRUE));
         /**
          * Whether or not this transfers from this input can overflow into other available outputs
-         * <p><strong>Possible Values:</strong>
+         * <p><strong>Possible Values:</strong></p>
+         * <ul>
          * <li><tt>true</tt> if the items should end up in the overflow</li>
-         * <li><tt>false</tt> if this output should force items to end up in the filtered output even 'though the target is full</li></p>
+         * <li><tt>false</tt> if this output should force items to end up in the filtered output even 'though the target is full</li>
+         * </ul>
          */
         public static final Option<Boolean> OVERFLOW = add(new Option<>("OVERFLOW", Value.FALSE, Value.TRUE));
         /**

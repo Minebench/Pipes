@@ -40,7 +40,7 @@ import java.util.Set;
 import java.util.logging.Level;
 import java.util.stream.Collectors;
 
-/**
+/*
  * Copyright (C) 2016 Lord36 aka Apfelcreme
  * <p>
  * This program is free software;
@@ -117,6 +117,7 @@ public class ItemMoveScheduler {
     /**
      * executes the item transfer
      *
+     * @param simpleLocation the location of the PipeInput
      * @return <tt>true</tt> if this transfer should be considered as completed and removed from the queue
      */
     public boolean execute(SimpleLocation simpleLocation) {

@@ -12,7 +12,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Level;
 
-/**
+/*
  * Copyright (C) 2016 Lord36 aka Apfelcreme
  * <p>
  * This program is free software;
@@ -130,6 +130,7 @@ public class PipesConfig {
     /**
      * returns the materials and their quantity for a custom recipe
      *
+     * @param path  The config path
      * @return the materials and their quantity for a custom recipe
      */
     public static Map<Material, Integer> getRecipeMaterials(String path) {
@@ -146,8 +147,8 @@ public class PipesConfig {
     /**
      * returns a texty string
      *
-     * @param key the config path
-     * @param replacements
+     * @param key           the config path
+     * @param replacements  the replacements as an array of alternating placeholder and value
      * @return the text
      */
     public static String getText(String key, String... replacements) {
@@ -163,6 +164,11 @@ public class PipesConfig {
         }
     }
 
+    /**
+     * Get the ItemStack from the GUI config
+     * @param key   The key, all parts get checked.
+     * @return The ItemStack or placeholder. Never null.
+     */
     public static ItemStack getGuiItemStack(String key) {
         while (!itemStacks.containsKey("gui." + key) && !plugin.getConfig().contains("gui." + key)) {
             int index = key.indexOf('.');
@@ -174,6 +180,11 @@ public class PipesConfig {
         return getItemStack("gui." + key);
     }
 
+    /**
+     * Get the ItemStack from the GUI config
+     * @param key   The literal key
+     * @return The ItemStack or placeholder. Never null.
+     */
     public static ItemStack getItemStack(String key) {
         if (itemStacks.containsKey(key)) {
             return new ItemStack(itemStacks.get(key));

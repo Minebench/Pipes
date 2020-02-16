@@ -38,7 +38,7 @@ import java.util.Set;
 import java.util.WeakHashMap;
 import java.util.concurrent.TimeUnit;
 
-/**
+/*
  * Copyright (C) 2016 Lord36 aka Apfelcreme
  * <p>
  * This program is free software;
@@ -151,6 +151,9 @@ public class PipeManager {
      *
      * @param location the location the input is at
      * @return a Pipe or <tt>null</tt>
+     * @throws ChunkNotLoadedException When the pipe reaches into a chunk that is not loaded
+     * @throws PipeTooLongException When the pipe is too long
+     * @throws TooManyOutputsException when the pipe has too many outputs
      */
     public Pipe getPipeByInput(SimpleLocation location) throws ChunkNotLoadedException, TooManyOutputsException, PipeTooLongException {
         Pipe pipe = pipeCache.getIfPresent(location);
@@ -398,6 +401,8 @@ public class PipeManager {
      * Merge multiple pipes into one
      * @param pipes The pipes to merge
      * @return the merged Pipe or <tt>null</tt> if they couldn't be merged
+     * @throws PipeTooLongException When the pipe is too long
+     * @throws TooManyOutputsException when the pipe has too many outputs
      */
     public Pipe mergePipes(Set<Pipe> pipes) throws TooManyOutputsException, PipeTooLongException {
         Material type = null;
@@ -442,6 +447,9 @@ public class PipeManager {
      *
      * @param startingPoint a block
      * @return a pipe, if there is one
+     * @throws ChunkNotLoadedException When the pipe reaches into a chunk that is not loaded
+     * @throws PipeTooLongException When the pipe is too long
+     * @throws TooManyOutputsException when the pipe has too many outputs
      */
     public Pipe isPipe(Block startingPoint) throws ChunkNotLoadedException, TooManyOutputsException, PipeTooLongException {
 

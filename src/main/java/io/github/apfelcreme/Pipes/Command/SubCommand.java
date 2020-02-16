@@ -2,9 +2,7 @@ package io.github.apfelcreme.Pipes.Command;
 
 import org.bukkit.command.CommandSender;
 
-/**
- * Plugin zum Reset von WorldGuard-Regionen mit einer Standard-Region
- * RegionReset
+/*
  * Copyright (C) 2015 Lord36 aka Apfelcreme
  * <p>
  * This program is free software;

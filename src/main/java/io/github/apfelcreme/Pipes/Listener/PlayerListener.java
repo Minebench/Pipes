@@ -9,7 +9,6 @@ import io.github.apfelcreme.Pipes.Pipe.Pipe;
 import io.github.apfelcreme.Pipes.Pipes;
 import io.github.apfelcreme.Pipes.PipesConfig;
 import io.github.apfelcreme.Pipes.PipesItem;
-import io.github.apfelcreme.Pipes.PipesUtil;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
@@ -19,7 +18,7 @@ import org.bukkit.inventory.EquipmentSlot;
 
 import java.util.Set;
 
-/**
+/*
  * Copyright (C) 2016 Lord36 aka Apfelcreme
  * <p>
  * This program is free software;
@@ -51,7 +50,7 @@ public class PlayerListener implements Listener {
             return;
         }
         if (event.getAction() == Action.RIGHT_CLICK_BLOCK) {
-            String action = plugin.getRegisterRightClick(event.getPlayer());
+            String action = plugin.getRegisteredRightClick(event.getPlayer());
             if ("info".equals(action)) {
                 event.setCancelled(true);
                 try {

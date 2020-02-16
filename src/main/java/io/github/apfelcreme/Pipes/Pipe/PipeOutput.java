@@ -14,7 +14,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-/**
+/*
  * Copyright (C) 2016 Lord36 aka Apfelcreme
  * <p>
  * This program is free software;
@@ -259,26 +259,32 @@ public class PipeOutput extends AbstractPipePart {
 
         /**
          * Whether or not this output is in whitelist mode. This changes how the filter items are used.
-         * <p><strong>Possible Values:</strong>
+         * <p><strong>Possible Values:</strong></p>
+         * <ul>
          * <li><tt>true</tt> if this output is in whitelist mode and should only let items through that are in the inventory</li>
-         * <li><tt>false</tt> if this output is in blacklist mode and should only let items through that are <strong>not</strong> in the inventory</li></p>
+         * <li><tt>false</tt> if this output is in blacklist mode and should only let items through that are <strong>not</strong> in the inventory</li>
+         * </ul>
          */
         public static final Option<Boolean> WHITELIST = add(new Option<>("WHITELIST", Option.GuiPosition.RIGHT, Value.TRUE, Value.FALSE));
 
         /**
          * Whether or not this output can overflow into other available outputs
-         * <p><strong>Possible Values:</strong>
+         * <p><strong>Possible Values:</strong></p>
+         * <ul>
          * <li><tt>input</tt> if the input settings should decide the overflow rules</li>
          * <li><tt>enabled</tt> if the items should end up in the overflow</li>
-         * <li><tt>disabled</tt> if this output should force items to end up here even 'though the target is full</li></p>
+         * <li><tt>disabled</tt> if this output should force items to end up here even 'though the target is full</li>
+         * </ul>
          */
         public static final Option<Overflow> OVERFLOW = add(new Option<>("OVERFLOW", Option.GuiPosition.LEFT, new Value<>(Overflow.INPUT), new Value<>(Overflow.TRUE), new Value<>(Overflow.FALSE)));
 
         /**
          * Whether or not to try to insert into the appropriate slots depending on the item type (like fuel)
-         * <p><strong>Possible Values:</strong>
+         * <p><strong>Possible Values:</strong></p>
+         * <ul>
          * <li><tt>true</tt> Detect the item type and put it in the slot that it belongs to</li>
-         * <li><tt>false</tt> Use the face that the output is facing to select the slot</li></p>
+         * <li><tt>false</tt> Use the face that the output is facing to select the slot</li>
+         * </ul>
          */
         public static final Option<Boolean> SMART_INSERT = add(new Option<>("SMART_INSERT", Option.GuiPosition.LEFT, Value.TRUE, Value.FALSE));
 

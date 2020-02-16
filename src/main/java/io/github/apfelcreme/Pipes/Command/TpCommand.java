@@ -12,7 +12,7 @@ import org.bukkit.entity.Player;
 
 import java.util.List;
 
-/**
+/*
  * Copyright (C) 2016 Lord36 aka Apfelcreme
  * <p>
  * This program is free software;

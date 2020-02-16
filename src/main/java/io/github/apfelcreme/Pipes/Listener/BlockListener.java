@@ -33,6 +33,8 @@ import org.bukkit.event.inventory.CraftItemEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryMoveItemEvent;
 import org.bukkit.event.inventory.InventoryType;
+import org.bukkit.event.inventory.PrepareItemCraftEvent;
+import org.bukkit.inventory.CraftingInventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataHolder;
@@ -251,6 +253,15 @@ public class BlockListener implements Listener {
             if (!event.getWhoClicked().hasPermission("Pipes.placeChunkLoader")) {
                 event.setCancelled(true);
                 Pipes.sendMessage(event.getWhoClicked(), PipesConfig.getText("error.noPermission"));
+            }
+        }
+    }
+
+    @EventHandler(ignoreCancelled = true)
+    public void onPrepareItemCraft(PrepareItemCraftEvent event) {
+        if (event.getRecipe() != null && PipesUtil.getPipesItem(event.getRecipe().getResult()) == PipesItem.CHUNK_LOADER) {
+            if (event.getViewers().stream().anyMatch(p -> !p.hasPermission("Pipes.placeChunkLoader"))) {
+                ((CraftingInventory) event.getView().getTopInventory()).setResult(null);
             }
         }
     }

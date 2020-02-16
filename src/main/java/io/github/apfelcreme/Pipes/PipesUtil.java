@@ -146,22 +146,28 @@ public class PipesUtil {
      * @return the PipesItem or null if none found
      */
     public static PipesItem getPipesItem(ItemStack item) {
-        if (item == null || !item.hasItemMeta() || !item.getItemMeta().hasLore() || item.getItemMeta().getLore().isEmpty()) {
+        if (item == null || !item.hasItemMeta()) {
             return null;
         }
 
-        List<String> lore = item.getItemMeta().getLore();
-        if (!lore.get(lore.size() -1).contains(PipesItem.getIdentifier())) {
-            return null;
+        String type = null;
+        if (item.getItemMeta().getPersistentDataContainer().has(AbstractPipePart.TYPE_KEY, PersistentDataType.STRING)) {
+            type = item.getItemMeta().getPersistentDataContainer().get(AbstractPipePart.TYPE_KEY, PersistentDataType.STRING);
+        } else if (item.getItemMeta().hasLore() && !item.getItemMeta().getLore().isEmpty()) {
+            List<String> lore = item.getItemMeta().getLore();
+            if (!lore.get(lore.size() - 1).contains(PipesItem.getIdentifier())) {
+                return null;
+            }
+
+            type = getHiddenString(lore.get(lore.size() - 1));
         }
 
-        String hidden = getHiddenString(lore.get(lore.size() - 1));
-        if (hidden == null || hidden.isEmpty()) {
+        if (type == null || type.isEmpty()) {
             return null;
         }
 
         try {
-            return PipesItem.valueOf(hidden);
+            return PipesItem.valueOf(type);
         } catch (IllegalArgumentException e) {
             return null;
         }

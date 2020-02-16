@@ -22,5 +22,8 @@ gui:
   true: "LIME_WOOL"
   false: "RED_WOOL"
   input: "YELLOW_WOOL"
+  whitelist:
+    true: "WHITE_WOOL"
+    false: "BLACK_WOOL"
   filler: "BLACK_STAINED_GLASS_PANE"
   copy: "WRITABLE_BOOK"

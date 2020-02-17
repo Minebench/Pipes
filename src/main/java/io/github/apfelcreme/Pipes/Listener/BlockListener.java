@@ -261,7 +261,7 @@ public class BlockListener implements Listener {
     public void onPrepareItemCraft(PrepareItemCraftEvent event) {
         if (event.getRecipe() != null && PipesUtil.getPipesItem(event.getRecipe().getResult()) == PipesItem.CHUNK_LOADER) {
             if (event.getViewers().stream().anyMatch(p -> !p.hasPermission("Pipes.placeChunkLoader"))) {
-                ((CraftingInventory) event.getView().getTopInventory()).setResult(null);
+                event.getInventory().setResult(null);
             }
         }
     }

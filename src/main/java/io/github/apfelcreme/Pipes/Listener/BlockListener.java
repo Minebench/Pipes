@@ -111,16 +111,23 @@ public class BlockListener implements Listener {
 
     @EventHandler(ignoreCancelled = true)
     public void onBlockPlace(BlockPlaceEvent event) {
+        PipesItem pipesItem = PipesUtil.getPipesItem(event.getItemInHand());
+        if (pipesItem != null) {
+            if (pipesItem == PipesItem.CHUNK_LOADER && !event.getPlayer().hasPermission("Pipes.placeChunkLoader")) {
+                Pipes.sendMessage(event.getPlayer(), PipesConfig.getText("error.noPermission"));
+                event.setCancelled(true);
+                return;
+            }
+            BlockState state = event.getBlock().getState(false);
+            if (state instanceof PersistentDataHolder) {
+                ((PersistentDataHolder) state).getPersistentDataContainer().set(AbstractPipePart.TYPE_KEY, PersistentDataType.STRING, pipesItem.name());
+            } else if (Pipes.hasBlockInfoStorage()) {
+                BlockInfoStorage.get().setBlockInfo(event.getBlock().getLocation(), AbstractPipePart.TYPE_KEY, pipesItem.name());
+            }
+        }
         try {
             AbstractPipePart pipePart = PipeManager.getInstance().getPipePart(event.getBlock());
             if (pipePart != null) {
-                if (event.getBlock().getType() == PipesItem.CHUNK_LOADER.getMaterial()
-                        && !event.getPlayer().hasPermission("Pipes.placeChunkLoader")) {
-                    Pipes.sendMessage(event.getPlayer(), PipesConfig.getText("error.noPermission"));
-                    event.setCancelled(true);
-                    return;
-                }
-                
                 if (pipePart instanceof PipeInput) {
                     Block block = event.getBlock().getRelative(((PipeInput) pipePart).getFacing());
                     if (MaterialTags.STAINED_GLASS.isTagged(block)) {
@@ -152,13 +159,6 @@ public class BlockListener implements Listener {
                     Pipes.sendMessage(event.getPlayer(), PipesConfig.getText("info.pipe.pipeBuilt",
                             pipe.getString()));
                     pipe.highlight();
-                }
-
-                BlockState state = event.getBlock().getState(true);
-                if (state instanceof PersistentDataHolder) {
-                    ((PersistentDataHolder) state).getPersistentDataContainer().set(AbstractPipePart.TYPE_KEY, PersistentDataType.STRING, pipePart.getType().name());
-                } else if (Pipes.hasBlockInfoStorage()) {
-                    BlockInfoStorage.get().setBlockInfo(event.getBlock().getLocation(), AbstractPipePart.TYPE_KEY, pipePart.getType().name());
                 }
             } else if (MaterialTags.STAINED_GLASS.isTagged(event.getBlock())) {
                 Material placedType = event.getBlock().getType();

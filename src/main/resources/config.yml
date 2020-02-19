@@ -4,6 +4,7 @@ transferCooldown: 20 #ticks
 inputToOutputRatio: 1.0 #ratio for max transfers per pipe per move task
 pistonUpdateCheck: true
 convertToBlockInfoOnChunkLoad: false
+customModelDataOffset: 1
 dispenserRecipe:
   IRON_BLOCK: 1
   DISPENSER: 1

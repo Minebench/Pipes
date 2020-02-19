@@ -40,6 +40,7 @@ public class PipesConfig {
     private static int maxPipeOutputs;
     private static int maxPipeLength;
     private static boolean pistonUpdateCheck;
+    private static int custommodelDataOffset;
     private static ItemStack guiFiller;
     private static Map<String, ItemStack> itemStacks;
 
@@ -59,6 +60,7 @@ public class PipesConfig {
         maxPipeOutputs = plugin.getConfig().getInt("maxPipeOutputs");
         maxPipeLength = plugin.getConfig().getInt("maxPipeLength");
         pistonUpdateCheck = plugin.getConfig().getBoolean("pistonUpdateCheck");
+        custommodelDataOffset = plugin.getConfig().getInt("custommodelDataOffset");
         languageConfig = YamlConfiguration.loadConfiguration(new File(plugin.getDataFolder(), "lang.de.yml"));
         itemStacks = new HashMap<>();
     }
@@ -126,6 +128,14 @@ public class PipesConfig {
         return pistonUpdateCheck;
     }
 
+    /**
+     * returns the offset for the custom model data of the items
+     *
+     * @return the custom model data offset
+     */
+    public static int getCustomModelDataOffset() {
+        return custommodelDataOffset;
+    }
 
     /**
      * returns the materials and their quantity for a custom recipe

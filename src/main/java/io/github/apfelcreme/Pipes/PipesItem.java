@@ -81,6 +81,7 @@ public enum PipesItem {
                 PipesConfig.getText("items." + toConfigKey() + ".name")
         ));
         meta.getPersistentDataContainer().set(TYPE_KEY, PersistentDataType.STRING, toString());
+        meta.setCustomModelData(PipesConfig.getCustomModelDataOffset() + ordinal());
         item.setItemMeta(meta);
         this.item = item;
         return new ItemStack(item);

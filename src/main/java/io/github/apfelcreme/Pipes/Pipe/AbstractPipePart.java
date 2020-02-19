@@ -100,6 +100,10 @@ public abstract class AbstractPipePart {
      */
     public Container getHolder() {
         BlockState state = location.getBlock().getState(false);
+        // Paper's non-snapshot BlockState's are broken in some cases
+        if (state instanceof PersistentDataHolder && ((PersistentDataHolder) state).getPersistentDataContainer() == null) {
+            state = location.getBlock().getState(true);
+        }
         if (type.check(state)) {
             return (Container) state;
         }
@@ -190,6 +194,7 @@ public abstract class AbstractPipePart {
                             value.getValue()
                     );
                 }
+                holder.update();
             } else if (Pipes.hasBlockInfoStorage()) {
                 Object v = value != null && value != option.getDefaultValue() ? value.getValue() : null;
                 if (v instanceof Enum) {
@@ -332,7 +337,7 @@ public abstract class AbstractPipePart {
      * @param block The block to load the options from
      */
     private void loadOptions(Block block) {
-        BlockState state = block.getState(false);
+        BlockState state = block.getState(true);
         if (state instanceof PersistentDataHolder && loadOptions((PersistentDataHolder) state)) {
             return;
         }
@@ -360,6 +365,7 @@ public abstract class AbstractPipePart {
                 }
                 if (state instanceof PersistentDataHolder) {
                     BlockInfoStorage.get().removeBlockInfo(block, Pipes.getInstance());
+                    state.update();
                 }
                 return;
             }
@@ -372,6 +378,7 @@ public abstract class AbstractPipePart {
                     applyOptions(hidden);
                     if (state instanceof PersistentDataHolder) {
                         ((PersistentDataHolder) state).getPersistentDataContainer().set(TYPE_KEY, PersistentDataType.STRING, getType().name());
+                        state.update();
                     } else if (Pipes.hasBlockInfoStorage()) {
                         BlockInfoStorage.get().setBlockInfo(state.getLocation(), TYPE_KEY, getType().name());
                     }

@@ -120,6 +120,10 @@ public class BlockListener implements Listener {
             }
             BlockState state = event.getBlock().getState(false);
             if (state instanceof PersistentDataHolder) {
+                // Paper's non-snapshot BlockState's are broken in some cases
+                if (((PersistentDataHolder) state).getPersistentDataContainer() == null) {
+                    state = event.getBlock().getState(true);
+                }
                 ((PersistentDataHolder) state).getPersistentDataContainer().set(AbstractPipePart.TYPE_KEY, PersistentDataType.STRING, pipesItem.name());
             } else if (Pipes.hasBlockInfoStorage()) {
                 BlockInfoStorage.get().setBlockInfo(event.getBlock().getLocation(), AbstractPipePart.TYPE_KEY, pipesItem.name());

@@ -180,6 +180,11 @@ public class PipesUtil {
      */
     public static PipesItem getPipesItem(Block block) {
         BlockState state = block.getState(false);
+        // Paper's non-snapshot BlockState's are broken in some cases
+        if (state instanceof PersistentDataHolder && ((PersistentDataHolder) state).getPersistentDataContainer() == null) {
+            state = block.getState(true);
+        }
+
         if (!(state instanceof InventoryHolder)) {
             return null;
         }

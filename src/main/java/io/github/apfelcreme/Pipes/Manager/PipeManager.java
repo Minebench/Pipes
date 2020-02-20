@@ -23,7 +23,9 @@ import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.block.BlockState;
+import org.bukkit.block.Container;
 import org.bukkit.inventory.InventoryHolder;
+import org.bukkit.persistence.PersistentDataType;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -548,9 +550,30 @@ public class PipeManager {
     }
 
     /**
+     * Create a new pipe part
+     * @param item  The PipesItem to create the part from
+     * @param block The block to create the part at
+     * @return The pipepart
+     */
+    public AbstractPipePart createPipePart(PipesItem item, Block block) {
+        BlockState state = block.getState(false);
+        if (state instanceof Container) {
+            // Paper's non-snapshot BlockState's are broken in some cases
+            if (((Container) state).getPersistentDataContainer() == null) {
+                state = block.getState(true);
+            }
+            ((Container) state).getPersistentDataContainer().set(AbstractPipePart.TYPE_KEY, PersistentDataType.STRING, item.name());
+            state.update();
+        }
+        AbstractPipePart part = PipesUtil.convertToPipePart(block, item);
+        pipePartCache.put(new SimpleLocation(block.getLocation()), part);
+        return part;
+    }
+
+    /**
      * Get the pipes part. Will try to lookup the part in the cache first, if not found it will create a new one.
      * @param block the block to get the part for
-     * @return the pipespart or
+     * @return the pipespart or null if the block isn't one
      */
     public AbstractPipePart getPipePart(Block block) {
         PipesItem type = PipesUtil.getPipesItem(block);

@@ -110,27 +110,15 @@ public class BlockListener implements Listener {
 
     @EventHandler(ignoreCancelled = true)
     public void onBlockPlace(BlockPlaceEvent event) {
-        PipesItem pipesItem = PipesUtil.getPipesItem(event.getItemInHand());
-        if (pipesItem != null) {
-            if (pipesItem == PipesItem.CHUNK_LOADER && !event.getPlayer().hasPermission("Pipes.placeChunkLoader")) {
-                Pipes.sendMessage(event.getPlayer(), PipesConfig.getText("error.noPermission"));
-                event.setCancelled(true);
-                return;
-            }
-            BlockState state = event.getBlock().getState(false);
-            if (state instanceof Container) {
-                // Paper's non-snapshot BlockState's are broken in some cases
-                if (((Container) state).getPersistentDataContainer() == null) {
-                    state = event.getBlock().getState(true);
-                }
-                ((Container) state).getPersistentDataContainer().set(AbstractPipePart.TYPE_KEY, PersistentDataType.STRING, pipesItem.name());
-            } else if (Pipes.hasBlockInfoStorage()) {
-                BlockInfoStorage.get().setBlockInfo(event.getBlock().getLocation(), AbstractPipePart.TYPE_KEY, pipesItem.name());
-            }
-        }
         try {
-            AbstractPipePart pipePart = PipeManager.getInstance().getPipePart(event.getBlock());
-            if (pipePart != null) {
+            PipesItem pipesItem = PipesUtil.getPipesItem(event.getItemInHand());
+            if (pipesItem != null) {
+                if (pipesItem == PipesItem.CHUNK_LOADER && !event.getPlayer().hasPermission("Pipes.placeChunkLoader")) {
+                    Pipes.sendMessage(event.getPlayer(), PipesConfig.getText("error.noPermission"));
+                    event.setCancelled(true);
+                    return;
+                }
+                AbstractPipePart pipePart = PipeManager.getInstance().createPipePart(pipesItem, event.getBlock());
                 if (pipePart instanceof PipeInput) {
                     Block block = event.getBlock().getRelative(((PipeInput) pipePart).getFacing());
                     if (MaterialTags.STAINED_GLASS.isTagged(block)) {

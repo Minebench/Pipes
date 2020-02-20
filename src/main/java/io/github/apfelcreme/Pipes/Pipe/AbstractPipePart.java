@@ -16,7 +16,6 @@ import net.md_5.bungee.api.chat.ComponentBuilder;
 import net.md_5.bungee.api.chat.HoverEvent;
 import net.md_5.bungee.api.chat.TextComponent;
 import org.bukkit.Material;
-import org.bukkit.Nameable;
 import org.bukkit.NamespacedKey;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockState;
@@ -195,15 +194,6 @@ public abstract class AbstractPipePart {
                     );
                 }
                 holder.update();
-            } else if (Pipes.hasBlockInfoStorage()) {
-                Object v = value != null && value != option.getDefaultValue() ? value.getValue() : null;
-                if (v instanceof Enum) {
-                    v = ((Enum) v).name();
-                }
-                BlockInfoStorage.get().setBlockInfo(
-                        getLocation().getLocation(),
-                        new NamespacedKey(Pipes.getInstance(), option.name()),
-                        v);
             }
         }
     }
@@ -337,8 +327,8 @@ public abstract class AbstractPipePart {
      * @param block The block to load the options from
      */
     private void loadOptions(Block block) {
-        BlockState state = block.getState(true);
-        if (state instanceof PersistentDataHolder && loadOptions((PersistentDataHolder) state)) {
+        Container state = getHolder();
+        if (state == null || loadOptions(state)) {
             return;
         }
 
@@ -347,8 +337,10 @@ public abstract class AbstractPipePart {
             if (blockInfo != null) {
                 for (String optionName : blockInfo.getKeys(false)) {
                     if ("type".equalsIgnoreCase(optionName)) {
-                        if (state instanceof PersistentDataHolder) {
-                            ((PersistentDataHolder) state).getPersistentDataContainer().set(TYPE_KEY, PersistentDataType.STRING, getType().name());
+                        state = getHolder();
+                        if (state != null) {
+                            state.getPersistentDataContainer().set(TYPE_KEY, PersistentDataType.STRING, getType().name());
+                            state.update();
                         }
                         continue;
                     }
@@ -365,26 +357,22 @@ public abstract class AbstractPipePart {
                 }
                 if (state instanceof PersistentDataHolder) {
                     BlockInfoStorage.get().removeBlockInfo(block, Pipes.getInstance());
-                    state.update();
                 }
                 return;
             }
         }
 
-        if (state instanceof Nameable) {
-            String hidden = PipesUtil.getHiddenString(((Nameable) state).getCustomName());
-            if (hidden != null) {
-                try {
-                    applyOptions(hidden);
-                    if (state instanceof PersistentDataHolder) {
-                        ((PersistentDataHolder) state).getPersistentDataContainer().set(TYPE_KEY, PersistentDataType.STRING, getType().name());
-                        state.update();
-                    } else if (Pipes.hasBlockInfoStorage()) {
-                        BlockInfoStorage.get().setBlockInfo(state.getLocation(), TYPE_KEY, getType().name());
-                    }
-                } catch (IllegalArgumentException e) {
-                    Pipes.getInstance().getLogger().log(Level.WARNING, "Error while loading pipe part at " + getLocation() + "! " + e.getMessage());
+        String hidden = PipesUtil.getHiddenString(state.getCustomName());
+        if (hidden != null) {
+            try {
+                applyOptions(hidden);
+                state = getHolder();
+                if (state != null) {
+                    ((PersistentDataHolder) state).getPersistentDataContainer().set(TYPE_KEY, PersistentDataType.STRING, getType().name());
+                    state.update();
                 }
+            } catch (IllegalArgumentException e) {
+                Pipes.getInstance().getLogger().log(Level.WARNING, "Error while loading pipe part at " + getLocation() + "! " + e.getMessage());
             }
         }
     }

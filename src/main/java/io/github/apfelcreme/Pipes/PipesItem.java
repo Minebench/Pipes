@@ -22,16 +22,14 @@ package io.github.apfelcreme.Pipes;
 import de.minebench.blockinfostorage.BlockInfoStorage;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
-import org.bukkit.Nameable;
 import org.bukkit.NamespacedKey;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockState;
+import org.bukkit.block.Container;
 import org.bukkit.enchantments.Enchantment;
-import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
-import org.bukkit.persistence.PersistentDataHolder;
 import org.bukkit.persistence.PersistentDataType;
 
 import java.util.Arrays;
@@ -93,11 +91,11 @@ public enum PipesItem {
     }
     
     public boolean check(BlockState blockState) {
-        if (blockState == null || blockState.getType() != this.material || !(blockState instanceof InventoryHolder)) {
+        if (blockState == null || blockState.getType() != this.material || !(blockState instanceof Container)) {
             return false;
         }
 
-        if (blockState instanceof PersistentDataHolder && ((PersistentDataHolder) blockState).getPersistentDataContainer().has(TYPE_KEY, PersistentDataType.STRING)) {
+        if (((Container) blockState).getPersistentDataContainer().has(TYPE_KEY, PersistentDataType.STRING)) {
             return true;
         }
 
@@ -105,7 +103,7 @@ public enum PipesItem {
             return BlockInfoStorage.get().getBlockInfo(blockState.getLocation(), Pipes.getInstance()) != null;
         }
 
-        String hidden = PipesUtil.getHiddenString(((Nameable) blockState).getCustomName());
+        String hidden = PipesUtil.getHiddenString(((Container) blockState).getCustomName());
 
         if (hidden != null && toString().equals(hidden.split(",")[0]) || IDENTIFIER.equals(hidden)) {
             return true;

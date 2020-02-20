@@ -8,20 +8,18 @@ import io.github.apfelcreme.Pipes.Pipe.PipeInput;
 import io.github.apfelcreme.Pipes.Pipe.PipeOutput;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
-import org.bukkit.Nameable;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.block.BlockState;
+import org.bukkit.block.Container;
 import org.bukkit.block.Dispenser;
 import org.bukkit.block.Dropper;
 import org.bukkit.inventory.BrewerInventory;
 import org.bukkit.inventory.FurnaceInventory;
 import org.bukkit.inventory.Inventory;
-import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.PotionMeta;
 import org.bukkit.material.DirectionalContainer;
-import org.bukkit.persistence.PersistentDataHolder;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.potion.PotionType;
 
@@ -181,11 +179,11 @@ public class PipesUtil {
     public static PipesItem getPipesItem(Block block) {
         BlockState state = block.getState(false);
         // Paper's non-snapshot BlockState's are broken in some cases
-        if (state instanceof PersistentDataHolder && ((PersistentDataHolder) state).getPersistentDataContainer() == null) {
+        if (state instanceof Container && ((Container) state).getPersistentDataContainer() == null) {
             state = block.getState(true);
         }
 
-        if (!(state instanceof InventoryHolder)) {
+        if (!(state instanceof Container)) {
             return null;
         }
 
@@ -196,8 +194,8 @@ public class PipesUtil {
         }
 
         Object stored = null;
-        if (state instanceof PersistentDataHolder && ((PersistentDataHolder) state).getPersistentDataContainer().has(AbstractPipePart.TYPE_KEY, PersistentDataType.STRING)) {
-            stored = ((PersistentDataHolder) state).getPersistentDataContainer().get(AbstractPipePart.TYPE_KEY, PersistentDataType.STRING);
+        if (((Container) state).getPersistentDataContainer().has(AbstractPipePart.TYPE_KEY, PersistentDataType.STRING)) {
+            stored = ((Container) state).getPersistentDataContainer().get(AbstractPipePart.TYPE_KEY, PersistentDataType.STRING);
         } else if (Pipes.hasBlockInfoStorage()) {
             stored = BlockInfoStorage.get().getBlockInfoValue(block, AbstractPipePart.TYPE_KEY);
         }
@@ -207,7 +205,7 @@ public class PipesUtil {
         }
 
         if (type == null) {
-            type = getHiddenString(((Nameable) state).getCustomName());
+            type = getHiddenString(((Container) state).getCustomName());
             if (type == null) {
                 return null;
             }

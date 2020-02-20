@@ -21,6 +21,7 @@ import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.block.BlockState;
+import org.bukkit.block.Container;
 import org.bukkit.event.Event;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -34,10 +35,8 @@ import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryMoveItemEvent;
 import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.event.inventory.PrepareItemCraftEvent;
-import org.bukkit.inventory.CraftingInventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
-import org.bukkit.persistence.PersistentDataHolder;
 import org.bukkit.persistence.PersistentDataType;
 
 import java.util.HashSet;
@@ -119,12 +118,12 @@ public class BlockListener implements Listener {
                 return;
             }
             BlockState state = event.getBlock().getState(false);
-            if (state instanceof PersistentDataHolder) {
+            if (state instanceof Container) {
                 // Paper's non-snapshot BlockState's are broken in some cases
-                if (((PersistentDataHolder) state).getPersistentDataContainer() == null) {
+                if (((Container) state).getPersistentDataContainer() == null) {
                     state = event.getBlock().getState(true);
                 }
-                ((PersistentDataHolder) state).getPersistentDataContainer().set(AbstractPipePart.TYPE_KEY, PersistentDataType.STRING, pipesItem.name());
+                ((Container) state).getPersistentDataContainer().set(AbstractPipePart.TYPE_KEY, PersistentDataType.STRING, pipesItem.name());
             } else if (Pipes.hasBlockInfoStorage()) {
                 BlockInfoStorage.get().setBlockInfo(event.getBlock().getLocation(), AbstractPipePart.TYPE_KEY, pipesItem.name());
             }

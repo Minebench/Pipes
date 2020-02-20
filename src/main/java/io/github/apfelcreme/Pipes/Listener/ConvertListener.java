@@ -18,7 +18,6 @@ package io.github.apfelcreme.Pipes.Listener;
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import de.minebench.blockinfostorage.BlockInfoStorage;
 import io.github.apfelcreme.Pipes.Manager.PipeManager;
 import io.github.apfelcreme.Pipes.Pipe.AbstractPipePart;
 import io.github.apfelcreme.Pipes.Pipes;
@@ -49,12 +48,8 @@ public class ConvertListener implements Listener {
             chunkIds.add(id);
             for (BlockState state : event.getChunk().getTileEntities(false)) {
                 AbstractPipePart part = PipeManager.getInstance().getPipePart(state.getBlock());
-                if (part != null) {
-                    if (state instanceof PersistentDataHolder) {
-                        ((PersistentDataHolder) state).getPersistentDataContainer().set(AbstractPipePart.TYPE_KEY, PersistentDataType.STRING, part.getType().name());
-                    } else if (Pipes.hasBlockInfoStorage()) {
-                        BlockInfoStorage.get().setBlockInfo(state.getLocation(), AbstractPipePart.TYPE_KEY, part.getType().name());
-                    }
+                if (part != null && state instanceof PersistentDataHolder) {
+                    ((PersistentDataHolder) state).getPersistentDataContainer().set(AbstractPipePart.TYPE_KEY, PersistentDataType.STRING, part.getType().name());
                 }
             }
         }

@@ -184,15 +184,25 @@ public abstract class AbstractPipePart {
         if (save) {
             Container holder = getHolder();
             if (holder != null) {
-                if (value == null) {
-                    holder.getPersistentDataContainer().remove(new NamespacedKey(Pipes.getInstance(), option.name()));
-                } else {
-                    holder.getPersistentDataContainer().set(
-                            new NamespacedKey(Pipes.getInstance(), option.name()),
-                            option.getTagType(),
-                            value.getValue()
-                    );
+                PersistentDataContainer optionsContainer = null;
+                if (holder.getPersistentDataContainer().has(OPTIONS_KEY, PersistentDataType.TAG_CONTAINER)) {
+                    optionsContainer = holder.getPersistentDataContainer().get(OPTIONS_KEY, PersistentDataType.TAG_CONTAINER);
                 }
+                if (value == null) {
+                    if (optionsContainer != null) {
+                        optionsContainer.remove(new NamespacedKey(Pipes.getInstance(), option.name()));
+                    }
+                } else {
+                    if (optionsContainer == null) {
+                        optionsContainer = holder.getPersistentDataContainer().getAdapterContext().newPersistentDataContainer();
+                    }
+                    option.set(optionsContainer, value);
+                }
+
+                if (optionsContainer != null) {
+                    holder.getPersistentDataContainer().set(OPTIONS_KEY, PersistentDataType.TAG_CONTAINER, optionsContainer);
+                }
+
                 holder.update();
             }
         }
@@ -378,11 +388,20 @@ public abstract class AbstractPipePart {
     }
 
     private boolean loadOptions(PersistentDataHolder dataHolder) {
+        if (dataHolder.getPersistentDataContainer().has(OPTIONS_KEY, PersistentDataType.TAG_CONTAINER)) {
+            return loadOptions(dataHolder.getPersistentDataContainer().get(OPTIONS_KEY, PersistentDataType.TAG_CONTAINER));
+        }
+        return loadOptions(dataHolder.getPersistentDataContainer());
+    }
+
+    private boolean loadOptions(PersistentDataContainer optionsContainer) {
+        if (optionsContainer == null) {
+            return false;
+        }
         boolean found = false;
-        PersistentDataContainer optionsContainer = dataHolder.getPersistentDataContainer().get(OPTIONS_KEY, PersistentDataType.TAG_CONTAINER);
         for (Option<?> option : getOptions()) {
             NamespacedKey key = new NamespacedKey(Pipes.getInstance(), option.name);
-            if (optionsContainer != null && optionsContainer.has(key, option.getTagType())) {
+            if (optionsContainer.has(key, option.getTagType())) {
                 Object object = optionsContainer.get(key, option.getTagType());
                 try {
                     Value value = option.parseValue(object);
@@ -500,7 +519,9 @@ public abstract class AbstractPipePart {
                     PipesConfig.getText("items." + storedItem.toConfigKey() + ".name")));
         }
 
-        loadOptions(meta);
+        if (meta.getPersistentDataContainer().has(OPTIONS_KEY, PersistentDataType.TAG_CONTAINER)) {
+            loadOptions(meta.getPersistentDataContainer().get(OPTIONS_KEY, PersistentDataType.TAG_CONTAINER));
+        }
     }
     
     /**
@@ -585,10 +606,6 @@ public abstract class AbstractPipePart {
         bookItem.setItemMeta(meta);
         
         return bookItem;
-    }
-
-    private <T, Z> void containerSet(PersistentDataContainer container, NamespacedKey key, PersistentDataType<Z, T> type, Value<T> value) {
-        container.set(key, type, value.getValue());
     }
 
     @Override
@@ -764,11 +781,19 @@ public abstract class AbstractPipePart {
          * @param container The container to store the option value to
          */
         public void store(AbstractPipePart pipePart, PersistentDataContainer container) {
-            Value<T> value = pipePart.getValue(this);
+            set(container, pipePart.getValue(this));
+        }
+
+        /**
+         * Set the value in a specific container
+         * @param container The container to store the option value to
+         * @param value     The value to store
+         */
+        public void set(PersistentDataContainer container, Value<T> value) {
             if (value == null || value.getValue() == null) {
-                container.remove(new NamespacedKey(Pipes.getInstance(), name));
+                container.remove(new NamespacedKey(Pipes.getInstance(), name()));
             } else {
-                container.set(new NamespacedKey(Pipes.getInstance(), name()), getTagType(), value.getValue());
+                container.set(new NamespacedKey(Pipes.getInstance(), name()), value.getTagType(), value.getValue());
             }
         }
 

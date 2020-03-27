@@ -8,7 +8,6 @@ import io.github.apfelcreme.Pipes.Pipe.SimpleLocation;
 import io.github.apfelcreme.Pipes.Pipes;
 import io.github.apfelcreme.Pipes.Manager.ItemMoveScheduler;
 import io.github.apfelcreme.Pipes.PipesItem;
-import org.bukkit.block.Block;
 import org.bukkit.block.BlockState;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -70,7 +69,7 @@ public class InventoryChangeListener implements Listener {
      * @return <tt>Wether or not something went wrong</tt>
      */
     private boolean handleInventoryAction(Inventory inventory, boolean scheduled) {
-        InventoryHolder holder = inventory.getHolder();
+        InventoryHolder holder = inventory.getHolder(false);
         if (holder instanceof InventoryGui.Holder) {
             holder = ((InventoryGui.Holder) holder).getGui().getOwner();
         }

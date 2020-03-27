@@ -1,7 +1,6 @@
 package io.github.apfelcreme.Pipes.Listener;
 
 import com.destroystokyo.paper.MaterialTags;
-import de.minebench.blockinfostorage.BlockInfoStorage;
 import io.github.apfelcreme.Pipes.Event.PipeBlockBreakEvent;
 import io.github.apfelcreme.Pipes.Event.PipeDispenseEvent;
 import io.github.apfelcreme.Pipes.Exception.ChunkNotLoadedException;
@@ -21,7 +20,6 @@ import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.block.BlockState;
-import org.bukkit.block.Container;
 import org.bukkit.event.Event;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -35,9 +33,9 @@ import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryMoveItemEvent;
 import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.event.inventory.PrepareItemCraftEvent;
+import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
-import org.bukkit.persistence.PersistentDataType;
 
 import java.util.HashSet;
 import java.util.LinkedHashSet;
@@ -80,10 +78,11 @@ public class BlockListener implements Listener {
     @EventHandler(ignoreCancelled = true)
     public void onItemMove(InventoryMoveItemEvent event) {
         if (event.getDestination().getType() != InventoryType.HOPPER // hoppers are allowed to remove items from the output
-                && event.getSource().getType() != InventoryType.HOPPER
-                && event.getSource().getHolder() instanceof BlockState
-                && PipesItem.PIPE_OUTPUT.check((BlockState) event.getSource().getHolder())) {
-            event.setCancelled(true);
+                && event.getSource().getType() != InventoryType.HOPPER) {
+            InventoryHolder holder = event.getSource().getHolder(false);
+            if (holder instanceof BlockState && PipesItem.PIPE_OUTPUT.check((BlockState) holder)) {
+                event.setCancelled(true);
+            }
         }
     }
 

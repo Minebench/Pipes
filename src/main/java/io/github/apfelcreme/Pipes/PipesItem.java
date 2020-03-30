@@ -91,7 +91,7 @@ public enum PipesItem {
     }
     
     public boolean check(BlockState blockState) {
-        if (blockState == null || blockState.getType() != this.material || !(blockState instanceof Container)) {
+        if (blockState == null || blockState.getType() != this.material || !(blockState instanceof Container) || (((Container) blockState).getPersistentDataContainer() == null)) {
             return false;
         }
 

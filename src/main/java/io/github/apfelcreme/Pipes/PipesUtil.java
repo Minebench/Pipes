@@ -410,18 +410,13 @@ public class PipesUtil {
      * @param itemStack The item stack
      */
     public static void addItem(Inventory target, ItemStack itemStack) {
-        if (target.firstEmpty() != -1) {
-            target.addItem(itemStack);
-            itemStack.setAmount(0);
-        } else {
-            Map<Integer, ItemStack> rest = target.addItem(itemStack);
-            // Recalculate the leftover amount as changing the input stack's size depends on the implementation
-            int newAmount = 0;
-            for (ItemStack item : rest.values()) {
-                newAmount += item.getAmount();
-            }
-            itemStack.setAmount(newAmount);
+        Map<Integer, ItemStack> rest = target.addItem(itemStack);
+        // Recalculate the leftover amount as changing the input stack's size depends on the implementation
+        int newAmount = 0;
+        for (ItemStack item : rest.values()) {
+            newAmount += item.getAmount();
         }
+        itemStack.setAmount(newAmount);
     }
 
     /**

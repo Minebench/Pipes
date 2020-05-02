@@ -383,6 +383,8 @@ public class PipesUtil {
                 ((BrewerInventory) inventory).setFuel(itemStack);
                 break;
             case FURNACE:
+            case SMOKER:
+            case BLAST_FURNACE:
                 ((FurnaceInventory) inventory).setFuel(itemStack);
                 break;
             default:
@@ -400,6 +402,8 @@ public class PipesUtil {
             case BREWING:
                 return ((BrewerInventory) inventory).getFuel();
             case FURNACE:
+            case SMOKER:
+            case BLAST_FURNACE:
                 return ((FurnaceInventory) inventory).getFuel();
             default:
                 throw new IllegalArgumentException("Inventories of the type " + inventory.getType() + " do not have fuel!");

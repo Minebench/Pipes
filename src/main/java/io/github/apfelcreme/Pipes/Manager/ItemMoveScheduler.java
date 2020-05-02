@@ -331,6 +331,8 @@ public class ItemMoveScheduler {
                     BEGIN FURNACE
                      */
                     case FURNACE:
+                    case SMOKER:
+                    case BLAST_FURNACE:
                         // try to put coal etc in the correct place
                         if (transferring.getType().isFuel() && (smartInsert || (output.getFacing() != BlockFace.DOWN && output.getFacing() != BlockFace.UP))) {
                             PipesUtil.addFuel(inputInventory, targetInventory, transferring);

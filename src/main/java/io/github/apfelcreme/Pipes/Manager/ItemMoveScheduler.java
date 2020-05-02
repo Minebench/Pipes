@@ -16,8 +16,11 @@ import io.github.apfelcreme.Pipes.PipesUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.Effect;
 import org.bukkit.Location;
+import org.bukkit.Material;
+import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.block.Container;
+import org.bukkit.block.data.Levelled;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Item;
 import org.bukkit.inventory.BrewerInventory;
@@ -238,6 +241,7 @@ public class ItemMoveScheduler {
             if (output.getTargetLocation().equals(input.getTargetLocation())) {
                 continue;
             }
+            Block targetBlock = output.getTargetLocation().getBlock();
             InventoryHolder targetHolder = output.getTargetHolder();
             Inventory targetInventory = targetHolder != null ? targetHolder.getInventory() : null;
 
@@ -434,6 +438,23 @@ public class ItemMoveScheduler {
                     /*
                     END DEFAULT
                      */
+                }
+            } else if (output.getFacing() == BlockFace.DOWN && targetBlock.getType() == Material.COMPOSTER) {
+                double itemChance = PipesUtil.getCompostableChance(itemStack.getType());
+                if (itemChance > 0) {
+                    Levelled composter = (Levelled) targetBlock.getBlockData();
+                    int layersToFill = composter.getMaximumLevel() - composter.getLevel();
+                    if (layersToFill > 0) {
+                        int layers = (int) Math.round(itemChance * transferring.getAmount());
+                        if (layers > layersToFill) {
+                            composter.setLevel(composter.getMaximumLevel());
+                            transferring.setAmount(transferring.getAmount() - (int) Math.round(layersToFill / itemChance));
+                        } else {
+                            composter.setLevel(composter.getLevel() + layers);
+                            transferring.setAmount(0);
+                        }
+                        targetBlock.setBlockData(composter);
+                    }
                 }
             }
 

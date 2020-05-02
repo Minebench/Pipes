@@ -1,5 +1,6 @@
 package io.github.apfelcreme.Pipes;
 
+import com.destroystokyo.paper.MaterialTags;
 import de.minebench.blockinfostorage.BlockInfoStorage;
 import io.github.apfelcreme.Pipes.Manager.PipeManager;
 import io.github.apfelcreme.Pipes.Pipe.AbstractPipePart;
@@ -8,6 +9,7 @@ import io.github.apfelcreme.Pipes.Pipe.PipeInput;
 import io.github.apfelcreme.Pipes.Pipe.PipeOutput;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
+import org.bukkit.Tag;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.block.BlockState;
@@ -567,5 +569,63 @@ public class PipesUtil {
             }
         }
         return amount;
+    }
+
+    /**
+     * Gets the chance that a compostable item has to fill a layer
+     * @param type  The item type
+     * @return      The chance, 0 if it isn't compostable
+     */
+    public static double getCompostableChance(Material type) {
+        switch (type) {
+            case BEETROOT_SEEDS:
+            case DRIED_KELP:
+            case GRASS:
+            case KELP:
+            case MELON_SEEDS:
+            case SEAGRASS:
+            case SWEET_BERRIES:
+            case WHEAT_SEEDS:
+                return 0.3;
+            case CACTUS:
+            case DRIED_KELP_BLOCK:
+            case MELON_SLICE:
+            case SUGAR_CANE:
+            case TALL_GRASS:
+            case VINE:
+                return 0.5;
+            case APPLE:
+            case BEETROOT:
+            case CARROT:
+            case COCOA_BEANS:
+            case FERN:
+            case LARGE_FERN:
+            case LILY_PAD:
+            case MELON:
+            case POTATO:
+            case PUMPKIN:
+            case CARVED_PUMPKIN:
+            case SEA_PICKLE:
+            case WHEAT:
+            case NETHER_WART:
+                return 0.65;
+            case BAKED_POTATO:
+            case BREAD:
+            case COOKIE:
+            case HAY_BLOCK:
+            case NETHER_WART_BLOCK:
+                return 0.85;
+            case CAKE:
+            case PUMPKIN_PIE:
+                return 1;
+        }
+        if (Tag.LEAVES.isTagged(type) || Tag.SAPLINGS.isTagged(type)) {
+            return 0.3;
+        } else if (Tag.FLOWERS.isTagged(type) || MaterialTags.MUSHROOMS.isTagged(type)) {
+            return 0.65;
+        } else if (MaterialTags.MUSHROOM_BLOCKS.isTagged(type)) {
+            return 0.85;
+        }
+        return 0;
     }
 }

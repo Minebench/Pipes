@@ -532,6 +532,8 @@ public class PipeManager {
                                 Block relativeToOutput = pipeOutput.getTargetLocation().getBlock();
                                 if (relativeToOutput.getState(false) instanceof InventoryHolder) {
                                     found.add(new SimpleLocation(relativeToOutput.getLocation()));
+                                } else if (relativeToOutput.getType() == Material.COMPOSTER) {
+                                    found.add(new SimpleLocation(relativeToOutput.getLocation()));
                                 }
                                 break;
                             case CHUNK_LOADER:

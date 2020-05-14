@@ -441,7 +441,8 @@ public class ItemMoveScheduler {
                     END DEFAULT
                      */
                 }
-            } else if (output.getFacing() == BlockFace.DOWN && targetBlock.getType() == Material.COMPOSTER) {
+            } else if (targetBlock.getType() == Material.COMPOSTER
+                    && (output.getFacing() == BlockFace.DOWN || output.getOption(PipeOutput.Options.SMART_INSERT))) {
                 double itemChance = PipesUtil.getCompostableChance(itemStack.getType());
                 if (itemChance > 0) {
                     Levelled composter = (Levelled) targetBlock.getBlockData();

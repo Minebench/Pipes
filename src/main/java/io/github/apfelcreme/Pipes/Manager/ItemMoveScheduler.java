@@ -224,7 +224,8 @@ public class ItemMoveScheduler {
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (oldValue, newValue) -> oldValue, LinkedHashMap::new));
 
         // Calculate amount that should be spread over the outputs (when in spread mode)
-        int spreadAmount = itemStack.getAmount() / (filterCount > 0 ? filterCount : outputs.size());
+        int spreadOver = filterCount > 0 ? filterCount : outputs.size();
+        int spreadAmount = itemStack.getAmount() / spreadOver;
         if (spread && spreadAmount == 0) { // not enough items to spread over all outputs, return
             return false;
         }
@@ -314,7 +315,7 @@ public class ItemMoveScheduler {
                 droppedItem.setVelocity(pipeDispenseEvent.getVelocity());
 
                 dropLocation.getWorld().playEffect(dropLocation, Effect.CLICK2, null);
-                dropLocation.getWorld().playEffect(dropLocation, Effect.SMOKE, output.getFacing().getOppositeFace());
+                dropLocation.getWorld().playEffect(dropLocation, Effect.SMOKE, output.getFacing() != BlockFace.DOWN ? output.getFacing() : BlockFace.SELF);
 
             } else if (targetInventory != null) {
                 // call move event before doing any moving to check if it was cancelled

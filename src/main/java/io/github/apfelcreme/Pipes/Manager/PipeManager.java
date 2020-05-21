@@ -545,6 +545,16 @@ public class PipeManager {
                 }
             }
         }
+
+        // Remove outputs that point in our own inputs
+        for (Iterator<PipeOutput> it = outputs.values().iterator(); it.hasNext();) {
+            PipeOutput pipeOutput = it.next();
+            SimpleLocation targetLocation = pipeOutput.getTargetLocation();
+            if (inputs.containsKey(targetLocation)) {
+                it.remove();
+            }
+        }
+
         if ((outputs.size() > 0) && (inputs.size() > 0) && pipeBlocks.size() > 0) {
             return new Pipe(inputs, outputs, chunkLoaders, pipeBlocks, type);
         }

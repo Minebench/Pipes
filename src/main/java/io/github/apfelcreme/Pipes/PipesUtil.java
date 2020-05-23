@@ -60,6 +60,16 @@ public class PipesUtil {
             BlockFace.UP,
             BlockFace.DOWN
     };
+    public static final int[][] OFFSETS = new int[][]{
+            {0,0,0},
+            {1,0,0},
+            {0,1,0},
+            {0,0,1},
+            {1,0,1},
+            {1,1,0},
+            {0,1,1},
+            {1,1,1},
+    };
 
     /**
      * returns whether a string only contains numbers

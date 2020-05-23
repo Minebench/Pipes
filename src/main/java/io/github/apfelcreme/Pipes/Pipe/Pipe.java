@@ -4,8 +4,8 @@ import com.google.common.collect.Multimap;
 import com.google.common.collect.MultimapBuilder;
 import io.github.apfelcreme.Pipes.Exception.ChunkNotLoadedException;
 import io.github.apfelcreme.Pipes.PipesConfig;
+import io.github.apfelcreme.Pipes.PipesUtil;
 import org.bukkit.Bukkit;
-import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Particle;
 import org.bukkit.World;
@@ -155,17 +155,27 @@ public class Pipe {
         locations.addAll(outputs.keySet());
         outputs.values().stream().map(PipeOutput::getTargetLocation).forEach(locations::add);
 
+        World world = null;
         for (SimpleLocation simpleLocation : locations) {
-            Location location = simpleLocation.getLocation();
-            location.setX(location.getX() + 0.5);
-            location.setY(location.getY() + 0.5);
-            location.setZ(location.getZ() + 0.5);
-            for (int i = 0; i < 3; i++) {
-                if (players.length == 0) {
-                    location.getWorld().spawnParticle(Particle.FIREWORKS_SPARK, location, 1, 0, 0, 0, 0);
-                } else {
-                    for (Player p : players) {
-                        p.spawnParticle(Particle.FIREWORKS_SPARK, location, 1, 0, 0, 0, 0);
+            if (world == null) {
+                world = Bukkit.getWorld(simpleLocation.getWorldName());
+            }
+            if (players.length == 0) {
+                for (int[] offset : PipesUtil.OFFSETS) {
+                    world.spawnParticle(Particle.FLAME,
+                            simpleLocation.getX() + offset[0],
+                            simpleLocation.getY() + offset[1],
+                            simpleLocation.getZ() + offset[2],
+                            1, 0, 0, 0, 0);
+                }
+            } else {
+                for (Player p : players) {
+                    for (int[] offset : PipesUtil.OFFSETS) {
+                        p.spawnParticle(Particle.FLAME,
+                                simpleLocation.getX() + offset[0],
+                                simpleLocation.getY() + offset[1],
+                                simpleLocation.getZ() + offset[2],
+                                1, 0, 0, 0, 0);
                     }
                 }
             }

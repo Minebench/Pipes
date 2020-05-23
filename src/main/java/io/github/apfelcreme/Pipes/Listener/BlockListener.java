@@ -133,7 +133,9 @@ public class BlockListener implements Listener {
                             Block block = event.getBlock().getRelative(face);
                             if (MaterialTags.STAINED_GLASS.isTagged(block)) {
                                 for (Pipe pipe : PipeManager.getInstance().getPipes(block, true)) {
-                                    PipeManager.getInstance().addPart(pipe, pipePart);
+                                    if (!pipe.getInputs().containsKey(((PipeOutput) pipePart).getTargetLocation())) {
+                                        PipeManager.getInstance().addPart(pipe, pipePart);
+                                    }
                                 }
                             }
                         }

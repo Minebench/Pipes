@@ -350,17 +350,17 @@ public class PipeManager {
      */
     public void removePart(Pipe pipe, AbstractPipePart pipePart) {
         if (pipePart instanceof PipeInput) {
-            pipe.getInputs().remove(pipePart);
+            pipe.getInputs().remove(pipePart.getLocation());
             pipeCache.invalidate(pipePart.getLocation());
         } else if (pipePart instanceof PipeOutput) {
-            pipe.getOutputs().remove(pipePart);
+            pipe.getOutputs().remove(pipePart.getLocation());
             if (pipe.getOutputs().isEmpty()) {
                 removePipe(pipe);
             } else {
                 removeFromMultiCache(pipePart.getLocation(), pipe);
             }
         } else if (pipePart instanceof ChunkLoader) {
-            pipe.getChunkLoaders().remove(pipePart);
+            pipe.getChunkLoaders().remove(pipePart.getLocation());
             removeFromMultiCache(pipePart.getLocation(), pipe);
         }
         pipePartCache.remove(pipePart.getLocation(), pipePart);

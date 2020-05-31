@@ -391,7 +391,7 @@ public class PipeManager {
      */
     public void addBlock(Pipe pipe, Block block) throws PipeTooLongException {
         SimpleLocation location = new SimpleLocation(block.getLocation());
-        if (PipesConfig.getMaxPipeLength() > 0 && pipe.getPipeBlocks().size() + 1 >= PipesConfig.getMaxPipeLength()) {
+        if (PipesConfig.getMaxPipeLength() > 0 && pipe.getPipeBlocks().size() >= PipesConfig.getMaxPipeLength()) {
             removePipe(pipe);
             throw new PipeTooLongException(location);
         }

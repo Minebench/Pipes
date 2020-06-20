@@ -90,6 +90,10 @@
 
     <repositories>
         <repository>
+            <id>papermc-repo</id>
+            <url>https://papermc.io/repo/repository/maven-public/</url>
+        </repository>
+        <repository>
             <id>minebench-repo</id>
             <url>https://repo.minebench.de/</url>
         </repository>
@@ -97,8 +101,8 @@
 
     <dependencies>
         <dependency>
-            <groupId>de.minebench.origami</groupId>
-            <artifactId>origami-api</artifactId>
+            <groupId>com.destroystokyo.paper</groupId>
+            <artifactId>paper-api</artifactId>
             <version>1.15.2-R0.1-SNAPSHOT</version>
             <scope>provided</scope>
         </dependency>

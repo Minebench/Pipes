@@ -152,7 +152,7 @@ public class PipeManager {
      * If none is found it will try to calculate the pipe that starts at that position
      *
      * @param location the location the input is at
-     * @return a Pipe or <tt>null</tt>
+     * @return a Pipe or <code>null</code>
      * @throws ChunkNotLoadedException When the pipe reaches into a chunk that is not loaded
      * @throws PipeTooLongException When the pipe is too long
      * @throws TooManyOutputsException when the pipe has too many outputs
@@ -402,7 +402,7 @@ public class PipeManager {
     /**
      * Merge multiple pipes into one
      * @param pipes The pipes to merge
-     * @return the merged Pipe or <tt>null</tt> if they couldn't be merged
+     * @return the merged Pipe or <code>null</code> if they couldn't be merged
      * @throws PipeTooLongException When the pipe is too long
      * @throws TooManyOutputsException when the pipe has too many outputs
      */

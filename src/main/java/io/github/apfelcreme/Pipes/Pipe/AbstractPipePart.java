@@ -113,7 +113,7 @@ public abstract class AbstractPipePart {
      * Get a certain option value of this pipe part
      * @param <T>       The type of the value
      * @param option    The option to get
-     * @return          The value of the option or <tt>null</tt> if it wasn't set and there is no default one
+     * @return          The value of the option or <code>null</code> if it wasn't set and there is no default one
      */
     public <T> Value<T> getValue(Option<T> option) {
         return getValue(option, option.getDefaultValue());
@@ -124,7 +124,7 @@ public abstract class AbstractPipePart {
      * @param <T>           The type of the value
      * @param option        The option to get
      * @param defaultValue  The default value to return if the value wasn't found
-     * @return              The value of the option or <tt>null</tt> if it wasn't set
+     * @return              The value of the option or <code>null</code> if it wasn't set
      */
     public <T> Value<T> getValue(Option<T> option, Value<T> defaultValue) {
         Value<?> value = options.getOrDefault(option, defaultValue);
@@ -140,7 +140,7 @@ public abstract class AbstractPipePart {
      * Get a certain option of this pipe part
      * @param <T>       The type of the value
      * @param option    The option to get
-     * @return          The value of the option or <tt>null</tt> if it wasn't set and there is no default one
+     * @return          The value of the option or <code>null</code> if it wasn't set and there is no default one
      */
     public <T> T getOption(Option<T> option) {
         return getOption(option, option.getDefaultValue());
@@ -151,7 +151,7 @@ public abstract class AbstractPipePart {
      * @param <T>           The type of the value
      * @param option        The option to get
      * @param defaultValue  The default value to return if the value wasn't found
-     * @return              The value of the option or <tt>null</tt> if it wasn't set
+     * @return              The value of the option or <code>null</code> if it wasn't set
      */
     public <T> T getOption(Option<T> option, Value<T> defaultValue) {
         return getValue(option, defaultValue).getValue();
@@ -726,7 +726,7 @@ public abstract class AbstractPipePart {
         /**
          * Check whether or not this option can be set to a value
          * @param value The value to check
-         * @return      <tt>true</tt> if this option accepts it; <tt>false</tt> otherwhise
+         * @return      <code>true</code> if this option accepts it; <code>false</code> otherwhise
          */
         public boolean isValid(Value<?> value) {
             if (value.getValue().getClass() != getValueType()) {

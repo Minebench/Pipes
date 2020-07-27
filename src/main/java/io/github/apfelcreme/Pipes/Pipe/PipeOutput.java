@@ -135,7 +135,7 @@ public class PipeOutput extends AbstractPipePart {
      * Check whether or not an item stack matches the filter of this output
      * @param filter    The filter item to match against
      * @param item      The item stack to check
-     * @return          <tt>true</tt> if the filter is similar; <tt>false</tt> if not
+     * @return          <code>true</code> if the filter is similar; <code>false</code> if not
      */
     public boolean matchesFilter(ItemStack filter, ItemStack item) {
         if (filter == null || item == null) {
@@ -261,8 +261,8 @@ public class PipeOutput extends AbstractPipePart {
          * Whether or not this output is in whitelist mode. This changes how the filter items are used.
          * <p><strong>Possible Values:</strong></p>
          * <ul>
-         * <li><tt>true</tt> if this output is in whitelist mode and should only let items through that are in the inventory</li>
-         * <li><tt>false</tt> if this output is in blacklist mode and should only let items through that are <strong>not</strong> in the inventory</li>
+         * <li><code>true</code> if this output is in whitelist mode and should only let items through that are in the inventory</li>
+         * <li><code>false</code> if this output is in blacklist mode and should only let items through that are <strong>not</strong> in the inventory</li>
          * </ul>
          */
         public static final Option<Boolean> WHITELIST = add(new Option<>("WHITELIST", Option.GuiPosition.RIGHT, Value.TRUE, Value.FALSE));
@@ -271,9 +271,9 @@ public class PipeOutput extends AbstractPipePart {
          * Whether or not this output can overflow into other available outputs
          * <p><strong>Possible Values:</strong></p>
          * <ul>
-         * <li><tt>input</tt> if the input settings should decide the overflow rules</li>
-         * <li><tt>enabled</tt> if the items should end up in the overflow</li>
-         * <li><tt>disabled</tt> if this output should force items to end up here even 'though the target is full</li>
+         * <li><code>input</code> if the input settings should decide the overflow rules</li>
+         * <li><code>enabled</code> if the items should end up in the overflow</li>
+         * <li><code>disabled</code> if this output should force items to end up here even 'though the target is full</li>
          * </ul>
          */
         public static final Option<Overflow> OVERFLOW = add(new Option<>("OVERFLOW", Option.GuiPosition.LEFT, new Value<>(Overflow.INPUT), new Value<>(Overflow.TRUE), new Value<>(Overflow.FALSE)));
@@ -282,8 +282,8 @@ public class PipeOutput extends AbstractPipePart {
          * Whether or not to try to insert into the appropriate slots depending on the item type (like fuel)
          * <p><strong>Possible Values:</strong></p>
          * <ul>
-         * <li><tt>true</tt> Detect the item type and put it in the slot that it belongs to</li>
-         * <li><tt>false</tt> Use the face that the output is facing to select the slot</li>
+         * <li><code>true</code> Detect the item type and put it in the slot that it belongs to</li>
+         * <li><code>false</code> Use the face that the output is facing to select the slot</li>
          * </ul>
          */
         public static final Option<Boolean> SMART_INSERT = add(new Option<>("SMART_INSERT", Option.GuiPosition.LEFT, Value.TRUE, Value.FALSE));

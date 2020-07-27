@@ -88,8 +88,8 @@ public class PipeInput extends AbstractPipePart {
          * Whether or not this transfers from this input can overflow into other available outputs
          * <p><strong>Possible Values:</strong></p>
          * <ul>
-         * <li><tt>true</tt> if the items should end up in the overflow</li>
-         * <li><tt>false</tt> if this output should force items to end up in the filtered output even 'though the target is full</li>
+         * <li><code>true</code> if the items should end up in the overflow</li>
+         * <li><code>false</code> if this output should force items to end up in the filtered output even 'though the target is full</li>
          * </ul>
          */
         public static final Option<Boolean> OVERFLOW = add(new Option<>("OVERFLOW", Value.FALSE, Value.TRUE));

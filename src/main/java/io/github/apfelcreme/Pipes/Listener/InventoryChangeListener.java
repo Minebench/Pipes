@@ -66,7 +66,7 @@ public class InventoryChangeListener implements Listener {
      * Handle an inventory action
      * @param inventory The inventory
      * @param scheduled Whether or not to add the scheduled task delayed by 2 ticks
-     * @return <tt>Wether or not something went wrong</tt>
+     * @return <code>Wether or not something went wrong</code>
      */
     private boolean handleInventoryAction(Inventory inventory, boolean scheduled) {
         InventoryHolder holder = inventory.getHolder(false);

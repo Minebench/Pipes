@@ -134,7 +134,7 @@ public class PipesUtil {
     /**
      * Returns a hidden string in the itemstack which is hidden using the last lore line
      * @param string The string to search in for a hidden string
-     * @return The hidden string or <tt>null</tt> if there is none or the input is null
+     * @return The hidden string or <code>null</code> if there is none or the input is null
      */
     public static String getHiddenString(String string) {
         if (string == null) {
@@ -250,7 +250,7 @@ public class PipesUtil {
      * Use {@link PipeManager#getPipePart} for cached ones.
      *
      * @param block The block to convert
-     * @return the pipe part or <tt>null</tt> if the block isn't one
+     * @return the pipe part or <code>null</code> if the block isn't one
      * @deprecated Either use {@link #convertToPipePart(Block, PipesItem)} or {@link PipeManager#getPipePart}
      */
     @Deprecated
@@ -263,7 +263,7 @@ public class PipesUtil {
      *
      * @param block The block to convert
      * @param type The type of the part
-     * @return the pipe part or <tt>null</tt> if the block isn't one
+     * @return the pipe part or <code>null</code> if the block isn't one
      */
     public static AbstractPipePart convertToPipePart(Block block, PipesItem type) {
         switch (type) {
@@ -508,7 +508,7 @@ public class PipesUtil {
      * @param itemStack     The potion to check
      * @param ingredient    The ingredient
      * @throws IllegalArgumentException When the input item is not a potion
-     * @return              <tt>true</tt> if the potion can be brewed with the ingredient; <tt>false</tt> if not
+     * @return              <code>true</code> if the potion can be brewed with the ingredient; <code>false</code> if not
      */
     public static boolean potionAcceptsIngredient(ItemStack itemStack, ItemStack ingredient) throws IllegalArgumentException {
         if (itemStack.getType() != Material.POTION && itemStack.getType() != Material.SPLASH_POTION && itemStack.getType() != Material.LINGERING_POTION) {

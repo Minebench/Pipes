@@ -121,7 +121,7 @@ public class ItemMoveScheduler {
      * executes the item transfer
      *
      * @param simpleLocation the location of the PipeInput
-     * @return <tt>true</tt> if this transfer should be considered as completed and removed from the queue
+     * @return <code>true</code> if this transfer should be considered as completed and removed from the queue
      */
     public boolean execute(SimpleLocation simpleLocation) {
         Location location = simpleLocation.getLocation();

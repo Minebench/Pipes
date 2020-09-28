@@ -82,36 +82,6 @@ public class PipesUtil {
     }
 
     /**
-     * returns the direction a dropper is facing
-     *
-     * @param dropper the dropper block
-     * @return the BlockFace the dropper is facing to
-     * @deprecated Use {@link DirectionalContainer#getFacing()}
-     */
-    @Deprecated
-    public static BlockFace getDropperFace(Dropper dropper) {
-        if (dropper.getData() instanceof DirectionalContainer) {
-            return ((DirectionalContainer) dropper.getData()).getFacing();
-        }
-        return null;
-    }
-
-    /**
-     * returns the direction a dispenser is facing
-     *
-     * @param dispenser the dispenser block
-     * @return the BlockFace the dispenser is facing to
-     * @deprecated Use {@link DirectionalContainer#getFacing()}
-     */
-    @Deprecated
-    public static BlockFace getDispenserFace(Dispenser dispenser) {
-        if (dispenser.getData() instanceof DirectionalContainer) {
-            return ((DirectionalContainer) dispenser.getData()).getFacing();
-        }
-        return null;
-    }
-
-    /**
      * Hide a string inside another string with chat color characters
      *
      * @param hidden The string to hide
@@ -252,19 +222,6 @@ public class PipesUtil {
 
     /**
      * This is a helper method to convert a block to a PipesPart.
-     * Use {@link PipeManager#getPipePart} for cached ones.
-     *
-     * @param block The block to convert
-     * @return the pipe part or <code>null</code> if the block isn't one
-     * @deprecated Either use {@link #convertToPipePart(Block, PipesItem)} or {@link PipeManager#getPipePart}
-     */
-    @Deprecated
-    public static AbstractPipePart getPipesPart(Block block) {
-        return PipeManager.getInstance().getPipePart(block);
-    }
-
-    /**
-     * This is a helper method to convert a block to a PipesPart.
      *
      * @param state The block state to convert
      * @param type The type of the part
@@ -352,39 +309,6 @@ public class PipesUtil {
         if (a == b)
             return true;
         return a.getType() == b.getType() && a.getData().equals(b.getData());
-    }
-
-    /**
-     * returns an ItemStack of the custom dispenser item
-     *
-     * @return an ItemStack of the custom dispenser item
-     * @deprecated Use {@link PipesItem#PIPE_INPUT} and {@link PipesItem#toItemStack()}
-     */
-    @Deprecated
-    public static ItemStack getCustomDispenserItem() {
-        return PipesItem.PIPE_INPUT.toItemStack();
-    }
-
-    /**
-     * returns an ItemStack of the custom dropper item
-     *
-     * @return an ItemStack of the custom dropper item
-     * @deprecated Use {@link PipesItem#PIPE_OUTPUT} and {@link PipesItem#toItemStack()}
-     */
-    @Deprecated
-    public static ItemStack getCustomDropperItem() {
-        return PipesItem.PIPE_OUTPUT.toItemStack();
-    }
-
-    /**
-     * returns an ItemStack of the custom chunkLoader item
-     *
-     * @return an ItemStack of the custom chunkLoader item
-     * @deprecated Use {@link PipesItem#CHUNK_LOADER} and {@link PipesItem#toItemStack()}
-     */
-    @Deprecated
-    public static ItemStack getCustomChunkLoaderItem() {
-        return PipesItem.CHUNK_LOADER.toItemStack();
     }
 
     /**

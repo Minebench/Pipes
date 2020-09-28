@@ -85,11 +85,6 @@ public enum PipesItem {
         return new ItemStack(item);
     }
     
-    @Deprecated
-    public boolean check(Block block) {
-        return block != null && check(block.getState(false));
-    }
-    
     public boolean check(BlockState blockState) {
         if (blockState == null || blockState.getType() != this.material || !(blockState instanceof Container) || (((Container) blockState).getPersistentDataContainer() == null)) {
             return false;

@@ -112,13 +112,12 @@ public class BlockListener implements Listener {
     public void onBlockBreakDrop(BlockDropItemEvent event) {
         AbstractPipePart pipePart = PipeManager.getInstance().getPipePart(event.getBlockState());
         if (pipePart != null) {
-            for (Iterator<Item> it = event.getItems().iterator(); it.hasNext(); ) {
-               if (it.next().getItemStack().getType() == pipePart.getType().getMaterial()) {
-                   it.remove();
-                   break;
-               }
+            for (Item item : event.getItems()) {
+                if (item.getItemStack().getType() == pipePart.getType().getMaterial()) {
+                    item.setItemStack(pipePart.getType().toItemStack());
+                    break;
+                }
             }
-            event.getBlockState().getWorld().dropItemNaturally(event.getBlockState().getLocation(), pipePart.getType().toItemStack());
         }
     }
 

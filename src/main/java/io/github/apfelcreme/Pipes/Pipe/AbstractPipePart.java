@@ -15,9 +15,9 @@ import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.ComponentBuilder;
 import net.md_5.bungee.api.chat.HoverEvent;
 import net.md_5.bungee.api.chat.TextComponent;
+import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
-import org.bukkit.block.Block;
 import org.bukkit.block.BlockState;
 import org.bukkit.block.Container;
 import org.bukkit.configuration.ConfigurationSection;
@@ -68,10 +68,10 @@ public abstract class AbstractPipePart {
     private final SimpleLocation location;
     private Map<Option<?>, Value<?>> options = new HashMap<>();
 
-    protected AbstractPipePart(PipesItem type, Block block) {
+    protected AbstractPipePart(PipesItem type, Location location) {
         this.type = type;
-        this.location = new SimpleLocation(block.getLocation());
-        loadOptions(block);
+        this.location = new SimpleLocation(location);
+        loadOptions();
     }
     
     /**
@@ -334,16 +334,15 @@ public abstract class AbstractPipePart {
 
     /**
      * Load the options from the storage
-     * @param block The block to load the options from
      */
-    private void loadOptions(Block block) {
+    private void loadOptions() {
         Container state = getHolder();
         if (state == null || loadOptions(state)) {
             return;
         }
 
         if (Pipes.hasBlockInfoStorage()) {
-            ConfigurationSection blockInfo = BlockInfoStorage.get().getBlockInfo(block, Pipes.getInstance());
+            ConfigurationSection blockInfo = BlockInfoStorage.get().getBlockInfo(getLocation().getLocation(), Pipes.getInstance());
             if (blockInfo != null) {
                 for (String optionName : blockInfo.getKeys(false)) {
                     if ("type".equalsIgnoreCase(optionName)) {
@@ -366,7 +365,7 @@ public abstract class AbstractPipePart {
                     }
                 }
                 if (state instanceof PersistentDataHolder) {
-                    BlockInfoStorage.get().removeBlockInfo(block, Pipes.getInstance());
+                    BlockInfoStorage.get().removeBlockInfo(getLocation().getLocation(), Pipes.getInstance());
                 }
                 return;
             }

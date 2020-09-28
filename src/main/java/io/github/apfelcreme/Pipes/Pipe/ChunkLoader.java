@@ -1,7 +1,7 @@
 package io.github.apfelcreme.Pipes.Pipe;
 
 import io.github.apfelcreme.Pipes.PipesItem;
-import org.bukkit.block.Block;
+import org.bukkit.block.BlockState;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.InventoryHolder;
 
@@ -31,8 +31,8 @@ public class ChunkLoader extends AbstractPipePart {
             "sss c zzz"
     };
 
-    public ChunkLoader(Block block) {
-        super(PipesItem.CHUNK_LOADER, block);
+    public ChunkLoader(BlockState state) {
+        super(PipesItem.CHUNK_LOADER, state.getLocation());
     }
 
     @Override

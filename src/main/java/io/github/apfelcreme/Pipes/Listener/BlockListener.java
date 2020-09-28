@@ -20,12 +20,14 @@ import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.block.BlockState;
+import org.bukkit.entity.Item;
 import org.bukkit.event.Event;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockDispenseEvent;
+import org.bukkit.event.block.BlockDropItemEvent;
 import org.bukkit.event.block.BlockPistonExtendEvent;
 import org.bukkit.event.block.BlockPistonRetractEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
@@ -39,6 +41,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
@@ -92,9 +95,6 @@ public class BlockListener implements Listener {
         AbstractPipePart pipePart = PipeManager.getInstance().getPipePart(event.getBlock());
         if (pipePart != null) {
             if (new PipeBlockBreakEvent(event.getBlock(), event.getPlayer(), pipePart).callEvent()) {
-                event.setDropItems(false);
-                event.getBlock().getWorld().dropItemNaturally(event.getBlock().getLocation(), pipePart.getType().toItemStack());
-
                 for (Pipe pipe : PipeManager.getInstance().getPipesSafe(event.getBlock(), true)) {
                     PipeManager.getInstance().removePart(pipe, pipePart);
                 }
@@ -105,6 +105,20 @@ public class BlockListener implements Listener {
             for (Pipe pipe : PipeManager.getInstance().getPipesSafe(event.getBlock(), true)) {
                 PipeManager.getInstance().removePipe(pipe);
             }
+        }
+    }
+
+    @EventHandler(ignoreCancelled = true)
+    public void onBlockBreakDrop(BlockDropItemEvent event) {
+        AbstractPipePart pipePart = PipeManager.getInstance().getPipePart(event.getBlockState());
+        if (pipePart != null) {
+            for (Iterator<Item> it = event.getItems().iterator(); it.hasNext(); ) {
+               if (it.next().getItemStack().getType() == pipePart.getType().getMaterial()) {
+                   it.remove();
+                   break;
+               }
+            }
+            event.getBlockState().getWorld().dropItemNaturally(event.getBlockState().getLocation(), pipePart.getType().toItemStack());
         }
     }
 

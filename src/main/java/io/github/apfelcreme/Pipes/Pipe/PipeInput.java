@@ -1,8 +1,8 @@
 package io.github.apfelcreme.Pipes.Pipe;
 
 import io.github.apfelcreme.Pipes.PipesItem;
-import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
+import org.bukkit.block.BlockState;
 import org.bukkit.material.Directional;
 
 import java.util.HashMap;
@@ -36,9 +36,9 @@ public class PipeInput extends AbstractPipePart {
 
     private final BlockFace facing;
 
-    public PipeInput(Block block) {
-        super(PipesItem.PIPE_INPUT, block);
-        this.facing = ((Directional) block.getState(false).getData()).getFacing();
+    public PipeInput(BlockState state) {
+        super(PipesItem.PIPE_INPUT, state.getLocation());
+        this.facing = ((Directional) state.getData()).getFacing();
     }
 
     public SimpleLocation getTargetLocation() {

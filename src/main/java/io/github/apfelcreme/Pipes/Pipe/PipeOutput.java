@@ -43,9 +43,9 @@ public class PipeOutput extends AbstractPipePart {
 
     private final BlockFace facing;
 
-    public PipeOutput(Block block) {
-        super(PipesItem.PIPE_OUTPUT, block);
-        this.facing = ((Directional) block.getState(false).getData()).getFacing();
+    public PipeOutput(BlockState state) {
+        super(PipesItem.PIPE_OUTPUT, state.getLocation());
+        this.facing = ((Directional) state.getData()).getFacing();
     }
 
     /**

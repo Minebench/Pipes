@@ -190,18 +190,23 @@ public class PipesUtil {
      */
     public static PipesItem getPipesItem(Block block) {
         BlockState state = block.getState(false);
+
         // Paper's non-snapshot BlockState's are broken in some cases
         if (state instanceof Container && ((Container) state).getPersistentDataContainer() == null) {
             state = block.getState(true);
         }
 
+        return getPipesItem(state);
+    }
+
+    public static PipesItem getPipesItem(BlockState state) {
         if (!(state instanceof Container)) {
             return null;
         }
 
-        if (block.getType() != PipesItem.PIPE_INPUT.getMaterial()
-                && block.getType() != PipesItem.PIPE_OUTPUT.getMaterial()
-                && block.getType() != PipesItem.CHUNK_LOADER.getMaterial()) {
+        if (state.getType() != PipesItem.PIPE_INPUT.getMaterial()
+                && state.getType() != PipesItem.PIPE_OUTPUT.getMaterial()
+                && state.getType() != PipesItem.CHUNK_LOADER.getMaterial()) {
             return null;
         }
 
@@ -209,7 +214,7 @@ public class PipesUtil {
         if (((Container) state).getPersistentDataContainer().has(AbstractPipePart.TYPE_KEY, PersistentDataType.STRING)) {
             stored = ((Container) state).getPersistentDataContainer().get(AbstractPipePart.TYPE_KEY, PersistentDataType.STRING);
         } else if (Pipes.hasBlockInfoStorage()) {
-            stored = BlockInfoStorage.get().getBlockInfoValue(block, AbstractPipePart.TYPE_KEY);
+            stored = BlockInfoStorage.get().getBlockInfoValue(state.getLocation(), AbstractPipePart.TYPE_KEY);
         }
         String type = null;
         if (stored instanceof String) {
@@ -232,7 +237,7 @@ public class PipesUtil {
         } catch (IllegalArgumentException e) {
             // Legacy
             if (PipesItem.getIdentifier().equals(type)) {
-                switch (block.getType()) {
+                switch (state.getType()) {
                     case DISPENSER:
                         return PipesItem.PIPE_INPUT;
                     case DROPPER:
@@ -261,18 +266,18 @@ public class PipesUtil {
     /**
      * This is a helper method to convert a block to a PipesPart.
      *
-     * @param block The block to convert
+     * @param state The block state to convert
      * @param type The type of the part
      * @return the pipe part or <code>null</code> if the block isn't one
      */
-    public static AbstractPipePart convertToPipePart(Block block, PipesItem type) {
+    public static AbstractPipePart convertToPipePart(BlockState state, PipesItem type) {
         switch (type) {
             case PIPE_INPUT:
-                return new PipeInput(block);
+                return new PipeInput(state);
             case PIPE_OUTPUT:
-                return new PipeOutput(block);
+                return new PipeOutput(state);
             case CHUNK_LOADER:
-                return new ChunkLoader(block);
+                return new ChunkLoader(state);
         }
         return null;
     }

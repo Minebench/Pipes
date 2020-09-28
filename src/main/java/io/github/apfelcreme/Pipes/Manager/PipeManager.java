@@ -577,7 +577,7 @@ public class PipeManager {
             ((Container) state).getPersistentDataContainer().set(AbstractPipePart.TYPE_KEY, PersistentDataType.STRING, item.name());
             state.update();
         }
-        AbstractPipePart part = PipesUtil.convertToPipePart(block, item);
+        AbstractPipePart part = PipesUtil.convertToPipePart(state, item);
         pipePartCache.put(new SimpleLocation(block.getLocation()), part);
         return part;
     }
@@ -594,7 +594,23 @@ public class PipeManager {
         }
         return pipePartCache.getOrDefault(
                 new SimpleLocation(block.getLocation()),
-                PipesUtil.convertToPipePart(block, type)
+                PipesUtil.convertToPipePart(block.getState(false), type)
+        );
+    }
+
+    /**
+     * Get the pipes part. Will try to lookup the part in the cache first, if not found it will create a new one.
+     * @param state the block's state to get the part for
+     * @return the pipespart or null if the block isn't one
+     */
+    public AbstractPipePart getPipePart(BlockState state) {
+        PipesItem type = PipesUtil.getPipesItem(state);
+        if (type == null) {
+            return null;
+        }
+        return pipePartCache.getOrDefault(
+                new SimpleLocation(state.getLocation()),
+                PipesUtil.convertToPipePart(state, type)
         );
     }
 

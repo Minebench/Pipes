@@ -15,6 +15,7 @@ import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.ComponentBuilder;
 import net.md_5.bungee.api.chat.HoverEvent;
 import net.md_5.bungee.api.chat.TextComponent;
+import net.md_5.bungee.api.chat.hover.content.Text;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
@@ -540,9 +541,10 @@ public abstract class AbstractPipePart {
         
         List<String> optionsLore = new ArrayList<>();
         List<BaseComponent[]> pages = new ArrayList<>();
-        List<ComponentBuilder> optionsPage = new ArrayList();
+        List<ComponentBuilder> optionsPage = new ArrayList<>();
         optionsPage.add(new ComponentBuilder(""));
 
+        meta.getPersistentDataContainer().set(TYPE_KEY, PersistentDataType.STRING, PipesItem.SETTINGS_BOOK.toString());
         meta.getPersistentDataContainer().set(STORED_TYPE_KEY, PersistentDataType.STRING, getType().toString());
 
         PersistentDataContainer optionsContainer = meta.getPersistentDataContainer().getAdapterContext().newPersistentDataContainer();
@@ -558,18 +560,19 @@ public abstract class AbstractPipePart {
                 shortDesc = ChatColor.DARK_PURPLE + shortDesc + ": " + ChatColor.BLUE + value.getValue().toString();
                 optionsLore.add(shortDesc);
             }
-    
-            BaseComponent[] optionEntry = TextComponent.fromLegacyText(shortDesc);
-            for (BaseComponent c : optionEntry) {
-                if (value.getValue() instanceof Boolean) {
-                        c.setColor(((Boolean) value.getValue() ? ChatColor.DARK_GREEN : ChatColor.DARK_RED));
-                }
-                c.setHoverEvent(new HoverEvent(
-                        HoverEvent.Action.SHOW_TEXT,
-                        TextComponent.fromLegacyText(PipesConfig.getText("options." + getType().toConfigKey() + "." + option.toConfigKey().toLowerCase() + "." + value.getValue().toString().toLowerCase()))
-                ));
+
+            ComponentBuilder entryBuilder = new ComponentBuilder();
+            if (value.getValue() instanceof Boolean) {
+                entryBuilder.color(((Boolean) value.getValue() ? ChatColor.DARK_GREEN : ChatColor.DARK_RED));
             }
-    
+            BaseComponent[] optionEntry = entryBuilder.event(new HoverEvent(
+                            HoverEvent.Action.SHOW_TEXT,
+                            new Text(TextComponent.fromLegacyText(PipesConfig.getText(
+                                    "options." + getType().toConfigKey() + "." + option.toConfigKey().toLowerCase() + "." + value.getValue().toString().toLowerCase())))
+                    ))
+                    .append(TextComponent.fromLegacyText(shortDesc))
+                    .create();
+
             ComponentBuilder pageBuilder = optionsPage.get(optionsPage.size() - 1);
             pageBuilder.append("\n");
             
@@ -589,9 +592,8 @@ public abstract class AbstractPipePart {
         }
         
         meta.spigot().setPages(pages);
-        
-        List<String> lore = new ArrayList<>();
-        lore.addAll(Arrays.asList(
+
+        List<String> lore = new ArrayList<>(Arrays.asList(
                 PipesConfig.getText("items." + PipesItem.SETTINGS_BOOK.toConfigKey() + ".lore",
                         getType().getName(), optionsLore.stream().collect(Collectors.joining("\n"))
                 ).split("\n")

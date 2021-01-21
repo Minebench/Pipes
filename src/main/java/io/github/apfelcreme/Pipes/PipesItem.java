@@ -43,6 +43,7 @@ public enum PipesItem {
 
     private static final String IDENTIFIER = "Pipes";
     private static final NamespacedKey TYPE_KEY = new NamespacedKey(Pipes.getInstance(), "type");
+    public static final NamespacedKey STORED_TYPE_KEY = new NamespacedKey(Pipes.getInstance(), "stored_type");
 
     private final Material material;
     private ItemStack item;
@@ -116,6 +117,8 @@ public enum PipesItem {
 
         if (meta.getPersistentDataContainer().has(TYPE_KEY, PersistentDataType.STRING)) {
             return toString().equals(meta.getPersistentDataContainer().get(TYPE_KEY, PersistentDataType.STRING));
+        } else if (SETTINGS_BOOK.getMaterial() == item.getType() && meta.getPersistentDataContainer().has(STORED_TYPE_KEY, PersistentDataType.STRING)) {
+            return true;
         }
 
         List<String> lore = item.getItemMeta().getLore();

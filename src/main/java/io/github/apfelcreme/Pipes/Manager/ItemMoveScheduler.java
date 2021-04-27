@@ -175,13 +175,15 @@ public class ItemMoveScheduler {
             detection.addLocation(new SimpleLocation(input.getLocation()));
         }
 
+        boolean transferedAnything = false;
         boolean transferredAll = true;
         boolean spread = input.getOption(PipeInput.Options.SPREAD);
         boolean overflow = input.getOption(PipeInput.Options.OVERFLOW);
 
         // loop through all items and try to move them
         for (ItemStack itemStack : itemQueue) {
-            transferredAll &= moveItem(input, inputInventory, pipe, itemStack, spread, overflow);
+            transferedAnything |= moveItem(input, inputInventory, pipe, itemStack, spread, overflow);
+            transferredAll &= transferedAnything;
         }
 
         if (!transferredAll && input.getOption(PipeInput.Options.MERGE)) {
@@ -195,9 +197,11 @@ public class ItemMoveScheduler {
         }
         inputHolder.update();
 
-        // Update transfers
-        pipe.setTransfers(pipe.getTransfers() + 1);
-        pipe.setLastTransfer(Bukkit.getCurrentTick());
+        if (transferedAnything) {
+            // Update transfers
+            pipe.setTransfers(pipe.getTransfers() + 1);
+            pipe.setLastTransfer(Bukkit.getCurrentTick());
+        }
 
         return transferredAll;
     }

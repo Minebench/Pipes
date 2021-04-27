@@ -301,6 +301,9 @@ public class PipeManager {
         for (PipeInput input : pipe.getInputs().values()) {
             pipeCache.put(input.getLocation(), pipe);
             pipePartCache.put(input.getLocation(), input);
+            if (!input.getHolder().getInventory().isEmpty()) {
+                ItemMoveScheduler.getInstance().add(input.getLocation());
+            }
         }
         for (SimpleLocation location : pipe.getPipeBlocks()) {
             singleCache.put(location, pipe);

@@ -4,6 +4,7 @@ import com.destroystokyo.paper.MaterialTags;
 import io.github.apfelcreme.Pipes.Event.PipeBlockBreakEvent;
 import io.github.apfelcreme.Pipes.Event.PipeDispenseEvent;
 import io.github.apfelcreme.Pipes.Exception.ChunkNotLoadedException;
+import io.github.apfelcreme.Pipes.Exception.LocationException;
 import io.github.apfelcreme.Pipes.Exception.PipeTooLongException;
 import io.github.apfelcreme.Pipes.Exception.TooManyOutputsException;
 import io.github.apfelcreme.Pipes.Manager.PipeManager;
@@ -202,6 +203,14 @@ public class BlockListener implements Listener {
                     PipeManager.getInstance().addBlock(found.iterator().next(), event.getBlock());
                 } else if (found.size() > 1) {
                     PipeManager.getInstance().mergePipes(found);
+                } else {
+                    try {
+                        for (Pipe pipe : PipeManager.getInstance().getPipes(event.getBlock())) {
+                            Pipes.sendMessage(event.getPlayer(), PipesConfig.getText("info.pipe.pipeBuilt",
+                                    pipe.getString()));
+                            pipe.highlight();
+                        }
+                    } catch (LocationException ignored) {}
                 }
             }
         } catch (ChunkNotLoadedException e) {

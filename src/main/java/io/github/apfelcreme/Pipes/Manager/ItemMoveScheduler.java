@@ -523,7 +523,7 @@ public class ItemMoveScheduler {
         emptyRuns = 0;
         if (!isTransferring) {
             scheduledItemTransfers.add(scheduledItemTransfer);
-        } else {
+        } else if (!scheduledItemTransfers.contains(scheduledItemTransfer)) {
             addItemTransfers.add(scheduledItemTransfer);
         }
         if (!isActive() && (!scheduledItemTransfers.isEmpty() || !addItemTransfers.isEmpty())) {

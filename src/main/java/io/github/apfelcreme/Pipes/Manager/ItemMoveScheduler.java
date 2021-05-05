@@ -74,6 +74,16 @@ public class ItemMoveScheduler {
     private Set<SimpleLocation> scheduledItemTransfers;
 
     /**
+     * item transfers that need to be added after the moves were run
+     */
+    private Set<SimpleLocation> addItemTransfers;
+
+    /**
+     * whether or not the scheduler is currently transferring
+     */
+    private boolean isTransferring;
+
+    /**
      * the number of consecutive runs without any transfers (cancels at 4)
      */
     private int emptyRuns;
@@ -86,6 +96,7 @@ public class ItemMoveScheduler {
     private ItemMoveScheduler() {
         taskId = -1;
         scheduledItemTransfers = new LinkedHashSet<>();
+        addItemTransfers = new LinkedHashSet<>();
         emptyRuns = 0;
     }
 
@@ -107,7 +118,10 @@ public class ItemMoveScheduler {
     private void create() {
         taskId = Pipes.getInstance().getServer().getScheduler().scheduleSyncRepeatingTask(Pipes.getInstance(), () -> {
             if (!scheduledItemTransfers.isEmpty()) {
+                isTransferring = true;
                 scheduledItemTransfers.removeIf(this::execute);
+                isTransferring = false;
+                addQueued();
             } else {
                 emptyRuns++;
                 if (emptyRuns >= 3) {
@@ -507,12 +521,19 @@ public class ItemMoveScheduler {
      */
     public void add(SimpleLocation scheduledItemTransfer) {
         emptyRuns = 0;
-        if (!scheduledItemTransfers.contains(scheduledItemTransfer)) {
+        if (!isTransferring) {
             scheduledItemTransfers.add(scheduledItemTransfer);
+        } else {
+            addItemTransfers.add(scheduledItemTransfer);
         }
-        if (!isActive() && !scheduledItemTransfers.isEmpty()) {
+        if (!isActive() && (!scheduledItemTransfers.isEmpty() || !addItemTransfers.isEmpty())) {
             create();
         }
+    }
+
+    private void addQueued() {
+        scheduledItemTransfers.addAll(addItemTransfers);
+        addItemTransfers.clear();
     }
 
     public Set<SimpleLocation> getTransfers() {

@@ -159,8 +159,11 @@ public class ItemMoveScheduler {
         if (pipe.getLastTransfer() != Bukkit.getCurrentTick()) {
             // Reset transfer count if no transfer occurred this tick
             pipe.setTransfers(0);
+        } else if (PipesConfig.getTransferCount() > 0 && pipe.getTransfers() >= PipesConfig.getTransferCount()) {
+            // Pipe already transferred more than the max transfer based on hard cap? Handle next tick
+            return false;
         } else if (PipesConfig.getInputToOutputRatio() > 0 && pipe.getTransfers() >= pipe.getOutputs().size() * PipesConfig.getInputToOutputRatio()) {
-            // Pipe already transferred more than the max transfer? Handle next tick
+            // Pipe already transferred more than the max transfer based on the input/output ratio? Handle next tick
             return false;
         }
 

@@ -36,6 +36,7 @@ public class PipesConfig {
 
     private static Pipes plugin;
     private static long transferCooldown;
+    private static int transferCount;
     private static double inputToOutputRatio;
     private static int maxPipeOutputs;
     private static int maxPipeLength;
@@ -56,6 +57,7 @@ public class PipesConfig {
         plugin.saveResource("lang.de.yml", false);
         plugin.reloadConfig();
         transferCooldown = plugin.getConfig().getLong("transferCooldown");
+        transferCount = plugin.getConfig().getInt("transferCount");
         inputToOutputRatio = plugin.getConfig().getDouble("inputToOutputRatio");
         maxPipeOutputs = plugin.getConfig().getInt("maxPipeOutputs");
         maxPipeLength = plugin.getConfig().getInt("maxPipeLength");
@@ -90,6 +92,15 @@ public class PipesConfig {
      */
     public static long getTransferCooldown() {
         return transferCooldown;
+    }
+
+    /**
+     * returns the max amount of item stacks transfered per pipe transfer
+     *
+     * @return the max amount of item stacks transfered per pipe transfer
+     */
+    public static double getTransferCount() {
+        return transferCount;
     }
 
     /**

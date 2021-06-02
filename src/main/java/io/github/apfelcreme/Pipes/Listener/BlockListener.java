@@ -41,8 +41,8 @@ import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
+import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
@@ -96,15 +96,21 @@ public class BlockListener implements Listener {
         AbstractPipePart pipePart = PipeManager.getInstance().getPipePart(event.getBlock());
         if (pipePart != null) {
             if (new PipeBlockBreakEvent(event.getBlock(), event.getPlayer(), pipePart).callEvent()) {
-                for (Pipe pipe : PipeManager.getInstance().getPipesSafe(event.getBlock(), true)) {
-                    PipeManager.getInstance().removePart(pipe, pipePart);
+                Set<Pipe> pipes = PipeManager.getInstance().getPipesSafe(event.getBlock(), true);
+                if (!pipes.isEmpty()) {
+                    for (Pipe pipe : new ArrayList<>(pipes)) {
+                        PipeManager.getInstance().removePart(pipe, pipePart);
+                    }
                 }
             } else {
                 event.setCancelled(true);
             }
         } else if (MaterialTags.STAINED_GLASS.isTagged(event.getBlock())) {
-            for (Pipe pipe : PipeManager.getInstance().getPipesSafe(event.getBlock(), true)) {
-                PipeManager.getInstance().removePipe(pipe);
+            Set<Pipe> pipes = PipeManager.getInstance().getPipesSafe(event.getBlock(), true);
+            if (!pipes.isEmpty()) {
+                for (Pipe pipe : new ArrayList<>(pipes)) {
+                    PipeManager.getInstance().removePipe(pipe);
+                }
             }
         }
     }
@@ -256,8 +262,11 @@ public class BlockListener implements Listener {
             }
         }
         for (Block u : update) {
-            for (Pipe pipe : PipeManager.getInstance().getPipesSafe(u, true)) {
-                PipeManager.getInstance().removePipe(pipe);
+            Set<Pipe> pipes = PipeManager.getInstance().getPipesSafe(u, true);
+            if (!pipes.isEmpty()) {
+                for (Pipe pipe : new ArrayList<>(pipes)) {
+                    PipeManager.getInstance().removePipe(pipe);
+                }
             }
         }
     }

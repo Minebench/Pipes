@@ -526,37 +526,59 @@ public class PipesUtil {
             case GRASS:
             case KELP:
             case MELON_SEEDS:
+            case PUMPKIN_SEEDS:
             case SEAGRASS:
             case SWEET_BERRIES:
+            case GLOW_BERRIES:
             case WHEAT_SEEDS:
+            case MOSS_CARPET:
+            case SMALL_DRIPLEAF:
+            case HANGING_ROOTS:
                 return 0.3;
-            case CACTUS:
             case DRIED_KELP_BLOCK:
-            case MELON_SLICE:
-            case SUGAR_CANE:
             case TALL_GRASS:
+            case FLOWERING_AZALEA_LEAVES:
+            case CACTUS:
+            case SUGAR_CANE:
             case VINE:
+            case NETHER_SPROUTS:
+            case WEEPING_VINES:
+            case TWISTING_VINES:
+            case MELON_SLICE:
+            case GLOW_LICHEN:
                 return 0.5;
+            case SEA_PICKLE:
+            case LILY_PAD:
+            case PUMPKIN:
+            case CARVED_PUMPKIN:
+            case MELON:
             case APPLE:
             case BEETROOT:
             case CARROT:
             case COCOA_BEANS:
-            case FERN:
-            case LARGE_FERN:
-            case LILY_PAD:
-            case MELON:
             case POTATO:
-            case PUMPKIN:
-            case CARVED_PUMPKIN:
-            case SEA_PICKLE:
             case WHEAT:
+            case MUSHROOM_STEM:
+            case CRIMSON_FUNGUS:
+            case WARPED_FUNGUS:
             case NETHER_WART:
+            case CRIMSON_ROOTS:
+            case WARPED_ROOTS:
+            case SHROOMLIGHT:
+            case FERN:
+            case ROSE_BUSH:
+            case LARGE_FERN:
+            case SPORE_BLOSSOM:
+            case MOSS_BLOCK:
+            case BIG_DRIPLEAF:
                 return 0.65;
-            case BAKED_POTATO:
-            case BREAD:
-            case COOKIE:
             case HAY_BLOCK:
+            case FLOWERING_AZALEA:
             case NETHER_WART_BLOCK:
+            case WARPED_WART_BLOCK:
+            case BREAD:
+            case BAKED_POTATO:
+            case COOKIE:
                 return 0.85;
             case CAKE:
             case PUMPKIN_PIE:

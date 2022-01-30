@@ -17,6 +17,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.Effect;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.Tag;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.block.Container;
@@ -451,6 +452,17 @@ public class ItemMoveScheduler {
                         break;
                     /*
                     END BEACON
+                     */
+                    /*
+                    BEGIN SHULKER_BOX
+                     */
+                    case SHULKER_BOX:
+                        if (Tag.SHULKER_BOXES.isTagged(transferring.getType())) {
+                            // Don't allow shulker boxes inside shulker boxes
+                            break;
+                        }
+                    /*
+                    END SHULKER_BOX
                      */
                     /*
                     BEGIN DEFAULT

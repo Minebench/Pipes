@@ -2,7 +2,6 @@ package io.github.apfelcreme.Pipes;
 
 import com.destroystokyo.paper.MaterialTags;
 import de.minebench.blockinfostorage.BlockInfoStorage;
-import io.github.apfelcreme.Pipes.Manager.PipeManager;
 import io.github.apfelcreme.Pipes.Pipe.AbstractPipePart;
 import io.github.apfelcreme.Pipes.Pipe.ChunkLoader;
 import io.github.apfelcreme.Pipes.Pipe.PipeInput;
@@ -14,14 +13,11 @@ import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.block.BlockState;
 import org.bukkit.block.Container;
-import org.bukkit.block.Dispenser;
-import org.bukkit.block.Dropper;
 import org.bukkit.inventory.BrewerInventory;
 import org.bukkit.inventory.FurnaceInventory;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.PotionMeta;
-import org.bukkit.material.DirectionalContainer;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.potion.PotionType;
 
@@ -460,6 +456,8 @@ public class PipesUtil {
             return false;
         }
         switch (ingredient.getType()) {
+            case NETHER_WART:
+                return type == PotionType.WATER;
             case REDSTONE:
             case GLOWSTONE_DUST:
                 return meta.getBasePotionData().isUpgraded() || meta.getBasePotionData().isExtended();
@@ -474,21 +472,19 @@ public class PipesUtil {
                     case NIGHT_VISION:
                     case SLOW_FALLING:
                     case TURTLE_MASTER:
-                        return false;
-                    default:
                         return true;
+                    default:
+                        return false;
                 }
-            case COD:
-            case SALMON:
-            case TROPICAL_FISH:
-            case GOLDEN_CARROT:
-            case MAGMA_CREAM:
-            case RABBIT_FOOT:
             case SUGAR:
+            case RABBIT_FOOT:
+            case BLAZE_POWDER:
             case GLISTERING_MELON_SLICE:
             case SPIDER_EYE:
             case GHAST_TEAR:
-            case BLAZE_POWDER:
+            case MAGMA_CREAM:
+            case PUFFERFISH:
+            case GOLDEN_CARROT:
             case TURTLE_HELMET:
             case PHANTOM_MEMBRANE:
                 return type == PotionType.AWKWARD;

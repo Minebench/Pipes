@@ -383,14 +383,6 @@ public class ItemMoveScheduler {
                     case BREWING:
                         BrewerInventory brewerInventory = (BrewerInventory) targetInventory;
                         switch (transferring.getType()) {
-                            case BLAZE_POWDER:
-                                // the transported item is fuel
-                                if (smartInsert || (output.getFacing() != BlockFace.DOWN && output.getFacing() != BlockFace.UP)) {
-                                    if (!PipesUtil.addFuel(inputInventory, brewerInventory, transferring)) {
-                                        continue;
-                                    }
-                                }
-                                break;
                             case POTION:
                             case SPLASH_POTION:
                             case LINGERING_POTION:
@@ -417,6 +409,15 @@ public class ItemMoveScheduler {
                                     }
                                 }
                                 break;
+                            case BLAZE_POWDER:
+                                // the transported item is fuel
+                                // only insert if pointing from the side, smart insert will treat it as an ingredient
+                                if (!smartInsert && output.getFacing() != BlockFace.DOWN && output.getFacing() != BlockFace.UP) {
+                                    if (!PipesUtil.addFuel(inputInventory, brewerInventory, transferring)) {
+                                        continue;
+                                    }
+                                    break;
+                                }
                             default:
                                 if (smartInsert || output.getFacing() == BlockFace.DOWN) {
                                     ItemStack ingredient = brewerInventory.getIngredient();

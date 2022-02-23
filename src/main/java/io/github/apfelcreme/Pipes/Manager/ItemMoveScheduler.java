@@ -282,15 +282,27 @@ public class ItemMoveScheduler {
                 InventoryHolder targetHolder = output.getTargetHolder();
                 Inventory targetInventory = targetHolder != null ? targetHolder.getInventory() : null;
 
+                PipeOutput.Options.Overflow outputOverflow = output.getOption(PipeOutput.Options.OVERFLOW);
+
                 ItemStack transferring = itemStack;
                 PipeOutput.AcceptResult acceptResult = entry.getValue();
 
                 // Set the spread amount
-                if (spread && spreadAmount < transferring.getAmount()) {
-                    if (transferring == itemStack) {
-                        transferring = new ItemStack(transferring);
+                if (spread) {
+                    // we still have more available than the spread amount, spread it further
+                    if (spreadAmount < transferring.getAmount()) {
+                        if (transferring == itemStack) {
+                            transferring = new ItemStack(transferring);
+                        }
+                        transferring.setAmount(spreadAmount);
+                    } else if (filterCount > 0 && !acceptResult.isInFilter()) {
+                        // There are outputs with matching filters and this output doesn't have one
+                        // If output doesn't allow overflowing, check next output
+                        if (outputOverflow == PipeOutput.Options.Overflow.FALSE
+                                || (outputOverflow == PipeOutput.Options.Overflow.INPUT && !overflow)) {
+                            continue;
+                        }
                     }
-                    transferring.setAmount(spreadAmount);
                 }
 
                 // Check the target amount option
@@ -322,8 +334,8 @@ public class ItemMoveScheduler {
                 // Calculate the amount not transferred
                 int leftOverAmount = transferring == itemStack ? 0 : itemStack.getAmount() - transferring.getAmount();
 
-                PipeOutput.Options.Overflow outputOverflow = output.getOption(PipeOutput.Options.OVERFLOW);
                 if (acceptResult.getType() != PipeOutput.ResultType.ACCEPT) {
+                    // Check overflow in non-spread mode
                     if (!spread && acceptResult.isInFilter() &&
                             (outputOverflow == PipeOutput.Options.Overflow.FALSE || (!overflow && outputOverflow == PipeOutput.Options.Overflow.INPUT))) {
                         return false;

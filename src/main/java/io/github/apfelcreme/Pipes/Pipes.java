@@ -76,7 +76,9 @@ public class Pipes extends JavaPlugin {
         for (Map.Entry<Material, Integer> material : PipesConfig.getRecipeMaterials("dispenserRecipe").entrySet()) {
             dispenserRecipe.addIngredient(material.getValue(), material.getKey());
         }
-        getServer().addRecipe(dispenserRecipe);
+        if (!dispenserRecipe.getIngredientList().isEmpty()) {
+            getServer().addRecipe(dispenserRecipe);
+        }
 
         ShapelessRecipe dropperRecipe = new ShapelessRecipe(
                 new NamespacedKey(this, PipesItem.PIPE_OUTPUT.toString()),
@@ -84,7 +86,9 @@ public class Pipes extends JavaPlugin {
         for (Map.Entry<Material, Integer> material : PipesConfig.getRecipeMaterials("dropperRecipe").entrySet()) {
             dropperRecipe.addIngredient(material.getValue(), material.getKey());
         }
-        getServer().addRecipe(dropperRecipe);
+        if (!dropperRecipe.getIngredientList().isEmpty()) {
+            getServer().addRecipe(dropperRecipe);
+        }
 
         ShapelessRecipe chunkLoaderRecipe = new ShapelessRecipe(
                 new NamespacedKey(this, PipesItem.CHUNK_LOADER.toString()),
@@ -92,7 +96,9 @@ public class Pipes extends JavaPlugin {
         for (Map.Entry<Material, Integer> material : PipesConfig.getRecipeMaterials("chunkLoaderRecipe").entrySet()) {
             chunkLoaderRecipe.addIngredient(material.getValue(), material.getKey());
         }
-        getServer().addRecipe(chunkLoaderRecipe);
+        if (!chunkLoaderRecipe.getIngredientList().isEmpty()) {
+            getServer().addRecipe(chunkLoaderRecipe);
+        }
     }
 
     @Override

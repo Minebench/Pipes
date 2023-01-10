@@ -207,11 +207,12 @@ public class ItemMoveScheduler {
         boolean transferedAnything = false;
         boolean transferredAll = true;
         boolean spread = input.getOption(PipeInput.Options.SPREAD);
+        boolean spreadFully = input.getOption(PipeInput.Options.FORCE_EQUAL_SPREAD);
         boolean overflow = input.getOption(PipeInput.Options.OVERFLOW);
 
         // loop through all items and try to move them
         for (ItemStack itemStack : itemQueue) {
-            transferedAnything |= moveItem(input, inputInventory, pipe, itemStack, spread, overflow);
+            transferedAnything |= moveItem(input, inputInventory, pipe, itemStack, spread, spreadFully, overflow);
             transferredAll &= transferedAnything;
         }
 
@@ -235,7 +236,7 @@ public class ItemMoveScheduler {
         return transferredAll;
     }
 
-    private boolean moveItem(PipeInput input, Inventory inputInventory, Pipe pipe, ItemStack itemStack, boolean spread, boolean overflow) {
+    private boolean moveItem(PipeInput input, Inventory inputInventory, Pipe pipe, ItemStack itemStack, boolean spread, boolean forceEqualSpread, boolean overflow) {
         Map<PipeOutput, PipeOutput.AcceptResult> outputs = new LinkedHashMap<>();
         int filterCount = 0;
         try (Timing t = TIMINGS_MOVE_FILTER.startTiming()) {
@@ -261,8 +262,13 @@ public class ItemMoveScheduler {
         // Calculate amount that should be spread over the outputs (when in spread mode)
         int spreadOver = filterCount > 0 ? filterCount : outputs.size();
         int spreadAmount = itemStack.getAmount() / spreadOver;
-        if (spread && spreadAmount == 0) { // not enough items to spread over all outputs, return
-            return false;
+        if (spread && spreadAmount == 0) {
+            if (forceEqualSpread) {
+                // not enough items to spread over all outputs equally, return
+                return false;
+            }
+            // get the amount that we should put into each output ignoring that we might not have enough (that's checked below)
+            spreadAmount = (int) Math.ceil(itemStack.getAmount() / (double) spreadOver);
         }
 
         try (Timing t = TIMINGS_MOVE_TRANSFER.startTiming()) {

@@ -81,9 +81,14 @@ public class PipeInput extends AbstractPipePart {
         private static final Map<String, Option<?>> VALUES = new HashMap<>();
 
         /**
-         * Whether or not to spread the items equally over all outputs
+         * Whether or not to spread the item over all outputs
          */
         public static final Option<Boolean> SPREAD = add(new Option<>("SPREAD", Value.FALSE, Value.TRUE));
+
+        /**
+         * Whether or not to spread the items equally over all outputs
+         */
+        public static final Option<Boolean> FORCE_EQUAL_SPREAD = add(new Option<>("FORCE_EQUAL_SPREAD", Value.TRUE, Value.FALSE));
         /**
          * Whether or not this transfers from this input can overflow into other available outputs
          * <p><strong>Possible Values:</strong></p>

@@ -84,12 +84,26 @@ texts:
         description: 'Verteilungsmodus'
         true: |
           &aPipe Input ist im &2Verteilungs&a Modus!
-          &7Items werden gleichmäßig über alle
-          &7passenden Outputs verteilt!
+          &7Items werden über alle passenden
+          &7Outputs verteilt!
         false: |
           &cPipe Input ist im &4Einzel&c Modus!
           &7Items werden in den ersten passenden
           &7Output transferiert. (Oder overflowen)
+      force-equal-spread:
+        description: 'Gleichmäßig verteilen'
+        true: |
+          &aPipe Input verteilt &2gleichmäßig&a!
+          &7Items werden gleichmäßig über alle
+          &7passenden Outputs verteilt! Wenn nicht
+          &7genug Items für gleichmäßige Verteilung
+          &7verfügbar sind, bleiben sie im Input!
+        false: |
+          &cPipe Input verteilt &4vollständig&c!
+          &7Items werden über alle passenden Outputs
+          &7verteilt. Manche Outputs können dabei
+          &7ein Item weniger erhalten wenn es nicht
+          &7gleichmäßig geht.
       overflow:
         description: 'Overflow'
         true: |

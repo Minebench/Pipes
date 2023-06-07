@@ -243,37 +243,37 @@ public abstract class AbstractPipePart {
                 gui.addElement(new StaticGuiElement('c',
                         PipesConfig.getGuiItemStack(getType().toConfigKey() + ".copy"),
                         click -> {
-                            if (click.getEvent().getCursor() == null) {
-                                Pipes.sendActionBar(click.getEvent().getWhoClicked(), PipesConfig.getText("error.notABook"));
+                            if (click.getCursor() == null) {
+                                Pipes.sendActionBar(click.getWhoClicked(), PipesConfig.getText("error.notABook"));
                                 
-                            } else if (click.getEvent().getCursor().getType() == Material.BOOK
-                                    || click.getEvent().getCursor().getType() == Material.WRITABLE_BOOK) {
+                            } else if (click.getCursor().getType() == Material.BOOK
+                                    || click.getCursor().getType() == Material.WRITABLE_BOOK) {
                                 ItemStack book = saveOptionsToBook();
-                                book.setAmount(click.getEvent().getCursor().getAmount());
-                                click.getEvent().getView().setCursor(book);
-                                ((Player) click.getEvent().getWhoClicked()).updateInventory();
-                                Pipes.sendActionBar(click.getEvent().getWhoClicked(), PipesConfig.getText("info.settings.bookCreated"));
+                                book.setAmount(click.getCursor().getAmount());
+                                click.setCursor(book);
+                                ((Player) click.getWhoClicked()).updateInventory();
+                                Pipes.sendActionBar(click.getWhoClicked(), PipesConfig.getText("info.settings.bookCreated"));
                                 
-                            } else if (PipesItem.SETTINGS_BOOK.check(click.getEvent().getCursor())) {
+                            } else if (PipesItem.SETTINGS_BOOK.check(click.getCursor())) {
                                 if (click.getType() == ClickType.LEFT || click.getType() == ClickType.SHIFT_LEFT) {
                                     try {
-                                        applyBook(click.getEvent().getCursor());
+                                        applyBook(click.getCursor());
                                         click.getGui().draw();
-                                        Pipes.sendMessage(click.getEvent().getWhoClicked(), PipesConfig.getText("info.settings.bookApplied"));
+                                        Pipes.sendMessage(click.getWhoClicked(), PipesConfig.getText("info.settings.bookApplied"));
                                     } catch (IllegalArgumentException e){
-                                        Pipes.sendMessage(click.getEvent().getWhoClicked(), e.getMessage());
+                                        Pipes.sendMessage(click.getWhoClicked(), e.getMessage());
                                     }
                                     
                                 } else if (click.getType() == ClickType.RIGHT || click.getType() == ClickType.SHIFT_RIGHT) {
                                     ItemStack book = saveOptionsToBook();
-                                    book.setAmount(click.getEvent().getCursor().getAmount());
-                                    click.getEvent().getView().setCursor(book);
-                                    ((Player) click.getEvent().getWhoClicked()).updateInventory();
-                                    Pipes.sendActionBar(click.getEvent().getWhoClicked(), PipesConfig.getText("info.settings.bookUpdated"));
+                                    book.setAmount(click.getCursor().getAmount());
+                                    click.setCursor(book);
+                                    ((Player) click.getWhoClicked()).updateInventory();
+                                    Pipes.sendActionBar(click.getWhoClicked(), PipesConfig.getText("info.settings.bookUpdated"));
                                     
                                 }
                             } else {
-                                Pipes.sendActionBar(click.getEvent().getWhoClicked(), PipesConfig.getText("error.notABook"));
+                                Pipes.sendActionBar(click.getWhoClicked(), PipesConfig.getText("error.notABook"));
                             }
                             return true;
                         },

@@ -289,35 +289,4 @@ public class BlockListener implements Listener {
             }
         }
     }
-
-    @EventHandler
-    public void onInventoryClick(InventoryClickEvent event) {
-        if (event.getInventory().getType() != InventoryType.ANVIL
-                || event.getResult() == Event.Result.DENY
-                || event.getSlotType() != InventoryType.SlotType.RESULT
-                || !event.getCurrentItem().hasItemMeta()
-                || !event.getCurrentItem().getItemMeta().hasDisplayName()) {
-            return;
-        }
-
-        if (event.getInventory().getContents().length > 0) {
-            ItemStack item = event.getInventory().getContents()[0];
-            if (item != null && item.hasItemMeta() && item.getItemMeta().hasDisplayName()
-                    && item.getItemMeta().getDisplayName().equals(event.getCurrentItem().getItemMeta().getDisplayName())) {
-                return;
-            }
-        }
-
-        PipesItem pipesItem = PipesUtil.getPipesItem(event.getCurrentItem());
-        if (pipesItem == null) {
-            return;
-        }
-
-        ItemMeta resultMeta = event.getCurrentItem().getItemMeta();
-        if (PipesUtil.getHiddenString(resultMeta.getDisplayName()) != null) {
-            return;
-        }
-        resultMeta.setDisplayName(PipesUtil.hideString(pipesItem.toString(), resultMeta.getDisplayName()));
-        event.getCurrentItem().setItemMeta(resultMeta);
-    }
 }

@@ -20,12 +20,14 @@ package io.github.apfelcreme.Pipes;
  */
 
 import de.minebench.blockinfostorage.BlockInfoStorage;
-import org.bukkit.ChatColor;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.format.Style;
+import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.block.BlockState;
 import org.bukkit.block.Container;
-import org.bukkit.command.CommandSender;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
@@ -56,8 +58,8 @@ public enum PipesItem {
         return IDENTIFIER;
     }
 
-    public String getName(CommandSender player) {
-        return PipesConfig.getText(player, "items." + toConfigKey() + ".name");
+    public String getName() {
+        return PipesConfig.getText(PipesConfig.getDefaultLocale(), "items." + toConfigKey() + ".name");
     }
 
     public Material getMaterial() {
@@ -70,15 +72,17 @@ public enum PipesItem {
         }
         ItemStack item = new ItemStack(this.material);
         ItemMeta meta = item.getItemMeta();
-        List<String> lore = Arrays.asList(PipesConfig.getText(PipesConfig.getDefaultLocale(), "items." + toConfigKey() + ".lore"),
-                ChatColor.BLUE + "" + ChatColor.ITALIC + IDENTIFIER);
-        meta.setLore(lore);
+        List<Component> lore = Arrays.asList(
+                Component.translatable("pipes.items." + toConfigKey() + ".lore", PipesConfig.getText(PipesConfig.getDefaultLocale(), "items." + toConfigKey() + ".lore")),
+                Component.text(IDENTIFIER).style(Style.style(NamedTextColor.BLUE, TextDecoration.ITALIC))
+        );
+        meta.lore(lore);
         meta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
         meta.addEnchant(Enchantment.ARROW_DAMAGE, 1, true);
-        meta.setDisplayName(ChatColor.RESET + "" + ChatColor.WHITE + PipesUtil.hideString(
-                toString(),
-                PipesConfig.getText(PipesConfig.getDefaultLocale(), "items." + toConfigKey() + ".name")
-        ));
+        Component displayName = Component.translatable("pipes.items." + toConfigKey() + ".name",
+                PipesConfig.getText(PipesConfig.getDefaultLocale(), "items." + toConfigKey() + ".name"),
+                Style.style().color(NamedTextColor.WHITE).decoration(TextDecoration.ITALIC, false).build());
+        meta.displayName(displayName);
         meta.getPersistentDataContainer().set(TYPE_KEY, PersistentDataType.STRING, toString());
         meta.setCustomModelData(PipesConfig.getCustomModelDataOffset() + ordinal());
         item.setItemMeta(meta);
@@ -99,12 +103,6 @@ public enum PipesItem {
             return BlockInfoStorage.get().getBlockInfo(blockState.getLocation(), Pipes.getInstance()) != null;
         }
 
-        String hidden = PipesUtil.getHiddenString(((Container) blockState).getCustomName());
-
-        if (hidden != null && toString().equals(hidden.split(",")[0]) || IDENTIFIER.equals(hidden)) {
-            return true;
-        }
-
         return false;
     }
 
@@ -121,10 +119,7 @@ public enum PipesItem {
             return true;
         }
 
-        List<String> lore = item.getItemMeta().getLore();
-        String hidden = PipesUtil.getHiddenString(lore.get(lore.size() - 1));
-
-        return hidden != null && (hidden.startsWith(toString()) || hidden.startsWith(IDENTIFIER));
+        return false;
     }
 
     /**

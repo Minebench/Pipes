@@ -10,12 +10,14 @@ import io.github.apfelcreme.Pipes.Pipes;
 import io.github.apfelcreme.Pipes.PipesConfig;
 import io.github.apfelcreme.Pipes.PipesItem;
 import io.github.apfelcreme.Pipes.PipesUtil;
-import net.md_5.bungee.api.ChatColor;
-import net.md_5.bungee.api.chat.BaseComponent;
-import net.md_5.bungee.api.chat.ComponentBuilder;
-import net.md_5.bungee.api.chat.HoverEvent;
-import net.md_5.bungee.api.chat.TextComponent;
-import net.md_5.bungee.api.chat.hover.content.Text;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.TextComponent;
+import net.kyori.adventure.text.event.HoverEvent;
+import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.format.Style;
+import net.kyori.adventure.text.format.TextDecoration;
+import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
+import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
@@ -32,6 +34,7 @@ import org.bukkit.persistence.PersistentDataAdapterContext;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataHolder;
 import org.bukkit.persistence.PersistentDataType;
+import org.jetbrains.annotations.NotNull;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -453,15 +456,16 @@ public abstract class AbstractPipePart {
         ItemStack bookItem = new ItemStack(Material.WRITTEN_BOOK);
         BookMeta meta = (BookMeta) bookItem.getItemMeta();
         meta.setAuthor(PipesItem.getIdentifier());
-        meta.setDisplayName(ChatColor.RESET + "" + ChatColor.WHITE + PipesUtil.hideString(
-                toString(),
-                PipesConfig.getText(player, "items." + PipesItem.SETTINGS_BOOK.toConfigKey() + ".name", getType().getName(player))
-        ));
+        Component displayName = Component.translatable("pipes.items." + PipesItem.SETTINGS_BOOK.toConfigKey() + ".name",
+                PipesConfig.getText(PipesConfig.getDefaultLocale(), "items." + PipesItem.SETTINGS_BOOK.toConfigKey() + ".name", getType().getName()),
+                Style.style().color(NamedTextColor.WHITE).decoration(TextDecoration.ITALIC, false).build(),
+                LegacyComponentSerializer.legacySection().deserialize(getType().getName()));
+        meta.displayName(displayName);
         
-        List<String> optionsLore = new ArrayList<>();
-        List<BaseComponent[]> pages = new ArrayList<>();
-        List<ComponentBuilder> optionsPage = new ArrayList<>();
-        optionsPage.add(new ComponentBuilder(""));
+        List<Component> optionsLore = new ArrayList<>();
+        List<Component> pages = new ArrayList<>();
+        List<TextComponent.Builder> optionsPage = new ArrayList<>();
+        optionsPage.add(Component.text());
 
         meta.getPersistentDataContainer().set(TYPE_KEY, PersistentDataType.STRING, PipesItem.SETTINGS_BOOK.toString());
         meta.getPersistentDataContainer().set(STORED_TYPE_KEY, PersistentDataType.STRING, getType().toString());
@@ -472,33 +476,32 @@ public abstract class AbstractPipePart {
 
             String shortDesc = PipesConfig.getText(player, "options." + getType().toConfigKey() + "." + option.toConfigKey() + ".description");
             Value<?> value = getValue(option);
+            Component shortDescComponent;
 
             if (value.getValue() instanceof Boolean) {
-                optionsLore.add(((Boolean) value.getValue() ? ChatColor.GREEN : ChatColor.RED) + shortDesc);
+                shortDescComponent = Component.text(shortDesc);
+                optionsLore.add(shortDescComponent.color((Boolean) value.getValue() ? NamedTextColor.GREEN : NamedTextColor.RED));
             } else {
-                shortDesc = ChatColor.DARK_PURPLE + shortDesc + ": " + ChatColor.BLUE + value.getValue().toString();
-                optionsLore.add(shortDesc);
+                shortDescComponent = Component.text(shortDesc).color(NamedTextColor.DARK_PURPLE).append(Component.text(value.getValue().toString()).color(NamedTextColor.BLUE));
+                optionsLore.add(shortDescComponent);
             }
 
-            ComponentBuilder entryBuilder = new ComponentBuilder();
             if (value.getValue() instanceof Boolean) {
-                entryBuilder.color(((Boolean) value.getValue() ? ChatColor.DARK_GREEN : ChatColor.DARK_RED));
+                shortDescComponent = shortDescComponent.color(((Boolean) value.getValue() ? NamedTextColor.DARK_GREEN : NamedTextColor.DARK_RED));
             }
-            BaseComponent[] optionEntry = entryBuilder.event(new HoverEvent(
-                            HoverEvent.Action.SHOW_TEXT,
-                            new Text(TextComponent.fromLegacyText(PipesConfig.getText(
-                                    player, "options." + getType().toConfigKey() + "." + option.toConfigKey().toLowerCase() + "." + value.getValue().toString().toLowerCase())))
-                    ))
-                    .append(TextComponent.fromLegacyText(shortDesc))
-                    .create();
+            Component optionEntry = shortDescComponent.hoverEvent(HoverEvent.showText(
+                            Component.translatable("options." + getType().toConfigKey() + "." + option.toConfigKey().toLowerCase() + "." + value.getValue().toString(),
+                                    PipesConfig.getText(player,
+                                            "options." + getType().toConfigKey() + "." + option.toConfigKey().toLowerCase() + "." + value.getValue().toString().toLowerCase())))
+                    );
 
-            ComponentBuilder pageBuilder = optionsPage.get(optionsPage.size() - 1);
-            pageBuilder.append("\n");
+            TextComponent.Builder pageBuilder = optionsPage.get(optionsPage.size() - 1);
+            pageBuilder.appendNewline();
             
-            String pageStr = TextComponent.toPlainText(pageBuilder.create()) + TextComponent.toPlainText(optionEntry);
+            String pageStr = PlainTextComponentSerializer.plainText().serialize(pageBuilder.build()) + PlainTextComponentSerializer.plainText().serialize(optionEntry);
             if (pageStr.length() > 255 || pageStr.split("\n").length > 13) {
-                pages.add(pageBuilder.create());
-                optionsPage.add(pageBuilder = new ComponentBuilder(""));
+                pages.add(pageBuilder.build());
+                optionsPage.add(pageBuilder = Component.text());
             }
             
             pageBuilder.append(optionEntry);
@@ -507,22 +510,34 @@ public abstract class AbstractPipePart {
         meta.getPersistentDataContainer().set(OPTIONS_KEY, PersistentDataType.TAG_CONTAINER, optionsContainer);
         
         if (!optionsPage.isEmpty()) {
-            pages.add(optionsPage.get(optionsPage.size() - 1).create());
+            pages.add(optionsPage.get(optionsPage.size() - 1).build());
         }
         
-        meta.spigot().setPages(pages);
+        meta.pages(pages);
 
-        List<String> lore = new ArrayList<>(Arrays.asList(
-                PipesConfig.getText(player, "items." + PipesItem.SETTINGS_BOOK.toConfigKey() + ".lore",
-                        getType().getName(player), optionsLore.stream().collect(Collectors.joining("\n"))
-                ).split("\n")
-        ));
-        lore.add(ChatColor.BLUE + "" + ChatColor.ITALIC + PipesUtil.hideString(
-                PipesItem.SETTINGS_BOOK.toString() + "," + toString(),
-                PipesItem.getIdentifier()
-        ));
+        TextComponent.Builder optionsComponent = Component.text();
+        for (int i = 0; i < optionsLore.size(); i++) {
+            optionsComponent.append(optionsLore.get(i));
+            if (i + 1 < optionsLore.size()) {
+                optionsComponent.appendNewline();
+            }
+        }
+        List<Component> translateWith = Arrays.asList(
+                LegacyComponentSerializer.legacySection().deserialize(getType().getName()),
+                optionsComponent.build()
+        );
+
+        List<Component> lore = Arrays.asList(
+                Component.translatable("pipes.items." + PipesItem.SETTINGS_BOOK.toConfigKey() + ".lore",
+                        PipesConfig.getText(PipesConfig.getDefaultLocale(), "items." + PipesItem.SETTINGS_BOOK.toConfigKey() + ".lore",
+                                getType().getName(), optionsLore.stream().map(c -> LegacyComponentSerializer.legacySection().serialize(c))
+                                        .collect(Collectors.joining("\n"))),
+                        translateWith
+                ),
+                Component.text(PipesItem.getIdentifier(), Style.style(NamedTextColor.BLUE, TextDecoration.ITALIC))
+        );
         
-        meta.setLore(lore);
+        meta.lore(lore);
         bookItem.setItemMeta(meta);
         
         return bookItem;

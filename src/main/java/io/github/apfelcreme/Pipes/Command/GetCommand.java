@@ -42,7 +42,7 @@ public class GetCommand implements SubCommand {
                         PipesItem pipesItem = PipesItem.valueOf(strings[1].toUpperCase());
                         if (pipesItem != PipesItem.CHUNK_LOADER || player.hasPermission("Pipes.placeChunkLoader")) {
                             if (player.getInventory().addItem(pipesItem.toItemStack()).isEmpty()) {
-                                Pipes.sendMessage(player, PipesConfig.getText(player, "info.get", pipesItem.getName(player)));
+                                Pipes.sendMessage(player, PipesConfig.getText(player, "info.get", pipesItem.getName()));
                             } else {
                                 Pipes.sendMessage(player, PipesConfig.getText(player, "error.notEnoughInventorySpace"));
                             }

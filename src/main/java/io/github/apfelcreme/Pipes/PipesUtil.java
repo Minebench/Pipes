@@ -78,45 +78,6 @@ public class PipesUtil {
     }
 
     /**
-     * Hide a string inside another string with chat color characters
-     *
-     * @param hidden The string to hide
-     * @param string The string to hide in
-     * @return The string with the hidden string appended
-     */
-    public static String hideString(String hidden, String string) {
-        while (string.length() > 1 && string.charAt(string.length() - 2) == ChatColor.COLOR_CHAR) {
-            string = string.substring(0, string.length() - 2);
-        }
-        // Add hidden string
-        char[] chars = new char[hidden.length() * 2];
-        for (int i = 0; i < hidden.length(); i++) {
-            chars[i * 2] = ChatColor.COLOR_CHAR;
-            chars[i * 2 + 1] = hidden.charAt(i);
-        }
-        return string + new String(chars);
-    }
-
-    /**
-     * Returns a hidden string in the itemstack which is hidden using the last lore line
-     * @param string The string to search in for a hidden string
-     * @return The hidden string or <code>null</code> if there is none or the input is null
-     */
-    public static String getHiddenString(String string) {
-        if (string == null) {
-            return null;
-        }
-        // Only the color chars at the end of the string is it
-        StringBuilder builder = new StringBuilder();
-        for (int i = string.length() - 1; i > 0 && string.charAt(i - 1) == ChatColor.COLOR_CHAR; i -= 2) {
-            builder.append(string.charAt(i));
-        }
-        if (builder.length() == 0)
-            return null;
-        return builder.reverse().toString();
-    }
-
-    /**
      * Get the {@link PipesItem} from an ItemStack
      * @param item  the ItemStack
      * @return the PipesItem or null if none found
@@ -129,13 +90,6 @@ public class PipesUtil {
         String type = null;
         if (item.getItemMeta().getPersistentDataContainer().has(AbstractPipePart.TYPE_KEY, PersistentDataType.STRING)) {
             type = item.getItemMeta().getPersistentDataContainer().get(AbstractPipePart.TYPE_KEY, PersistentDataType.STRING);
-        } else if (item.getItemMeta().hasLore() && !item.getItemMeta().getLore().isEmpty()) {
-            List<String> lore = item.getItemMeta().getLore();
-            if (!lore.get(lore.size() - 1).contains(PipesItem.getIdentifier())) {
-                return null;
-            }
-
-            type = getHiddenString(lore.get(lore.size() - 1));
         }
 
         if (type == null || type.isEmpty()) {
@@ -188,14 +142,7 @@ public class PipesUtil {
         }
 
         if (type == null) {
-            type = getHiddenString(((Container) state).getCustomName());
-            if (type == null) {
-                return null;
-            }
-            type = type.split(",")[0];
-            if (type.isEmpty()) {
-                return null;
-            }
+            return null;
         }
 
         try {

@@ -1,13 +1,14 @@
 package io.github.apfelcreme.Pipes;
 
+import de.themoep.utils.lang.LanguageConfig;
+import de.themoep.utils.lang.bukkit.LanguageManager;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
+import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.ConfigurationSection;
-import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
-import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Level;
@@ -32,7 +33,7 @@ import java.util.logging.Level;
  */
 public class PipesConfig {
 
-    private static YamlConfiguration languageConfig;
+    private static LanguageManager languageManager;
 
     private static Pipes plugin;
     private static long transferCooldown;
@@ -63,8 +64,18 @@ public class PipesConfig {
         maxPipeLength = plugin.getConfig().getInt("maxPipeLength");
         pistonUpdateCheck = plugin.getConfig().getBoolean("pistonUpdateCheck");
         custommodelDataOffset = plugin.getConfig().getInt("custommodelDataOffset");
-        languageConfig = YamlConfiguration.loadConfiguration(new File(plugin.getDataFolder(), "lang.de.yml"));
+        languageManager = new LanguageManager(plugin, getDefaultLocale());
+        languageManager.loadConfigs();
         itemStacks = new HashMap<>();
+    }
+
+    /**
+     * returns the configured default locale
+     *
+     * @return the default locale
+     */
+    public static String getDefaultLocale() {
+        return plugin.getConfig().getString("defaultLocale");
     }
 
     /**
@@ -168,12 +179,37 @@ public class PipesConfig {
     /**
      * returns a texty string
      *
-     * @param key           the config path
-     * @param replacements  the replacements as an array of alternating placeholder and value
+     * @param sender       the sender to get the locale for
+     * @param key          the config path
+     * @param replacements the replacements as an array of alternating placeholder and value
      * @return the text
      */
-    public static String getText(String key, String... replacements) {
-        String ret = (String) languageConfig.get("texts." + key);
+    public static String getText(CommandSender sender, String key, String... replacements) {
+        return getText(languageManager.getConfig(sender), key, replacements);
+    }
+
+    /**
+     * returns a texty string
+     *
+     * @param locale       the locale to use
+     * @param key          the config path
+     * @param replacements the replacements as an array of alternating placeholder and value
+     * @return the text
+     */
+    public static String getText(String locale, String key, String... replacements) {
+        return getText(languageManager.getConfig(locale), key, replacements);
+    }
+
+    /**
+     * returns a texty string
+     *
+     * @param config       the config to use
+     * @param key          the config path
+     * @param replacements the replacements as an array of alternating placeholder and value
+     * @return the text
+     */
+    private static String getText(LanguageConfig<?> config, String key, String... replacements) {
+        String ret = config.get("texts." + key);
         if (ret != null && !ret.isEmpty()) {
             for (int i = 0; i < replacements.length; i++) {
                 ret = ret.replace("{" + i + "}", replacements[i]);

@@ -139,7 +139,7 @@ public class Pipes extends JavaPlugin {
      * @param message the message
      */
     public static void sendMessage(CommandSender player, String message) {
-        player.sendMessage(PipesConfig.getText("prefix") + message);
+        player.sendMessage(PipesConfig.getText(player, "prefix") + message);
     }
     
     /**
@@ -152,7 +152,7 @@ public class Pipes extends JavaPlugin {
         if (player instanceof Player) {
             ((Player) player).spigot().sendMessage(
                     ChatMessageType.ACTION_BAR,
-                    TextComponent.fromLegacyText(PipesConfig.getText("prefix") + message)
+                    TextComponent.fromLegacyText(PipesConfig.getText(player, "prefix") + message)
             );
         } else {
             sendMessage(player, message);

@@ -21,6 +21,7 @@ import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.block.BlockState;
 import org.bukkit.block.Container;
+import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.ClickType;
@@ -244,40 +245,40 @@ public abstract class AbstractPipePart {
                         PipesConfig.getGuiItemStack(getType().toConfigKey() + ".copy"),
                         click -> {
                             if (click.getCursor() == null) {
-                                Pipes.sendActionBar(click.getWhoClicked(), PipesConfig.getText("error.notABook"));
+                                Pipes.sendActionBar(click.getWhoClicked(), PipesConfig.getText(player, "error.notABook"));
                                 
                             } else if (click.getCursor().getType() == Material.BOOK
                                     || click.getCursor().getType() == Material.WRITABLE_BOOK) {
-                                ItemStack book = saveOptionsToBook();
+                                ItemStack book = saveOptionsToBook(player);
                                 book.setAmount(click.getCursor().getAmount());
                                 click.setCursor(book);
                                 ((Player) click.getWhoClicked()).updateInventory();
-                                Pipes.sendActionBar(click.getWhoClicked(), PipesConfig.getText("info.settings.bookCreated"));
+                                Pipes.sendActionBar(click.getWhoClicked(), PipesConfig.getText(player, "info.settings.bookCreated"));
                                 
                             } else if (PipesItem.SETTINGS_BOOK.check(click.getCursor())) {
                                 if (click.getType() == ClickType.LEFT || click.getType() == ClickType.SHIFT_LEFT) {
                                     try {
-                                        applyBook(click.getCursor());
+                                        applyBook(player, click.getCursor());
                                         click.getGui().draw();
-                                        Pipes.sendMessage(click.getWhoClicked(), PipesConfig.getText("info.settings.bookApplied"));
+                                        Pipes.sendMessage(click.getWhoClicked(), PipesConfig.getText(player, "info.settings.bookApplied"));
                                     } catch (IllegalArgumentException e){
                                         Pipes.sendMessage(click.getWhoClicked(), e.getMessage());
                                     }
                                     
                                 } else if (click.getType() == ClickType.RIGHT || click.getType() == ClickType.SHIFT_RIGHT) {
-                                    ItemStack book = saveOptionsToBook();
+                                    ItemStack book = saveOptionsToBook(player);
                                     book.setAmount(click.getCursor().getAmount());
                                     click.setCursor(book);
                                     ((Player) click.getWhoClicked()).updateInventory();
-                                    Pipes.sendActionBar(click.getWhoClicked(), PipesConfig.getText("info.settings.bookUpdated"));
+                                    Pipes.sendActionBar(click.getWhoClicked(), PipesConfig.getText(player, "info.settings.bookUpdated"));
                                     
                                 }
                             } else {
-                                Pipes.sendActionBar(click.getWhoClicked(), PipesConfig.getText("error.notABook"));
+                                Pipes.sendActionBar(click.getWhoClicked(), PipesConfig.getText(player, "error.notABook"));
                             }
                             return true;
                         },
-                        PipesConfig.getText("gui." + getType().toConfigKey() + ".copy")
+                        PipesConfig.getText(player, "gui." + getType().toConfigKey() + ".copy")
                 ));
             }
 
@@ -293,9 +294,9 @@ public abstract class AbstractPipePart {
                         && (option.getGuiPosition() == Option.GuiPosition.LEFT
                         || option.getGuiPosition() == Option.GuiPosition.ANYWHERE
                         || optionsGroupRight.size() >= optionsGroupRight.getSlots().length)) {
-                    optionsGroupLeft.addElement(option.getElement(this));
+                    optionsGroupLeft.addElement(option.getElement(player, this));
                 } else {
-                    optionsGroupRight.addElement(option.getElement(this));
+                    optionsGroupRight.addElement(option.getElement(player, this));
                 }
             }
             optionsGroupLeft.setFiller(gui.getFiller());
@@ -361,28 +362,12 @@ public abstract class AbstractPipePart {
                         setOption(option, value, false);
                     } catch (IllegalArgumentException e) {
                         e.printStackTrace();
-                        throw new IllegalArgumentException(PipesConfig.getText("error.invalidSettingsBook",
-                                "Invalid option" + optionName + "=" + blockInfo.get(optionName)));
+                        throw new IllegalArgumentException("Invalid option" + optionName + "=" + blockInfo.get(optionName));
                     }
                 }
                 if (state instanceof PersistentDataHolder) {
                     BlockInfoStorage.get().removeBlockInfo(getLocation().getLocation(), Pipes.getInstance());
                 }
-                return;
-            }
-        }
-
-        String hidden = PipesUtil.getHiddenString(state.getCustomName());
-        if (hidden != null) {
-            try {
-                applyOptions(hidden);
-                state = getHolder();
-                if (state != null) {
-                    ((PersistentDataHolder) state).getPersistentDataContainer().set(TYPE_KEY, PersistentDataType.STRING, getType().name());
-                    state.update();
-                }
-            } catch (IllegalArgumentException e) {
-                Pipes.getInstance().getLogger().log(Level.WARNING, "Error while loading pipe part at " + getLocation() + "! " + e.getMessage());
             }
         }
     }
@@ -414,98 +399,31 @@ public abstract class AbstractPipePart {
         }
         return found;
     }
-
-    /**
-     * Apply options from a string
-     * @param optionString the string that the options are encoded in
-     * @throws IllegalArgumentException thrown if the string is invalid
-     */
-    @Deprecated
-    private void applyOptions(String optionString) throws IllegalArgumentException {
-        boolean isBook = false;
-        for (String group : optionString.split(",")) {
-            String[] parts = group.split("=");
-            if (parts.length < 2) {
-                if (parts.length > 0) {
-                    if (!isBook && parts[0].equals(PipesItem.SETTINGS_BOOK.toString())) {
-                        isBook = true;
-                    } else if (isBook && !parts[0].equals(getType().toString())) {
-                        PipesItem storedItem;
-                        try {
-                            storedItem = PipesItem.valueOf(parts[0]);
-                        } catch (IllegalArgumentException e) {
-                            throw new IllegalArgumentException(PipesConfig.getText("error.unknownPipesItem",
-                                    parts[0]));
-                        }
-                        throw new IllegalArgumentException(PipesConfig.getText("error.wrongBookType",
-                                PipesConfig.getText("items." + storedItem.toConfigKey() + ".name")));
-                    }
-                }
-                continue;
-            }
-            try {
-                Option<?> option = getAvailableOption(parts[0].toUpperCase());
-                Value value;
-                if (option.getValueType() == Boolean.class) {
-                    value = new Value<>(Boolean.parseBoolean(parts[1]));
-                } else if (option.getValueType().isEnum()) {
-                    Enum<?> e = (Enum) option.getDefaultValue().getValue();
-                    value = new Value<>(e.valueOf(e.getDeclaringClass(), parts[1].toUpperCase()));
-                } else if (option.getValueType() == String.class) {
-                    value = new Value<>(parts[1]);
-                } else {
-                    // If all fails try to get a static method that can get the value
-                    Method get = null;
-                    for (String method : new String[]{"valueOf", "fromString", "parse"}) {
-                        try {
-                            get = option.getValueType().getMethod(method, String.class);
-                            if (Modifier.isStatic(get.getModifiers())) {
-                                break;
-                            }
-                        } catch (NoSuchMethodException ignored) { }
-                    }
-                    if (get == null) {
-                        throw new IllegalArgumentException("Values of type " + option.getValueType() + " are not supported!");
-                    }
-                    value = new Value<>(get.invoke(null, parts[1]));
-                }
-                setOption(option, value);
-            } catch (IllegalArgumentException | IllegalAccessException | InvocationTargetException e) {
-                e.printStackTrace();
-                throw new IllegalArgumentException(PipesConfig.getText("error.invalidSettingsBook",
-                        "Invalid option" + parts[0] + "=" + parts[1]));
-            }
-        }
-    }
     
     /**
      * Apply the settings stored in a book to this pipe part
-     * @param book the book to apply
+     *
+     * @param player the player that applied the book
+     * @param book   the book to apply
      * @throws IllegalArgumentException if the item is not a book or the settings stored are invalid
      */
-    public void applyBook(ItemStack book) throws IllegalArgumentException {
+    public void applyBook(CommandSender player, ItemStack book) throws IllegalArgumentException {
         ItemMeta meta = book.getItemMeta();
         if (!(meta instanceof BookMeta)) {
             throw new IllegalArgumentException("ItemStack needs to be a book!");
         }
 
         if (!meta.getPersistentDataContainer().has(OPTIONS_KEY, PersistentDataType.TAG_CONTAINER)) {
-            if (meta.hasLore()) {
-                List<String> lore = meta.getLore();
-                String hidden = PipesUtil.getHiddenString(lore.get(lore.size() - 1));
-                applyOptions(hidden);
-                return;
-            }
             throw new IllegalArgumentException("ItemStack does not have custom tags nor a custom lore!");
         }
 
         if (!meta.getPersistentDataContainer().has(STORED_TYPE_KEY, PersistentDataType.STRING)) {
-            throw new IllegalArgumentException(PipesConfig.getText("error.unknownPipesItem", "null"));
+            throw new IllegalArgumentException(PipesConfig.getText(player, "error.unknownPipesItem", "null"));
         }
 
         String storedType = meta.getPersistentDataContainer().get(STORED_TYPE_KEY, PersistentDataType.STRING);
         if (storedType == null) {
-            throw new IllegalArgumentException(PipesConfig.getText("error.unknownPipesItem", "null"));
+            throw new IllegalArgumentException(PipesConfig.getText(player, "error.unknownPipesItem", "null"));
         }
 
         if (!storedType.equals(getType().toString())) {
@@ -513,10 +431,10 @@ public abstract class AbstractPipePart {
             try {
                 storedItem = PipesItem.valueOf(storedType);
             } catch (IllegalArgumentException e) {
-                throw new IllegalArgumentException(PipesConfig.getText("error.unknownPipesItem", storedType));
+                throw new IllegalArgumentException(PipesConfig.getText(player, "error.unknownPipesItem", storedType));
             }
-            throw new IllegalArgumentException(PipesConfig.getText("error.wrongBookType",
-                    PipesConfig.getText("items." + storedItem.toConfigKey() + ".name")));
+            throw new IllegalArgumentException(PipesConfig.getText(player, "error.wrongBookType",
+                    PipesConfig.getText(player, "items." + storedItem.toConfigKey() + ".name")));
         }
 
         if (meta.getPersistentDataContainer().has(OPTIONS_KEY, PersistentDataType.TAG_CONTAINER)) {
@@ -526,17 +444,18 @@ public abstract class AbstractPipePart {
     
     /**
      * Save the options of this part to a book
+     * @param player The player that saved the options
      * @return The changed item stack
      * @throws IllegalArgumentException if the item passed is not a book
      */
-    private ItemStack saveOptionsToBook() {
+    private ItemStack saveOptionsToBook(CommandSender player) {
     
         ItemStack bookItem = new ItemStack(Material.WRITTEN_BOOK);
         BookMeta meta = (BookMeta) bookItem.getItemMeta();
         meta.setAuthor(PipesItem.getIdentifier());
         meta.setDisplayName(ChatColor.RESET + "" + ChatColor.WHITE + PipesUtil.hideString(
                 toString(),
-                PipesConfig.getText("items." + PipesItem.SETTINGS_BOOK.toConfigKey() + ".name", getType().getName())
+                PipesConfig.getText(player, "items." + PipesItem.SETTINGS_BOOK.toConfigKey() + ".name", getType().getName(player))
         ));
         
         List<String> optionsLore = new ArrayList<>();
@@ -551,7 +470,7 @@ public abstract class AbstractPipePart {
         for (Option<?> option : getOptions()) {
             option.store(this, optionsContainer);
 
-            String shortDesc = PipesConfig.getText("options." + getType().toConfigKey() + "." + option.toConfigKey() + ".description");
+            String shortDesc = PipesConfig.getText(player, "options." + getType().toConfigKey() + "." + option.toConfigKey() + ".description");
             Value<?> value = getValue(option);
 
             if (value.getValue() instanceof Boolean) {
@@ -568,7 +487,7 @@ public abstract class AbstractPipePart {
             BaseComponent[] optionEntry = entryBuilder.event(new HoverEvent(
                             HoverEvent.Action.SHOW_TEXT,
                             new Text(TextComponent.fromLegacyText(PipesConfig.getText(
-                                    "options." + getType().toConfigKey() + "." + option.toConfigKey().toLowerCase() + "." + value.getValue().toString().toLowerCase())))
+                                    player, "options." + getType().toConfigKey() + "." + option.toConfigKey().toLowerCase() + "." + value.getValue().toString().toLowerCase())))
                     ))
                     .append(TextComponent.fromLegacyText(shortDesc))
                     .create();
@@ -594,8 +513,8 @@ public abstract class AbstractPipePart {
         meta.spigot().setPages(pages);
 
         List<String> lore = new ArrayList<>(Arrays.asList(
-                PipesConfig.getText("items." + PipesItem.SETTINGS_BOOK.toConfigKey() + ".lore",
-                        getType().getName(), optionsLore.stream().collect(Collectors.joining("\n"))
+                PipesConfig.getText(player, "items." + PipesItem.SETTINGS_BOOK.toConfigKey() + ".lore",
+                        getType().getName(player), optionsLore.stream().collect(Collectors.joining("\n"))
                 ).split("\n")
         ));
         lore.add(ChatColor.BLUE + "" + ChatColor.ITALIC + PipesUtil.hideString(
@@ -746,10 +665,12 @@ public abstract class AbstractPipePart {
 
         /**
          * Get the GUI element of this option for a certain pipe part
-         * @param pipePart  The pipe part to get the element for
-         * @return          The GuiStateElement of this option
+         *
+         * @param player The player viewing the GUI
+         * @param pipePart The pipe part to get the element for
+         * @return The GuiStateElement of this option
          */
-        public GuiStateElement getElement(AbstractPipePart pipePart) {
+        public GuiStateElement getElement(CommandSender player, AbstractPipePart pipePart) {
             List<GuiStateElement.State> states = new ArrayList<>();
             for (Value v : getPossibleValues()) {
                 ItemStack icon = PipesConfig.getGuiItemStack(pipePart.getType().toConfigKey() + "." + toConfigKey().toLowerCase() + "." + v.getValue().toString().toLowerCase());
@@ -758,7 +679,7 @@ public abstract class AbstractPipePart {
                         change -> pipePart.setOption(this, v),
                         v.getValue().toString(),
                         icon,
-                        PipesConfig.getText("options." + pipePart.getType().toConfigKey() + "." + toConfigKey().toLowerCase() + "." + v.getValue().toString().toLowerCase())
+                        PipesConfig.getText(player, "options." + pipePart.getType().toConfigKey() + "." + toConfigKey().toLowerCase() + "." + v.getValue().toString().toLowerCase())
                 ));
             }
             return new GuiStateElement(

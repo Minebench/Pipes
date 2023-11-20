@@ -37,12 +37,12 @@ public class InfoCommand implements SubCommand {
             final Player player = (Player) commandSender;
             if (player.hasPermission("Pipes.info")) {
                 Pipes.getInstance().registerRightClick(player, "info");
-                Pipes.sendMessage(player, PipesConfig.getText("info.info.cooldownStarted"));
+                Pipes.sendMessage(player, PipesConfig.getText(player, "info.info.cooldownStarted"));
             } else {
-                Pipes.sendMessage(player, PipesConfig.getText("error.noPermission"));
+                Pipes.sendMessage(player, PipesConfig.getText(player, "error.noPermission"));
             }
         } else {
-            Pipes.sendMessage(commandSender, PipesConfig.getText("error.commandCanOnlyBeRunByAPlayer"));
+            Pipes.sendMessage(commandSender, PipesConfig.getText(commandSender, "error.commandCanOnlyBeRunByAPlayer"));
         }
     }
 }

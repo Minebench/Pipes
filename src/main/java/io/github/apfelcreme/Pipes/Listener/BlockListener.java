@@ -134,7 +134,7 @@ public class BlockListener implements Listener {
             PipesItem pipesItem = PipesUtil.getPipesItem(event.getItemInHand());
             if (pipesItem != null) {
                 if (pipesItem == PipesItem.CHUNK_LOADER && !event.getPlayer().hasPermission("Pipes.placeChunkLoader")) {
-                    Pipes.sendMessage(event.getPlayer(), PipesConfig.getText("error.noPermission"));
+                    Pipes.sendMessage(event.getPlayer(), PipesConfig.getText(event.getPlayer(), "error.noPermission"));
                     event.setCancelled(true);
                     return;
                 }
@@ -169,8 +169,8 @@ public class BlockListener implements Listener {
                 }
 
                 for (Pipe pipe : PipeManager.getInstance().getPipes(event.getBlock())) {
-                    Pipes.sendMessage(event.getPlayer(), PipesConfig.getText("info.pipe.pipeBuilt",
-                            pipe.getString()));
+                    Pipes.sendMessage(event.getPlayer(), PipesConfig.getText(event.getPlayer(), "info.pipe.pipeBuilt",
+                            pipe.getString(event.getPlayer())));
                     pipe.highlight();
                 }
             } else if (MaterialTags.STAINED_GLASS.isTagged(event.getBlock())) {
@@ -212,20 +212,20 @@ public class BlockListener implements Listener {
                 } else {
                     try {
                         for (Pipe pipe : PipeManager.getInstance().getPipes(event.getBlock())) {
-                            Pipes.sendMessage(event.getPlayer(), PipesConfig.getText("info.pipe.pipeBuilt",
-                                    pipe.getString()));
+                            Pipes.sendMessage(event.getPlayer(), PipesConfig.getText(event.getPlayer(), "info.pipe.pipeBuilt",
+                                    pipe.getString(event.getPlayer())));
                             pipe.highlight();
                         }
                     } catch (LocationException ignored) {}
                 }
             }
         } catch (ChunkNotLoadedException e) {
-            Pipes.sendMessage(event.getPlayer(), PipesConfig.getText("error.chunkNotLoaded"));
+            Pipes.sendMessage(event.getPlayer(), PipesConfig.getText(event.getPlayer(), "error.chunkNotLoaded"));
         } catch (TooManyOutputsException e) {
-            Pipes.sendMessage(event.getPlayer(), PipesConfig.getText("error.tooManyOutputs",
+            Pipes.sendMessage(event.getPlayer(), PipesConfig.getText(event.getPlayer(), "error.tooManyOutputs",
                     String.valueOf(PipesConfig.getMaxPipeOutputs())));
         } catch (PipeTooLongException e) {
-            Pipes.sendMessage(event.getPlayer(), PipesConfig.getText("error.pipeTooLong",
+            Pipes.sendMessage(event.getPlayer(), PipesConfig.getText(event.getPlayer(), "error.pipeTooLong",
                     String.valueOf(PipesConfig.getMaxPipeLength())));
         }
     }
@@ -276,7 +276,7 @@ public class BlockListener implements Listener {
         if (PipesUtil.getPipesItem(event.getCurrentItem()) == PipesItem.CHUNK_LOADER) {
             if (!event.getWhoClicked().hasPermission("Pipes.placeChunkLoader")) {
                 event.setCancelled(true);
-                Pipes.sendMessage(event.getWhoClicked(), PipesConfig.getText("error.noPermission"));
+                Pipes.sendMessage(event.getWhoClicked(), PipesConfig.getText(event.getWhoClicked(), "error.noPermission"));
             }
         }
     }

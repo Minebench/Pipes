@@ -23,9 +23,9 @@ import de.minebench.blockinfostorage.BlockInfoStorage;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
-import org.bukkit.block.Block;
 import org.bukkit.block.BlockState;
 import org.bukkit.block.Container;
+import org.bukkit.command.CommandSender;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
@@ -56,8 +56,8 @@ public enum PipesItem {
         return IDENTIFIER;
     }
 
-    public String getName() {
-        return PipesConfig.getText("items." + toConfigKey() + ".name");
+    public String getName(CommandSender player) {
+        return PipesConfig.getText(player, "items." + toConfigKey() + ".name");
     }
 
     public Material getMaterial() {
@@ -70,14 +70,14 @@ public enum PipesItem {
         }
         ItemStack item = new ItemStack(this.material);
         ItemMeta meta = item.getItemMeta();
-        List<String> lore = Arrays.asList(PipesConfig.getText("items." + toConfigKey() + ".lore"),
+        List<String> lore = Arrays.asList(PipesConfig.getText(PipesConfig.getDefaultLocale(), "items." + toConfigKey() + ".lore"),
                 ChatColor.BLUE + "" + ChatColor.ITALIC + IDENTIFIER);
         meta.setLore(lore);
         meta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
         meta.addEnchant(Enchantment.ARROW_DAMAGE, 1, true);
         meta.setDisplayName(ChatColor.RESET + "" + ChatColor.WHITE + PipesUtil.hideString(
                 toString(),
-                PipesConfig.getText("items." + toConfigKey() + ".name")
+                PipesConfig.getText(PipesConfig.getDefaultLocale(), "items." + toConfigKey() + ".name")
         ));
         meta.getPersistentDataContainer().set(TYPE_KEY, PersistentDataType.STRING, toString());
         meta.setCustomModelData(PipesConfig.getCustomModelDataOffset() + ordinal());

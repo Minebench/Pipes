@@ -9,6 +9,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.Particle;
 import org.bukkit.World;
+import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
 import java.util.LinkedHashMap;
@@ -185,10 +186,11 @@ public class Pipe {
     /**
      * returns a string with some info in it
      *
+     * @param player the player getting the string representation of this Pipe
      * @return a string with some info in it
      */
-    public String getString() {
-        return PipesConfig.getText("info.pipe.pipeData",
+    public String getString(CommandSender player) {
+        return PipesConfig.getText(player, "info.pipe.pipeData",
                 String.valueOf(inputs.size()),
                 String.valueOf(outputs.size()),
                 String.valueOf(pipeBlocks.size()),

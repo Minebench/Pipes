@@ -42,24 +42,24 @@ public class GetCommand implements SubCommand {
                         PipesItem pipesItem = PipesItem.valueOf(strings[1].toUpperCase());
                         if (pipesItem != PipesItem.CHUNK_LOADER || player.hasPermission("Pipes.placeChunkLoader")) {
                             if (player.getInventory().addItem(pipesItem.toItemStack()).isEmpty()) {
-                                Pipes.sendMessage(player, PipesConfig.getText("info.get", pipesItem.getName()));
+                                Pipes.sendMessage(player, PipesConfig.getText(player, "info.get", pipesItem.getName(player)));
                             } else {
-                                Pipes.sendMessage(player, PipesConfig.getText("error.notEnoughInventorySpace"));
+                                Pipes.sendMessage(player, PipesConfig.getText(player, "error.notEnoughInventorySpace"));
                             }
                         } else {
-                            Pipes.sendMessage(player, PipesConfig.getText("error.noPermission"));
+                            Pipes.sendMessage(player, PipesConfig.getText(player, "error.noPermission"));
                         }
                     } catch (IllegalArgumentException e) {
-                        Pipes.sendMessage(commandSender, PipesConfig.getText("error.unknownPipesItem", strings[1].toLowerCase()));
+                        Pipes.sendMessage(commandSender, PipesConfig.getText(player, "error.unknownPipesItem", strings[1].toLowerCase()));
                     }
                 } else {
-                    Pipes.sendMessage(commandSender, PipesConfig.getText("error.wrongUsage.get"));
+                    Pipes.sendMessage(commandSender, PipesConfig.getText(player, "error.wrongUsage.get"));
                 }
             } else {
-                Pipes.sendMessage(player, PipesConfig.getText("error.noPermission"));
+                Pipes.sendMessage(player, PipesConfig.getText(player, "error.noPermission"));
             }
         } else {
-            Pipes.sendMessage(commandSender, PipesConfig.getText("error.commandCanOnlyBeRunByAPlayer"));
+            Pipes.sendMessage(commandSender, PipesConfig.getText(commandSender, "error.commandCanOnlyBeRunByAPlayer"));
         }
     }
 }

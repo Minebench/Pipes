@@ -57,19 +57,19 @@ public class PlayerListener implements Listener {
                     plugin.unregisterRightClick(event.getPlayer());
                     Set<Pipe> pipes = PipeManager.getInstance().getPipes(event.getClickedBlock());
                     for (Pipe pipe : pipes) {
-                        Pipes.sendMessage(event.getPlayer(), pipe.getString());
+                        Pipes.sendMessage(event.getPlayer(), pipe.getString(event.getPlayer()));
                         pipe.highlight(event.getPlayer());
                     }
                     if (pipes.isEmpty()) {
-                        Pipes.sendMessage(event.getPlayer(), PipesConfig.getText("error.noPipe"));
+                        Pipes.sendMessage(event.getPlayer(), PipesConfig.getText(event.getPlayer(), "error.noPipe"));
                     }
                 } catch (ChunkNotLoadedException e) {
-                    Pipes.sendMessage(event.getPlayer(), PipesConfig.getText("error.chunkNotLoaded"));
+                    Pipes.sendMessage(event.getPlayer(), PipesConfig.getText(event.getPlayer(), "error.chunkNotLoaded"));
                 } catch (TooManyOutputsException e) {
-                    Pipes.sendMessage(event.getPlayer(), PipesConfig.getText("error.tooManyOutputs",
+                    Pipes.sendMessage(event.getPlayer(), PipesConfig.getText(event.getPlayer(), "error.tooManyOutputs",
                             String.valueOf(PipesConfig.getMaxPipeOutputs())));
                 } catch (PipeTooLongException e) {
-                    Pipes.sendMessage(event.getPlayer(), PipesConfig.getText("error.pipeTooLong",
+                    Pipes.sendMessage(event.getPlayer(), PipesConfig.getText(event.getPlayer(), "error.pipeTooLong",
                             String.valueOf(PipesConfig.getMaxPipeLength())));
                 }
             } else if (!event.isCancelled() && (!event.getPlayer().isSneaking() || (
@@ -92,8 +92,8 @@ public class PlayerListener implements Listener {
             }
             event.setCancelled(true);
             try {
-                part.applyBook(event.getItem());
-                Pipes.sendMessage(event.getPlayer(), PipesConfig.getText("info.settings.bookApplied"));
+                part.applyBook(event.getPlayer(), event.getItem());
+                Pipes.sendMessage(event.getPlayer(), PipesConfig.getText(event.getPlayer(), "info.settings.bookApplied"));
             } catch (IllegalArgumentException e){
                 Pipes.sendMessage(event.getPlayer(), e.getMessage());
             }

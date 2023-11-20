@@ -45,17 +45,17 @@ public class DetectCommand implements SubCommand {
                 duration = 20L * Integer.parseInt(strings[1]);
             }
             DetectionManager.getInstance().createDetection(commandSender);
-            Pipes.sendMessage(commandSender, PipesConfig.getText("info.detect.started",
+            Pipes.sendMessage(commandSender, PipesConfig.getText(commandSender, "info.detect.started",
                     new DecimalFormat("0").format(duration / 20)));
             Pipes.getInstance().getServer().getScheduler().runTaskLaterAsynchronously(Pipes.getInstance(), () -> {
                 Detection detection = DetectionManager.getInstance().getDetection(commandSender);
                 if (detection != null) {
                     List<TickingLocation> result = detection.getResult();
                     if (!result.isEmpty()) {
-                        Pipes.sendMessage(commandSender, PipesConfig.getText("info.detect.finished"));
+                        Pipes.sendMessage(commandSender, PipesConfig.getText(commandSender, "info.detect.finished"));
                         int i = 0;
                         for (TickingLocation tickingLocation : result) {
-                            Pipes.sendMessage(commandSender, PipesConfig.getText("info.detect.element",
+                            Pipes.sendMessage(commandSender, PipesConfig.getText(commandSender, "info.detect.element",
                                     String.valueOf(i),
                                     String.valueOf(tickingLocation.getLocation().getWorldName()),
                                     String.valueOf(tickingLocation.getLocation().getX()),
@@ -65,12 +65,12 @@ public class DetectCommand implements SubCommand {
                             i++;
                         }
                     } else {
-                        Pipes.sendMessage(commandSender, PipesConfig.getText("info.detect.noElements"));
+                        Pipes.sendMessage(commandSender, PipesConfig.getText(commandSender, "info.detect.noElements"));
                     }
                 }
             }, duration);
         } else {
-            Pipes.sendMessage(commandSender, PipesConfig.getText("error.noPermission"));
+            Pipes.sendMessage(commandSender, PipesConfig.getText(commandSender, "error.noPermission"));
         }
     }
 }

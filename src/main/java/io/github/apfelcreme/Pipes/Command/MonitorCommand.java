@@ -2,7 +2,6 @@ package io.github.apfelcreme.Pipes.Command;
 
 import io.github.apfelcreme.Pipes.Manager.ItemMoveScheduler;
 import io.github.apfelcreme.Pipes.Manager.PipeManager;
-import io.github.apfelcreme.Pipes.Pipe.Pipe;
 import io.github.apfelcreme.Pipes.Pipes;
 import io.github.apfelcreme.Pipes.PipesConfig;
 import org.bukkit.command.CommandSender;
@@ -36,7 +35,7 @@ public class MonitorCommand implements SubCommand {
     @Override
     public void execute(final CommandSender commandSender, String[] strings) {
         if (commandSender.hasPermission("Pipes.monitor")) {
-            Pipes.sendMessage(commandSender, PipesConfig.getText("info.monitor.pipes",
+            Pipes.sendMessage(commandSender, PipesConfig.getText(commandSender, "info.monitor.pipes",
                     String.valueOf(PipeManager.getInstance().getPipeCache().size()),
                     String.valueOf(PipeManager.getInstance().getSingleCache().size()),
                     String.valueOf(PipeManager.getInstance().getMultiCache().size()),
@@ -44,15 +43,15 @@ public class MonitorCommand implements SubCommand {
             ));
 
             if (ItemMoveScheduler.getInstance().isActive()) {
-                Pipes.sendMessage(commandSender, PipesConfig.getText("info.monitor.schedulerActive",
+                Pipes.sendMessage(commandSender, PipesConfig.getText(commandSender, "info.monitor.schedulerActive",
                         String.valueOf(ItemMoveScheduler.getInstance().getTransfers().size())));
             } else {
-                Pipes.sendMessage(commandSender, PipesConfig.getText("info.monitor.schedulerNotActive"));
+                Pipes.sendMessage(commandSender, PipesConfig.getText(commandSender, "info.monitor.schedulerNotActive"));
             }
-            Pipes.sendMessage(commandSender, PipesConfig.getText("info.monitor.version",
+            Pipes.sendMessage(commandSender, PipesConfig.getText(commandSender, "info.monitor.version",
                     Pipes.getInstance().getDescription().getVersion()));
         } else {
-            Pipes.sendMessage(commandSender, PipesConfig.getText("error.noPermission"));
+            Pipes.sendMessage(commandSender, PipesConfig.getText(commandSender, "error.noPermission"));
         }
     }
 }

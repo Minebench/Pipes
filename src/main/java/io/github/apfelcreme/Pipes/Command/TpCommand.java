@@ -56,21 +56,21 @@ public class TpCommand implements SubCommand {
                                     targetLocation.getLocation().getY() + 1,
                                     targetLocation.getLocation().getZ() + 0.5);
                             player.teleport(location);
-                            Pipes.sendMessage(commandSender, PipesConfig.getText("info.tp.teleported"));
+                            Pipes.sendMessage(commandSender, PipesConfig.getText(player, "info.tp.teleported"));
                         } else {
-                            Pipes.sendMessage(commandSender, PipesConfig.getText("error.notThatManyResults"));
+                            Pipes.sendMessage(commandSender, PipesConfig.getText(player, "error.notThatManyResults"));
                         }
                     } else {
-                        Pipes.sendMessage(commandSender, PipesConfig.getText("error.noDetection"));
+                        Pipes.sendMessage(commandSender, PipesConfig.getText(player, "error.noDetection"));
                     }
                 } else {
-                    Pipes.sendMessage(commandSender, PipesConfig.getText("error.wrongUsage.tp"));
+                    Pipes.sendMessage(commandSender, PipesConfig.getText(player, "error.wrongUsage.tp"));
                 }
             } else {
-                Pipes.sendMessage(commandSender, PipesConfig.getText("error.noPermission"));
+                Pipes.sendMessage(commandSender, PipesConfig.getText(player, "error.noPermission"));
             }
         } else {
-            Pipes.sendMessage(commandSender, PipesConfig.getText("error.commandCanOnlyBeRunByAPlayer"));
+            Pipes.sendMessage(commandSender, PipesConfig.getText(commandSender, "error.commandCanOnlyBeRunByAPlayer"));
         }
     }
 }

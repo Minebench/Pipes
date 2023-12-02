@@ -55,7 +55,6 @@ public class PipesConfig {
             plugin.getDataFolder().mkdirs();
         }
         plugin.saveDefaultConfig();
-        plugin.saveResource("lang.de.yml", false);
         plugin.reloadConfig();
         transferCooldown = plugin.getConfig().getLong("transferCooldown");
         transferCount = plugin.getConfig().getInt("transferCount");

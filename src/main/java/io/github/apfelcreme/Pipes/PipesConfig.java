@@ -258,11 +258,14 @@ public class PipesConfig {
             String[] parts = input.split(":");
             try {
                 Material mat = Material.valueOf(parts[0].toUpperCase());
-                byte data = 0;
+                int data;
                 if (parts.length > 1) {
-                    data = Byte.parseByte(parts[1]);
+                    data = Integer.parseInt(parts[1]);
+                } else {
+                    data = 0;
                 }
-                ItemStack item = new ItemStack(mat, 1, data);
+                ItemStack item = new ItemStack(mat);
+                item.editMeta(meta -> meta.setCustomModelData(data));
                 itemStacks.put(key, item);
                 return item;
             } catch (NumberFormatException e) {

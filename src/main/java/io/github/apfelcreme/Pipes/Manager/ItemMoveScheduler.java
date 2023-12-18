@@ -1,7 +1,6 @@
 package io.github.apfelcreme.Pipes.Manager;
 
-import co.aikar.timings.Timing;
-import co.aikar.timings.Timings;
+import co.aikar.timings.lib.MCTiming;
 import io.github.apfelcreme.Pipes.Event.PipeDispenseEvent;
 import io.github.apfelcreme.Pipes.Event.PipeMoveItemEvent;
 import io.github.apfelcreme.Pipes.Exception.ChunkNotLoadedException;
@@ -66,9 +65,9 @@ import java.util.stream.Collectors;
  */
 public class ItemMoveScheduler {
 
-    private final Timing TIMINGS_MOVE_FILTER;
-    private final Timing TIMINGS_MOVE_TRANSFER;
-    private final Timing TIMINGS_MOVE_FILTER_AMOUNT;
+    private final MCTiming TIMINGS_MOVE_FILTER;
+    private final MCTiming TIMINGS_MOVE_TRANSFER;
+    private final MCTiming TIMINGS_MOVE_FILTER_AMOUNT;
 
     /**
      * the task id of the repeating task
@@ -106,10 +105,10 @@ public class ItemMoveScheduler {
         addItemTransfers = new LinkedHashSet<>();
         emptyRuns = 0;
 
-        Timing timingsMove = Timings.of(Pipes.getInstance(), "move");
-        TIMINGS_MOVE_FILTER = Timings.of(Pipes.getInstance(), "## filter", timingsMove);
-        TIMINGS_MOVE_TRANSFER = Timings.of(Pipes.getInstance(), "## transfer", timingsMove);
-        TIMINGS_MOVE_FILTER_AMOUNT = Timings.of(Pipes.getInstance(), "## filter_amount", timingsMove);
+        MCTiming timingsMove = Pipes.getTiming("move");
+        TIMINGS_MOVE_FILTER = Pipes.getTiming("## filter", timingsMove);
+        TIMINGS_MOVE_TRANSFER = Pipes.getTiming("## transfer", timingsMove);
+        TIMINGS_MOVE_FILTER_AMOUNT = Pipes.getTiming("## filter_amount", timingsMove);
     }
 
     /**
@@ -239,7 +238,7 @@ public class ItemMoveScheduler {
     private boolean moveItem(PipeInput input, Inventory inputInventory, Pipe pipe, ItemStack itemStack, boolean spread, boolean forceEqualSpread, boolean overflow) {
         Map<PipeOutput, PipeOutput.AcceptResult> outputs = new LinkedHashMap<>();
         int filterCount = 0;
-        try (Timing t = TIMINGS_MOVE_FILTER.startTiming()) {
+        try (MCTiming t = TIMINGS_MOVE_FILTER.startTiming()) {
             for (PipeOutput output : pipe.getOutputs().values()) {
                 PipeOutput.AcceptResult acceptResult = output.accepts(input, itemStack);
                 if (!spread || acceptResult.getType() == PipeOutput.ResultType.ACCEPT) {
@@ -271,7 +270,7 @@ public class ItemMoveScheduler {
             spreadAmount = (int) Math.ceil(itemStack.getAmount() / (double) spreadOver);
         }
 
-        try (Timing t = TIMINGS_MOVE_TRANSFER.startTiming()) {
+        try (MCTiming t = TIMINGS_MOVE_TRANSFER.startTiming()) {
             // loop through all outputs
             for (Map.Entry<PipeOutput, PipeOutput.AcceptResult> entry : outputs.entrySet()) {
                 // we don't need to move empty/already moved itemstacks
@@ -318,7 +317,7 @@ public class ItemMoveScheduler {
                         && output.getOption(PipeOutput.Options.WHITELIST)
                         && output.getOption(PipeOutput.Options.TARGET_AMOUNT)) {
                     int amountInTarget = 0;
-                    try (Timing t2 = TIMINGS_MOVE_FILTER_AMOUNT.startTiming()) {
+                    try (MCTiming t2 = TIMINGS_MOVE_FILTER_AMOUNT.startTiming()) {
                         for (ItemStack item : targetInventory) {
                             if (output.matchesFilter(acceptResult.getFilterItem(), item)) {
                                 amountInTarget += item.getAmount();

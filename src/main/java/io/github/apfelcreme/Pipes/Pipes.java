@@ -1,5 +1,7 @@
 package io.github.apfelcreme.Pipes;
 
+import co.aikar.timings.lib.MCTiming;
+import co.aikar.timings.lib.TimingManager;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import io.github.apfelcreme.Pipes.Listener.BlockListener;
@@ -54,10 +56,16 @@ public class Pipes extends JavaPlugin {
      */
     private static boolean blockInfoStorage = false;
 
+    /**
+     * the timing manager
+     */
+    private static TimingManager timingManager;
+
     @Override
     public void onEnable() {
         instance = this;
         blockInfoStorage = getServer().getPluginManager().isPluginEnabled("BlockInfoStorage");
+        timingManager = TimingManager.of(this);
         registeredRightClicks = CacheBuilder.newBuilder().expireAfterWrite(10, TimeUnit.SECONDS).build();
         PipesConfig.load();
         ItemMoveScheduler.load();
@@ -175,5 +183,24 @@ public class Pipes extends JavaPlugin {
      */
     public static boolean hasBlockInfoStorage() {
         return blockInfoStorage;
+    }
+
+    /**
+     * Returns a timing object for the given name
+     * @param name the name of the timing
+     * @return the timing object
+     */
+    public static MCTiming getTiming(String name) {
+        return timingManager.of(name);
+    }
+
+    /**
+     * Returns a timing object for the given name and parent
+     * @param name the name of the timing
+     * @param parent the parent timing
+     * @return the timing object
+     */
+    public static MCTiming getTiming(String name, MCTiming parent) {
+        return timingManager.of(name, parent);
     }
 }

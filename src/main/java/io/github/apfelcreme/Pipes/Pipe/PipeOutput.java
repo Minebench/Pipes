@@ -6,6 +6,7 @@ import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.block.BlockState;
 import org.bukkit.entity.Entity;
+import org.bukkit.entity.minecart.HopperMinecart;
 import org.bukkit.entity.minecart.StorageMinecart;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
@@ -75,7 +76,7 @@ public class PipeOutput extends AbstractPipePart {
             World world = block.getWorld();
 
             for (Entity entity : world.getNearbyEntities(box)) {
-                if (entity instanceof InventoryHolder) { // Minecarts and similar entities inherit InventoryHolder
+                if (entity instanceof InventoryHolder && isAcceptedEntity(entity)) { // Minecarts and similar entities inherit InventoryHolder
                     return (InventoryHolder) entity;
                 }
             }
@@ -213,6 +214,10 @@ public class PipeOutput extends AbstractPipePart {
         }
 
         return true;
+    }
+
+    private boolean isAcceptedEntity(Entity entity) {
+        return entity instanceof StorageMinecart || entity instanceof HopperMinecart;
     }
 
     @Override

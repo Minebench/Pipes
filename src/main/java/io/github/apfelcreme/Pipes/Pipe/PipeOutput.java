@@ -1,9 +1,12 @@
 package io.github.apfelcreme.Pipes.Pipe;
 
 import io.github.apfelcreme.Pipes.PipesItem;
+import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.block.BlockState;
+import org.bukkit.entity.Entity;
+import org.bukkit.entity.minecart.StorageMinecart;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -13,6 +16,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.bukkit.util.BoundingBox;
 
 /*
  * Copyright (C) 2016 Lord36 aka Apfelcreme
@@ -55,9 +59,26 @@ public class PipeOutput extends AbstractPipePart {
      */
     public InventoryHolder getTargetHolder() {
         Block block = getTargetLocation().getBlock();
-        BlockState state = block != null ? block.getState(false) : null;
-        if (state != null && state instanceof InventoryHolder) {
+
+        if (block == null) {
+            return null; // The world isn't loaded
+        }
+
+        BlockState state = block.getState(false);
+        if (state instanceof InventoryHolder) {
             return (InventoryHolder) state;
+        }
+
+        if (!block.isSolid()) {
+            // Perform an entity search for container minecarts
+            BoundingBox box = block.getBoundingBox();
+            World world = block.getWorld();
+
+            for (Entity entity : world.getNearbyEntities(box)) {
+                if (entity instanceof InventoryHolder) { // Minecarts and similar entities inherit InventoryHolder
+                    return (InventoryHolder) entity;
+                }
+            }
         }
         return null;
     }

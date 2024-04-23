@@ -390,7 +390,8 @@ public class ItemMoveScheduler {
                         case SMOKER:
                         case BLAST_FURNACE:
                             // try to put coal etc in the correct place
-                            if (transferring.getType().isFuel() && (smartInsert || (output.getFacing() != BlockFace.DOWN && output.getFacing() != BlockFace.UP))) {
+                            // lava buckets are not seen as fuel by spigot, therefore we have to manually check for it
+                            if ((transferring.getType().isFuel() || transferring.getType().equals(Material.LAVA_BUCKET)) && (smartInsert || (output.getFacing() != BlockFace.DOWN && output.getFacing() != BlockFace.UP))) {
                                 PipesUtil.addFuel(inputInventory, targetInventory, transferring);
                             } else if (smartInsert || output.getFacing() == BlockFace.DOWN) {
                                 FurnaceInventory furnaceInventory = (FurnaceInventory) targetInventory;

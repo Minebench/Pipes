@@ -258,27 +258,25 @@ public class PipesConfig {
             String[] parts = input.split(":");
             try {
                 Material mat = Material.valueOf(parts[0].toUpperCase());
-                int data;
-                if (parts.length > 1) {
-                    data = Integer.parseInt(parts[1]);
-                } else {
-                    data = 0;
-                }
                 ItemStack item = new ItemStack(mat);
-                item.editMeta(meta -> meta.setCustomModelData(data));
+                if (parts.length > 1) {
+                    int data = Integer.parseInt(parts[1]);
+                    if (data != 0) {
+                        item.editMeta(meta -> meta.setCustomModelData(data));
+                    }
+                }
                 itemStacks.put(key, item);
                 return item;
             } catch (NumberFormatException e) {
-                error = parts[1] + " is not a valid Byte!";
+                error = parts[1] + " is not a valid Integer!";
             } catch (IllegalArgumentException e) {
                 error = parts[0].toUpperCase() + " is not a valid Material name!";
             }
         }
         plugin.getLogger().log(Level.WARNING, error);
         ItemStack item = new ItemStack(Material.BARRIER);
-        ItemMeta meta = item.getItemMeta();
-        meta.setDisplayName(ChatColor.RED + error);
-        item.setItemMeta(meta);
+        String finalError = error;
+        item.editMeta(meta -> meta.setDisplayName(ChatColor.RED + finalError));
         itemStacks.put(key, item);
         return item;
     }

@@ -5,13 +5,13 @@ import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.block.BlockState;
+import org.bukkit.block.data.Directional;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.minecart.HopperMinecart;
 import org.bukkit.entity.minecart.StorageMinecart;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
-import org.bukkit.material.Directional;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -50,7 +50,7 @@ public class PipeOutput extends AbstractPipePart {
 
     public PipeOutput(BlockState state) {
         super(PipesItem.PIPE_OUTPUT, state.getLocation());
-        this.facing = ((Directional) state.getData()).getFacing();
+        this.facing = ((Directional) state.getBlockData()).getFacing();
     }
 
     /**

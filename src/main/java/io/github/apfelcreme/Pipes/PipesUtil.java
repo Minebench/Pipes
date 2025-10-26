@@ -251,7 +251,7 @@ public class PipesUtil {
             return false;
         if (a == b)
             return true;
-        return a.getType() == b.getType() && a.getData().equals(b.getData());
+        return a.getType() == b.getType();
     }
 
     /**

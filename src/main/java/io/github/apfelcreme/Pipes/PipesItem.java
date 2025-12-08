@@ -28,8 +28,6 @@ import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.block.BlockState;
 import org.bukkit.block.Container;
-import org.bukkit.enchantments.Enchantment;
-import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataType;
@@ -77,8 +75,7 @@ public enum PipesItem {
                 Component.text(IDENTIFIER).style(Style.style(NamedTextColor.BLUE, TextDecoration.ITALIC))
         );
         meta.lore(lore);
-        meta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
-        meta.addEnchant(Enchantment.ARROW_DAMAGE, 1, true);
+        meta.setEnchantmentGlintOverride(true);
         Component displayName = Component.translatable("pipes.items." + toConfigKey() + ".name",
                 PipesConfig.getText(PipesConfig.getDefaultLocale(), "items." + toConfigKey() + ".name"),
                 Style.style().color(NamedTextColor.WHITE).decoration(TextDecoration.ITALIC, false).build());

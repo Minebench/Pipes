@@ -22,6 +22,7 @@ import org.bukkit.Tag;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.block.Container;
+import org.bukkit.block.Crafter;
 import org.bukkit.block.data.Levelled;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Item;
@@ -500,6 +501,17 @@ public class ItemMoveScheduler {
                     END SHULKER_BOX
                      */
                     /*
+                    BEGIN CRAFTER
+                     */
+                        case CRAFTER:
+                            if (targetHolder instanceof Crafter crafter) {
+                                PipesUtil.addCrafterItem(crafter, targetInventory, transferring);
+                            }
+                            break;
+                    /*
+                    END CRAFTER
+                     */
+                    /*
                     BEGIN DEFAULT
                      */
                         default:
@@ -512,7 +524,7 @@ public class ItemMoveScheduler {
                     }
                 } else if (targetBlock.getType() == Material.COMPOSTER
                         && (output.getFacing() == BlockFace.DOWN || output.getOption(PipeOutput.Options.SMART_INSERT))) {
-                    double itemChance = PipesUtil.getCompostableChance(itemStack.getType());
+                    double itemChance = itemStack.getType().isCompostable() ? itemStack.getType().getCompostChance() : 0;
                     if (itemChance > 0) {
                         Levelled composter = (Levelled) targetBlock.getBlockData();
                         int layersToFill = composter.getMaximumLevel() - composter.getLevel();

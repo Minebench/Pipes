@@ -493,10 +493,11 @@ public class ItemMoveScheduler {
                     BEGIN SHULKER_BOX
                      */
                         case SHULKER_BOX:
-                            if (Tag.SHULKER_BOXES.isTagged(transferring.getType())) {
+                            if (!Tag.SHULKER_BOXES.isTagged(transferring.getType())) {
                                 // Don't allow shulker boxes inside shulker boxes
-                                break;
+                                PipesUtil.addItem(targetInventory, transferring);
                             }
+                            break;
                     /*
                     END SHULKER_BOX
                      */

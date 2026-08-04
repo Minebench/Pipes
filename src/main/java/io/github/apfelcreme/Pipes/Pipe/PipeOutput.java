@@ -119,19 +119,19 @@ public class PipeOutput extends AbstractPipePart {
      */
     public AcceptResult accepts(PipeInput input, ItemStack itemStack) {
         Block block = getLocation().getBlock();
-        BlockState state = block != null ? block.getState(false) : null;
-        if (state == null || !(state instanceof InventoryHolder)) {
+        if (block == null || block.getType() != PipesItem.PIPE_OUTPUT.getMaterial()) {
             return new AcceptResult(ResultType.DENY_INVALID, null);
         }
         Options.Overflow outputOverflow = getOption(Options.OVERFLOW);
         if ((outputOverflow == Options.Overflow.TRUE || outputOverflow == Options.Overflow.INPUT && input.getOption(PipeInput.Options.OVERFLOW))
-                && block.isBlockPowered()) {
+                && getOption(Options.REDSTONE) && block.isBlockPowered()) {
             return new AcceptResult(ResultType.DENY_REDSTONE, null);
         }
 
         ItemStack filter = null;
         boolean isEmpty = true;
         boolean isWhitelist = getOption(Options.WHITELIST);
+        BlockState state = block.getState(false);
         for (ItemStack filterItem : ((InventoryHolder) state).getInventory().getContents()) {
             isEmpty &= filterItem == null;
             if (matchesFilter(filterItem, itemStack)) {
@@ -144,7 +144,7 @@ public class PipeOutput extends AbstractPipePart {
             }
         }
 
-        if (block.isBlockPowered()) {
+        if (getOption(Options.REDSTONE) && block.isBlockPowered()) {
             return new AcceptResult(ResultType.DENY_REDSTONE, filter);
         } else if (!isEmpty && isWhitelist && filter == null) {
             return new AcceptResult(ResultType.DENY_WHITELIST, null);
@@ -348,6 +348,11 @@ public class PipeOutput extends AbstractPipePart {
          * Whether or not to drop the item instead of adding to an inventory
          */
         public static final Option<Boolean> DROP = add(new Option<>("DROP", Option.GuiPosition.LEFT, Value.FALSE, Value.TRUE));
+
+        /**
+         * Whether or not to disable this output when a redstone signal is applied
+         */
+        public static final Option<Boolean> REDSTONE = add(new Option<>("REDSTONE", Option.GuiPosition.LEFT, Value.FALSE, Value.TRUE));
 
         protected static <T> Option<T> add(Option<T> option) {
             VALUES.put(option.name().toLowerCase(), option);

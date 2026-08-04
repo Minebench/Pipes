@@ -240,8 +240,18 @@ texts:
         true: |
           &aPipe Output droppt Items!
           &7Der Output droppt Items wie ein normaler
-          &7dropper in die richtung in die er zeigt.
+          &7Dropper in die richtung in die er zeigt.
         false: |
           &cPipe Output transferiert Items!
           &7Der Output fügt Items in das Inventar
           &7des Blockes ein in die er zeigt.
+      redstone:
+        description: 'Redstone'
+        true: |
+          &aPipe Output reagiert auf Redstone!
+          &7Der Output wird keine Items annehmen
+          &7wenn ein Redstone-Signal anliegt.
+        false: |
+          &cPipe Output ignoriert Redstone!
+          &7Der Output reagiert nicht auf
+          &7anliegende Redstone-Signale.

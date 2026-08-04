@@ -6,7 +6,7 @@
 
     <groupId>io.github.apfelcreme</groupId>
     <artifactId>Pipes</artifactId>
-    <version>1.6-SNAPSHOT</version>
+    <version>1.6.1-SNAPSHOT</version>
 
 
     <properties>
@@ -54,7 +54,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.14.0</version>
+                <version>3.15.0</version>
                 <configuration>
                     <source>21</source>
                     <target>21</target>
@@ -62,7 +62,7 @@
             </plugin>
             <plugin>
                 <artifactId>maven-shade-plugin</artifactId>
-                <version>3.5.1</version>
+                <version>3.6.1</version>
                 <configuration>
                     <relocations>
                         <relocation>
@@ -98,7 +98,7 @@
     <repositories>
         <repository>
             <id>papermc-repo</id>
-            <url>https://papermc.io/repo/repository/maven-public/</url>
+            <url>https://repo.papermc.io/repository/maven-public/</url>
         </repository>
         <repository>
             <id>minebench-repo</id>

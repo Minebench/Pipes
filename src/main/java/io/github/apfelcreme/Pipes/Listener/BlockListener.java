@@ -82,8 +82,8 @@ public class BlockListener implements Listener {
 
     @EventHandler(ignoreCancelled = true)
     public void onItemMove(InventoryMoveItemEvent event) {
-        if (event.getDestination().getType() != InventoryType.HOPPER // hoppers are allowed to remove items from the output
-                && event.getSource().getType() != InventoryType.HOPPER) {
+        if (event.getSource().getType() == InventoryType.DROPPER
+                && event.getDestination().getType() != InventoryType.HOPPER) { // hoppers are allowed to remove items from the output
             InventoryHolder holder = event.getSource().getHolder(false);
             if (holder instanceof BlockState && PipesItem.PIPE_OUTPUT.check((BlockState) holder)) {
                 event.setCancelled(true);

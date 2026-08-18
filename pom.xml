@@ -40,6 +40,33 @@
                 <buildDescription>(build ${env.BUILD_NUMBER})</buildDescription>
             </properties>
         </profile>
+        <profile>
+            <id>relocate_libraries</id>
+            <activation>
+                <file>
+                    <missing>non-existing-file-to-force-activation</missing>
+                </file>
+            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <artifactId>maven-shade-plugin</artifactId>
+                        <configuration>
+                            <relocations>
+                                <relocation>
+                                    <pattern>de.themoep</pattern>
+                                    <shadedPattern>io.github.apfelcreme.Pipes.libs</shadedPattern>
+                                </relocation>
+                                <relocation>
+                                    <pattern>co.aikar.timings.lib</pattern>
+                                    <shadedPattern>io.github.apfelcreme.Pipes.libs.mctimings</shadedPattern>
+                                </relocation>
+                            </relocations>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
     </profiles>
 
     <build>
@@ -63,18 +90,6 @@
             <plugin>
                 <artifactId>maven-shade-plugin</artifactId>
                 <version>3.6.1</version>
-                <configuration>
-                    <relocations>
-                        <relocation>
-                            <pattern>de.themoep</pattern>
-                            <shadedPattern>io.github.apfelcreme.Pipes.libs</shadedPattern>
-                        </relocation>
-                        <relocation>
-                            <pattern>co.aikar.timings.lib</pattern>
-                            <shadedPattern>io.github.apfelcreme.Pipes.libs.mctimings</shadedPattern>
-                        </relocation>
-                    </relocations>
-                </configuration>
                 <executions>
                     <execution>
                         <phase>package</phase>
